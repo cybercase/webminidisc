@@ -1,0 +1,28 @@
+{
+  "short_name": "Web MiniDisc",
+  "name": "Web MiniDisc: Brings NetMD Devices to the Web",
+  "description": "Upload music to NetMD MiniDisc devices",
+  "icons": [
+    {
+      "src": "MiniDisc192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "MiniDisc512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "splash_pages": null
+}
