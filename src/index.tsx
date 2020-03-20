@@ -1,12 +1,54 @@
+/* eslint no-restricted-globals: 0 */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+import { Provider } from 'react-redux';
 import * as serviceWorker from './serviceWorker';
+import { NetMDUSBService } from './services/netmd';
+import serviceRegistry from './services/registry';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import { store } from './redux/store';
+import { actions as appActions } from './redux/app-feature';
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+import App from './components/app';
+
+import './index.css';
+import { FFMpegAudioExportService } from './services/audio-export';
+
+serviceRegistry.netmdService = new NetMDUSBService();
+serviceRegistry.audioExportService = new FFMpegAudioExportService();
+
+(function setupEventHandlers() {
+    window.addEventListener('beforeunload', ev => {
+        let isUploading = store.getState().uploadDialog.visible;
+        if (!isUploading) {
+            return;
+        }
+        ev.preventDefault();
+        ev.returnValue = `Warning! Recording will be interrupted`;
+    });
+
+    if (navigator && navigator.usb) {
+        navigator.usb.ondisconnect = function() {
+            store.dispatch(appActions.setState('WELCOME'));
+        };
+    } else {
+        store.dispatch(appActions.setBrowserSupported(false));
+    }
+
+    // eslint-disable-next-line
+    let deferredPrompt: any;
+    window.addEventListener('beforeinstallprompt', (e: any) => {
+        e.preventDefault();
+        deferredPrompt = e;
+    });
+})();
+
+ReactDOM.render(
+    <Provider store={store}>
+        <App />
+    </Provider>,
+    document.getElementById('root')
+);
+
+// serviceWorker.unregister();
+serviceWorker.register();

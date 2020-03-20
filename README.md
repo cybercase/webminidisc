@@ -1,44 +1,57 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Web MiniDisc
 
-## Available Scripts
+*Brings NetMD Devices to the Web*
 
-In the project directory, you can run:
+live demo at [https://minidisc.brilli.me](https://minidisc.brilli.me).
 
-### `yarn start`
+Requires *Chrome* or any other browser that supports both **WASM** and **WebUSB**
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+##### macOS
+_it just works ®_ ... no need to download or install any software.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+##### Linux
+Follow the instructions here [https://github.com/glaubitz/linux-minidisc/tree/master/netmd/etc](https://github.com/glaubitz/linux-minidisc/tree/master/netmd/etc) to grant your user access to the device.
 
-### `yarn test`
+##### Windows 10
+There are no official Windows 10 drivers for NetMD devices, and the good news is that we don't need it!
+We can just use a generic driver like the WinUSB driver to access the device.
+You can find installation instruction [here](https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/winusb-installation), but the easiest way is to use [Zadig](https://zadig.akeo.ie/).<br/> Note: you'll need to restart your browser after installation to make it see the device.
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Don't know what is a MiniDisc?
 
-### `yarn build`
+- Where to start -> [https://en.wikipedia.org/wiki/MiniDisc](https://en.wikipedia.org/wiki/MiniDisc)
+- Community -> [https://www.reddit.com/r/minidisc/](https://www.reddit.com/r/minidisc/)
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### How to build
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), so you can run:
+- `npm start` to start the development server
+- `npm build` to build for production
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+WASM modules are provided in the `public/` directory. However, if you wish to build those binaries yourself, instructions are provided in the `extra/` directory.
 
-### `yarn eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### How Contribute
+Every contribute is welcome but, please, reach out to me before working on any PR. I've built this app mainly for personal use and I wish to keep it as light as possible in terms of features.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Bugs and Issues
+There might be plenty of them, for sure :) . The thing is that I've not the time to fix all of them and to make sure this app works on every browser or device.
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+The best way to get a bug fixed, a feature implemented, or a device supported, is to fork the project and do it for yourself. I'll try to provide support as best as I can.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Backstory
+A few weeks ago I've found my old [MZ-N710](https://www.minidisc.org/part_Sony_MZ-N710.html) in the basement of my parents' house.
 
-## Learn More
+Determined to make it work on my modern Mac, after some googling, I found out about the [linux-minidisc](https://github.com/glaubitz/linux-minidisc) project. They've done such a great job in reversing the NetMD protocol!
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+After a quick inspection to the source code, I realized the project could be easily ported to javascript (either node and the browser) using the WebUSB api, so I created [netmd-js](https://github.com/cybercase/netmd-js). Then, on top of that I've build **Web MiniDisc** to manage the music on my device without the need of downloading and installing any dedicated software.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+That's it. It was a LOT of fun :).
+
+### Some OSS I've used
+- [FFmpeg](https://www.ffmpeg.org/) and [ffmpegjs](https://github.com/ffmpegjs/FFmpeg), to read your audio files (wav, mp3, ogg, mp4, etc...).
+- [Atracdenc](https://github.com/dcherednik/atracdenc/), to support atrac3 encoding (lp2, lp4 audio formats).
+- [Emscripten](https://emscripten.org/), to run both FFmpeg and Atracdenc in the browser.
+- [netmd-js](https://github.com/cybercase/netmd-js), to send commands to NetMD devices using Javascript.
+- [linux-minidisc](https://github.com/glaubitz/linux-minidisc), to have made the netmd-js project possible.
+- [material-ui](https://material-ui.com/), to build the user interface.
