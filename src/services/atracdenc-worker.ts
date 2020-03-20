@@ -1,4 +1,5 @@
 /* eslint no-restricted-globals: 0 */
+import { getPublicPathFor } from '../utils';
 export class AtracdencProcess {
     private messageCallback?: (ev: MessageEvent) => void;
 
@@ -33,7 +34,7 @@ if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScop
     onmessage = async (ev: MessageEvent) => {
         const { action, ...others } = ev.data;
         if (action === 'init') {
-            self.importScripts(`atracdenc.js`);
+            self.importScripts(getPublicPathFor(`atracdenc.js`));
             (self as any).Module().then((m: any) => {
                 Module = m;
                 self.postMessage({ action: 'init' });

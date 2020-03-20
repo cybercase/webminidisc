@@ -1,5 +1,6 @@
 import { createWorker, setLogging } from '@ffmpeg/ffmpeg';
 import { AtracdencProcess } from './atracdenc-worker';
+import { getPublicPathFor } from '../utils';
 const AtracdencWorker = require('worker-loader!./atracdenc-worker'); // eslint-disable-line import/no-webpack-loader-syntax
 
 interface LogPayload {
@@ -32,9 +33,8 @@ export class FFMpegAudioExportService implements AudioExportService {
                 this.loglines.push(payload);
                 console.log(payload.action, payload.message);
             },
-            corePath: '/ffmpeg-core.js',
-            // workerPath: '/worker.min.js',
-            workerPath: '/worker.dev.js',
+            corePath: getPublicPathFor('ffmpeg-core.js'),
+            workerPath: getPublicPathFor('worker.min.js'),
         });
         await this.ffmpegProcess.load();
 

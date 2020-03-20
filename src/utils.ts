@@ -23,6 +23,10 @@ export function debugEnabled() {
     return process.env.NODE_ENV === 'development';
 }
 
+export function getPublicPathFor(script: string) {
+    return `${process.env.PUBLIC_URL}/${script}`;
+}
+
 export function savePreference(key: string, value: unknown) {
     localStorage.setItem(key, JSON.stringify(value));
 }
