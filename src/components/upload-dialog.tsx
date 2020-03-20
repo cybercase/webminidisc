@@ -62,7 +62,12 @@ export const UploadDialog = (props: {}) => {
                         ? `Convertion completed`
                         : `Converting ${trackConverting + 1} of ${trackTotal}: ${titleConverting}`}
                 </DialogContentText>
-                <LinearProgress className={classes.progressBar} variant="determinate" color="primary" value={convertedValue} />
+                <LinearProgress
+                    className={classes.progressBar}
+                    variant={convertedValue === 0 ? 'indeterminate' : 'determinate'}
+                    color="primary"
+                    value={convertedValue}
+                />
                 <Box className={classes.progressPerc}>{convertedValue}%</Box>
 
                 <DialogContentText id="alert-dialog-slide-description" className={classes.uploadLabel}>
