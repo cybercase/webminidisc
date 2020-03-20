@@ -45,7 +45,7 @@ A few weeks ago I've found my old [MZ-N710](https://www.minidisc.org/part_Sony_M
 
 Determined to make it work on my modern Mac, after some googling, I found out about the [linux-minidisc](https://github.com/glaubitz/linux-minidisc) project. They've done an amazing job in reversing the NetMD protocol.
 
-After a quick inspection to the source code I realized the project could be easily ported to javascript (either node and the browser) using the WebUSB api, so I created [netmd-js](https://github.com/cybercase/netmd-js). Then, on top of that I've build **Web MiniDisc** to manage the music on my device without the need of downloading and installing any dedicated software.
+After a quick inspection to the source code I realized the project could be easily ported to javascript (either node and the browser) using the WebUSB api, so I created [netmd-js](https://github.com/cybercase/netmd-js). Then, on top of that I've built **Web MiniDisc** to manage the music on my device without the need of downloading and installing any dedicated software.
 
 That's it. It was a LOT of fun :).
 
