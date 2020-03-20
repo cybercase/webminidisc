@@ -2,20 +2,21 @@
 
 *Brings NetMD Devices to the Web*
 
-live demo at [https://minidisc.brilli.me](https://minidisc.brilli.me).
+live demo at [https://stefano.brilli.me/webminidisc/](https://stefano.brilli.me/webminidisc/).
 
 Requires *Chrome* or any other browser that supports both **WASM** and **WebUSB**
 
-##### macOS
+#### macOS
 _it just works ®_ ... no need to download or install any software.
 
-##### Linux
-Follow the instructions here [https://github.com/glaubitz/linux-minidisc/tree/master/netmd/etc](https://github.com/glaubitz/linux-minidisc/tree/master/netmd/etc) to grant your user access to the device.
+#### Linux
+Follow the instructions here [https://github.com/glaubitz/linux-minidisc/tree/master/netmd/etc](https://github.com/glaubitz/linux-minidisc/tree/master/netmd/etc) to grant your user access to the device. If you skip this step you'll likely get an *Access denied* message when trying to connect.
 
-##### Windows 10
-There are no official Windows 10 drivers for NetMD devices, and the good news is that we don't need it!
-We can just use a generic driver like the WinUSB driver to access the device.
-You can find installation instruction [here](https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/winusb-installation), but the easiest way is to use [Zadig](https://zadig.akeo.ie/).<br/> Note: you'll need to restart your browser after installation to make it see the device.
+#### Windows 10
+The Windows USB stack requires a driver to be installed to communicate with any USB device. The bad news is that there are no official Windows 10 drivers for NetMD devices. The good news is that we don't need it!
+We can just use a generic driver like *WinUSB* to access the device.
+
+You can find installation instruction [here](https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/winusb-installation), but the easiest way to install is to use [Zadig](https://zadig.akeo.ie/).<br/> Note: you'll need to restart your browser after installation.
 
 ### Don't know what is a MiniDisc?
 
@@ -42,9 +43,9 @@ The best way to get a bug fixed, a feature implemented, or a device supported, i
 ### Backstory
 A few weeks ago I've found my old [MZ-N710](https://www.minidisc.org/part_Sony_MZ-N710.html) in the basement of my parents' house.
 
-Determined to make it work on my modern Mac, after some googling, I found out about the [linux-minidisc](https://github.com/glaubitz/linux-minidisc) project. They've done such a great job in reversing the NetMD protocol!
+Determined to make it work on my modern Mac, after some googling, I found out about the [linux-minidisc](https://github.com/glaubitz/linux-minidisc) project. They've done an amazing job in reversing the NetMD protocol.
 
-After a quick inspection to the source code, I realized the project could be easily ported to javascript (either node and the browser) using the WebUSB api, so I created [netmd-js](https://github.com/cybercase/netmd-js). Then, on top of that I've build **Web MiniDisc** to manage the music on my device without the need of downloading and installing any dedicated software.
+After a quick inspection to the source code I realized the project could be easily ported to javascript (either node and the browser) using the WebUSB api, so I created [netmd-js](https://github.com/cybercase/netmd-js). Then, on top of that I've build **Web MiniDisc** to manage the music on my device without the need of downloading and installing any dedicated software.
 
 That's it. It was a LOT of fun :).
 
