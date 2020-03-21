@@ -16,7 +16,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/f5d160d285380a2b692a.worker.js.LICENSE.txt"
   },
   {
-    "revision": "893be1cedbb2a5f3d74b6550c8bee52d",
+    "revision": "060f9e27c52cc4b6bac5c04aa05f2069",
     "url": "/webminidisc/index.html"
   },
   {
