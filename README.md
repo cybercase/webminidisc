@@ -2,7 +2,8 @@
 
 *Brings NetMD Devices to the Web*
 
-live demo at [https://stefano.brilli.me/webminidisc/](https://stefano.brilli.me/webminidisc/).
+Live @ [https://stefano.brilli.me/webminidisc/](https://stefano.brilli.me/webminidisc/).</br>
+How it works @ [https://www.youtube.com/watch?v=Frs8qhw0g9Y](https://www.youtube.com/watch?v=Frs8qhw0g9Y).
 
 Requires *Chrome* or any other browser that supports both **WASM** and **WebUSB**
 
