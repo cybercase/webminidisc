@@ -85,7 +85,7 @@ export class NetMDUSBService implements NetMDService {
             updateProgress();
         });
 
-        let mdTrack = new MDTrack(title, format, data, webWorkerAsyncPacketIterator);
+        let mdTrack = new MDTrack(title, format, data, 0x80000, webWorkerAsyncPacketIterator);
 
         await download(this.netmdInterface!, mdTrack, ({ writtenBytes }) => {
             written = writtenBytes;
