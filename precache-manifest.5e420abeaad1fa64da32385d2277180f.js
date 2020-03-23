@@ -8,19 +8,19 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/036c27ad182506b1360e.worker.js.LICENSE.txt"
   },
   {
-    "revision": "30dd6d60674fb846e81d69e42a024b6f",
-    "url": "/webminidisc/f5d160d285380a2b692a.worker.js"
+    "revision": "fb982ae50c5e64d09e81e5037fedbbe0",
+    "url": "/webminidisc/7d7d50d9b1200ed3b2c7.worker.js"
   },
   {
     "revision": "928d7b5eb39d16fe9a880722c974b51e",
-    "url": "/webminidisc/f5d160d285380a2b692a.worker.js.LICENSE.txt"
+    "url": "/webminidisc/7d7d50d9b1200ed3b2c7.worker.js.LICENSE.txt"
   },
   {
-    "revision": "060f9e27c52cc4b6bac5c04aa05f2069",
+    "revision": "eced06d7abc6c53f26bbfb44981544be",
     "url": "/webminidisc/index.html"
   },
   {
-    "revision": "5adedd79a71be9d489b2",
+    "revision": "60deff1883c6419095b3",
     "url": "/webminidisc/static/css/main.0b990f46.chunk.css"
   },
   {
@@ -32,8 +32,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/static/js/2.126c9f2d.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "5adedd79a71be9d489b2",
-    "url": "/webminidisc/static/js/main.5278b8de.chunk.js"
+    "revision": "60deff1883c6419095b3",
+    "url": "/webminidisc/static/js/main.8520de1d.chunk.js"
   },
   {
     "revision": "b873df5f5158f06b4f7b",
