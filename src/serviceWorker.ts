@@ -95,6 +95,7 @@ function registerValidSW(swUrl: string, config?: Config) {
                     }
                 };
             };
+            registration.update(); // Check for new version everytime we load the page
         })
         .catch(error => {
             console.error('Error during service worker registration:', error);
