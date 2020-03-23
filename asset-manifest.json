@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/webminidisc/static/css/main.0b990f46.chunk.css",
-    "main.js": "/webminidisc/static/js/main.8520de1d.chunk.js",
-    "main.js.map": "/webminidisc/static/js/main.8520de1d.chunk.js.map",
+    "main.js": "/webminidisc/static/js/main.09991c3e.chunk.js",
+    "main.js.map": "/webminidisc/static/js/main.09991c3e.chunk.js.map",
     "runtime-main.js": "/webminidisc/static/js/runtime-main.114d47b9.js",
     "runtime-main.js.map": "/webminidisc/static/js/runtime-main.114d47b9.js.map",
     "static/js/2.126c9f2d.chunk.js": "/webminidisc/static/js/2.126c9f2d.chunk.js",
@@ -14,7 +14,7 @@
     "7d7d50d9b1200ed3b2c7.worker.js.LICENSE.txt": "/webminidisc/7d7d50d9b1200ed3b2c7.worker.js.LICENSE.txt",
     "7d7d50d9b1200ed3b2c7.worker.js.map": "/webminidisc/7d7d50d9b1200ed3b2c7.worker.js.map",
     "index.html": "/webminidisc/index.html",
-    "precache-manifest.5e420abeaad1fa64da32385d2277180f.js": "/webminidisc/precache-manifest.5e420abeaad1fa64da32385d2277180f.js",
+    "precache-manifest.25933b827c75ccd1dff30448a7bb4681.js": "/webminidisc/precache-manifest.25933b827c75ccd1dff30448a7bb4681.js",
     "service-worker.js": "/webminidisc/service-worker.js",
     "static/css/main.0b990f46.chunk.css.map": "/webminidisc/static/css/main.0b990f46.chunk.css.map",
     "static/js/2.126c9f2d.chunk.js.LICENSE.txt": "/webminidisc/static/js/2.126c9f2d.chunk.js.LICENSE.txt",
@@ -24,6 +24,6 @@
     "static/js/runtime-main.114d47b9.js",
     "static/js/2.126c9f2d.chunk.js",
     "static/css/main.0b990f46.chunk.css",
-    "static/js/main.8520de1d.chunk.js"
+    "static/js/main.09991c3e.chunk.js"
   ]
 }
