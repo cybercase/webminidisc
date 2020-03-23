@@ -38,12 +38,14 @@ if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScop
             (self as any).Module().then((m: any) => {
                 Module = m;
                 self.postMessage({ action: 'init' });
+                Module.setLogger((msg: string, stream: string) => console.log(`${stream}: ${msg}`));
             });
         } else if (action === 'encode') {
             const { bitrate, data } = others;
             const inWavFile = `inWavFile.wav`;
             const outAt3File = `outAt3File.aea`;
-            Module.FS.writeFile(`${inWavFile}`, new Uint8Array(data));
+            const dataArray = new Uint8Array(data);
+            Module.FS.writeFile(`${inWavFile}`, dataArray);
             Module.callMain([`-e`, `atrac3`, `-i`, inWavFile, `-o`, outAt3File, `--bitrate`, bitrate]);
 
             // Read file and trim header (96 bytes)
