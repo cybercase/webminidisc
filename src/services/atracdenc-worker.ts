@@ -38,7 +38,7 @@ if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScop
             (self as any).Module().then((m: any) => {
                 Module = m;
                 self.postMessage({ action: 'init' });
-                Module.setLogger((msg: string, stream: string) => console.log(`${stream}: ${msg}`));
+                Module.setLogger && Module.setLogger((msg: string, stream: string) => console.log(`${stream}: ${msg}`));
             });
         } else if (action === 'encode') {
             const { bitrate, data } = others;
