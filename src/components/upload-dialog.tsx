@@ -59,7 +59,7 @@ export const UploadDialog = (props: {}) => {
             <DialogContent>
                 <DialogContentText id="alert-dialog-slide-description">
                     {convertedValue === 100 && trackConverting === trackTotal
-                        ? `Convertion completed`
+                        ? `Conversion completed`
                         : `Converting ${trackConverting + 1} of ${trackTotal}: ${titleConverting}`}
                 </DialogContentText>
                 <LinearProgress
