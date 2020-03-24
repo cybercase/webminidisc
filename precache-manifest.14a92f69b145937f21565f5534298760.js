@@ -16,11 +16,11 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/ff3100a0019baa5b3604.worker.js.LICENSE.txt"
   },
   {
-    "revision": "b033e9232a371a5b649a8a2eda092d0a",
+    "revision": "3c43d28b8e36e6c0397478f73483c339",
     "url": "/webminidisc/index.html"
   },
   {
-    "revision": "fc042ca0c41c247b99a4",
+    "revision": "ac260233acc7e37408b5",
     "url": "/webminidisc/static/css/main.0b990f46.chunk.css"
   },
   {
@@ -32,8 +32,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/static/js/2.af5ead0f.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "fc042ca0c41c247b99a4",
-    "url": "/webminidisc/static/js/main.e725cdf3.chunk.js"
+    "revision": "ac260233acc7e37408b5",
+    "url": "/webminidisc/static/js/main.7fbfcd41.chunk.js"
   },
   {
     "revision": "b873df5f5158f06b4f7b",
