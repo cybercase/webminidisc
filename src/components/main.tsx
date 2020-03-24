@@ -221,7 +221,7 @@ export const Main = (props: {}) => {
                     </Typography>
                 ) : (
                     <Typography component="h3" variant="h6" className={classes.toolbarLabel}>
-                        {disc?.title || `Empty Disc Title`}
+                        {disc?.title || `Untitled Disc`}
                     </Typography>
                 )}
 
