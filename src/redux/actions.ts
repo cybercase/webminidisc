@@ -165,6 +165,7 @@ export function convertAndUpload(files: File[], format: string) {
             let j = 0;
             while (j < converted.length) {
                 yield await converted[j];
+                delete converted[j];
                 j++;
             }
         };
