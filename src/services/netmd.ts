@@ -10,6 +10,7 @@ export interface NetMDService {
     getDeviceName(): Promise<string>;
     finalize(): Promise<void>;
     renameTrack(index: number, newTitle: string): Promise<void>;
+    renameDisc(newName: string): Promise<void>;
     deleteTrack(index: number): Promise<void>;
     wipeDisc(): Promise<void>;
     upload(
@@ -55,6 +56,15 @@ export class NetMDUSBService implements NetMDService {
 
     async renameTrack(index: number, newTitle: string) {
         await this.netmdInterface!.setTrackTitle(index, newTitle);
+    }
+
+    async renameDisc(newName: string) {
+        const oldName = await this.netmdInterface!.getDiscTitle();
+        let newNameWithGroups = await this.netmdInterface!._getDiscTitle();
+        newNameWithGroups = newNameWithGroups.replace(oldName, newName);
+        await this.netmdInterface!.cacheTOC();
+        await this.netmdInterface!.setDiscTitle(newNameWithGroups);
+        await this.netmdInterface!.syncTOC();
     }
 
     async deleteTrack(index: number) {

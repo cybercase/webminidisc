@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { batchActions } from 'redux-batched-actions';
 
 import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
@@ -8,6 +9,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import { wipeDisc, listContent } from '../redux/actions';
 import { actions as appActions } from '../redux/app-feature';
+import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
 import { useShallowEqualSelector } from '../utils';
 import Link from '@material-ui/core/Link';
 
@@ -15,6 +17,7 @@ export const TopMenu = function() {
     const dispatch = useDispatch();
 
     let { mainView } = useShallowEqualSelector(state => state.appState);
+    let disc = useShallowEqualSelector(state => state.main.disc);
 
     const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
     const menuOpen = Boolean(menuAnchorEl);
@@ -36,6 +39,17 @@ export const TopMenu = function() {
         handleMenuClose();
     };
 
+    const handleRenameDisc = () => {
+        dispatch(
+            batchActions([
+                renameDialogActions.setVisible(true),
+                renameDialogActions.setCurrentName(disc?.title ?? ``),
+                renameDialogActions.setIndex(-1),
+            ])
+        );
+        handleMenuClose();
+    };
+
     const handleExit = () => {
         dispatch(appActions.setState('WELCOME'));
         handleMenuClose();
@@ -50,6 +64,11 @@ export const TopMenu = function() {
         menuItems.push(
             <MenuItem key="update" onClick={handleRefresh}>
                 Refresh
+            </MenuItem>
+        );
+        menuItems.push(
+            <MenuItem key="title" onClick={handleRenameDisc}>
+                Rename Disc
             </MenuItem>
         );
         menuItems.push(

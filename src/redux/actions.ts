@@ -60,6 +60,15 @@ export function renameTrack({ index, newName }: { index: number; newName: string
     };
 }
 
+export function renameDisc({ newName }: { newName: string }) {
+    return async function(dispatch: AppDispatch) {
+        const { netmdService } = serviceRegistry;
+        await netmdService!.renameDisc(newName);
+        dispatch(renameDialogActions.setVisible(false));
+        listContent()(dispatch);
+    };
+}
+
 export function deleteTracks(indexes: number[]) {
     return async function(dispatch: AppDispatch) {
         const { netmdService } = serviceRegistry;

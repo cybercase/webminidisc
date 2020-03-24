@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useShallowEqualSelector } from '../utils';
 import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
-import { renameTrack } from '../redux/actions';
+import { renameTrack, renameDisc } from '../redux/actions';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -23,12 +23,18 @@ export const RenameDialog = (props: {}) => {
     let renameDialogTitle = useShallowEqualSelector(state => state.renameDialog.title);
     let renameDialogIndex = useShallowEqualSelector(state => state.renameDialog.index);
 
+    const what = renameDialogIndex < 0 ? `Disc` : `Track`;
+
     const handleCancelRename = () => {
         dispatch(renameDialogActions.setVisible(false));
     };
 
     const handleDoRename = () => {
-        dispatch(renameTrack({ index: renameDialogIndex, newName: renameDialogTitle }));
+        if (renameDialogIndex < 0) {
+            dispatch(renameDisc({ newName: renameDialogTitle }));
+        } else {
+            dispatch(renameTrack({ index: renameDialogIndex, newName: renameDialogTitle }));
+        }
     };
 
     return (
@@ -40,12 +46,12 @@ export const RenameDialog = (props: {}) => {
             TransitionComponent={Transition as any}
             aria-labelledby="rename-dialog-title"
         >
-            <DialogTitle id="rename-dialog-title">Rename Track</DialogTitle>
+            <DialogTitle id="rename-dialog-title">Rename {what}</DialogTitle>
             <DialogContent>
                 <TextField
                     autoFocus
                     id="name"
-                    label="Track Name"
+                    label={`${what} Name`}
                     type="text"
                     fullWidth
                     value={renameDialogTitle}
