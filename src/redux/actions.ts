@@ -176,12 +176,18 @@ export function convertAndUpload(files: File[], format: string) {
         for await (let item of conversionIterator(files)) {
             const { file, data } = item;
 
+            let title = file.name;
+            const extStartIndex = title.lastIndexOf('.');
+            if (extStartIndex > 0) {
+                title = title.substring(0, extStartIndex);
+            }
+
             trackUpdate.current = i++;
-            trackUpdate.titleCurrent = file.name;
+            trackUpdate.titleCurrent = title;
             updateTrack();
             updateProgressCallback({ written: 0, encrypted: 0, total: 100 });
             try {
-                await netmdService?.upload(file.name, data, wireformat, updateProgressCallback);
+                await netmdService?.upload(title, data, wireformat, updateProgressCallback);
             } catch (err) {
                 error = err;
                 errorMessage = `${file.name}: Error uploading to device`;
