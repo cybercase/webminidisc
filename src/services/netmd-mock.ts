@@ -121,6 +121,19 @@ class NetMDMockService implements NetMDService {
         await sleep(0.5);
         progressCallback({ written: 100, encrypted: 100, total: 100 });
     }
+
+    async play() {
+        console.log('play');
+    }
+    async stop() {
+        console.log('stop');
+    }
+    async next() {
+        console.log('next');
+    }
+    async prev() {
+        console.log('prev');
+    }
 }
 
 export { NetMDMockService };

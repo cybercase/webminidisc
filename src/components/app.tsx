@@ -9,6 +9,7 @@ import { makeStyles, createMuiTheme, ThemeProvider } from '@material-ui/core/sty
 
 import { Welcome } from './welcome';
 import { Main } from './main';
+import { Controls } from './controls';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
@@ -44,6 +45,9 @@ const useStyles = makeStyles(theme => ({
     copyright: {
         display: 'flex',
         alignItems: 'center',
+        [theme.breakpoints.down(600 + theme.spacing(2) * 2)]: {
+            flexWrap: 'wrap',
+        },
     },
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
@@ -51,6 +55,16 @@ const useStyles = makeStyles(theme => ({
     },
     minidiscLogo: {
         width: 48,
+    },
+    controlsContainer: {
+        flex: '1 1 auto',
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(8),
+        [theme.breakpoints.down(600 + theme.spacing(2) * 2)]: {
+            order: -1,
+            width: '100%',
+            paddingLeft: 0,
+        },
     },
 }));
 
@@ -111,7 +125,7 @@ const App = () => {
                             >
                                 Tweet
                             </Link>
-                            <Box style={{ flex: '1 1 auto' }}></Box>
+                            <Box className={classes.controlsContainer}>{mainView === 'MAIN' ? <Controls /> : null}</Box>
                         </Box>
                     </Paper>
                 </main>

@@ -20,6 +20,11 @@ export interface NetMDService {
         format: Wireformat,
         progressCallback: (progress: { written: number; encrypted: number; total: number }) => void
     ): Promise<void>;
+
+    play(): Promise<void>;
+    stop(): Promise<void>;
+    next(): Promise<void>;
+    prev(): Promise<void>;
 }
 
 export class NetMDUSBService implements NetMDService {
@@ -106,5 +111,18 @@ export class NetMDUSBService implements NetMDService {
             written = writtenBytes;
             updateProgress();
         });
+    }
+
+    async play() {
+        await this.netmdInterface!.play();
+    }
+    async stop() {
+        await this.netmdInterface!.stop();
+    }
+    async next() {
+        await this.netmdInterface!.nextTrack();
+    }
+    async prev() {
+        await this.netmdInterface!.previousTrack();
     }
 }
