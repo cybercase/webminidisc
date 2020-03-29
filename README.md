@@ -3,7 +3,8 @@
 *Brings NetMD Devices to the Web*
 
 Live @ [https://stefano.brilli.me/webminidisc/](https://stefano.brilli.me/webminidisc/).</br>
-How it works @ [https://www.youtube.com/watch?v=Frs8qhw0g9Y](https://www.youtube.com/watch?v=Frs8qhw0g9Y).
+How it works @ [https://www.youtube.com/watch?v=Frs8qhw0g9Y](https://www.youtube.com/watch?v=Frs8qhw0g9Y).</br>
+Blogpost @ [https://stefano.brilli.me/blog/web-minidisc/](https://stefano.brilli.me/blog/web-minidisc/)
 
 Requires *Chrome* or any other browser that supports both **WASM** and **WebUSB**
 
@@ -33,7 +34,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 WASM modules are provided in the `public/` directory. However, if you wish to build those binaries yourself, instructions are provided in the `extra/` directory.
 
 
-### How Contribute
+### How to Contribute
 Every contribute is welcome but, please, reach out to me before working on any PR. I've built this app mainly for personal use and I wish to keep it as light as possible in terms of features.
 
 ### Bugs and Issues

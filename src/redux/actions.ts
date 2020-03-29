@@ -91,6 +91,14 @@ export function wipeDisc() {
     };
 }
 
+export function moveTrack(srcIndex: number, destIndex: number) {
+    return async function(dispatch: AppDispatch) {
+        const { netmdService } = serviceRegistry;
+        await netmdService!.moveTrack(srcIndex, destIndex);
+        listContent()(dispatch);
+    };
+}
+
 export const WireformatDict: { [k: string]: Wireformat } = {
     SP: Wireformat.pcm,
     LP2: Wireformat.lp2,

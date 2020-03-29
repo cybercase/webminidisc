@@ -12,6 +12,7 @@ export interface NetMDService {
     renameTrack(index: number, newTitle: string): Promise<void>;
     renameDisc(newName: string): Promise<void>;
     deleteTrack(index: number): Promise<void>;
+    moveTrack(src: number, dst: number): Promise<void>;
     wipeDisc(): Promise<void>;
     upload(
         title: string,
@@ -73,6 +74,10 @@ export class NetMDUSBService implements NetMDService {
 
     async wipeDisc() {
         await this.netmdInterface!.eraseDisc();
+    }
+
+    async moveTrack(src: number, dst: number) {
+        await this.netmdInterface!.moveTrack(src, dst);
     }
 
     async upload(
