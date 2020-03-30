@@ -4,42 +4,51 @@ import { sleep } from '../utils';
 import { assert } from 'netmd-js/dist/utils';
 
 class NetMDMockService implements NetMDService {
-    public _discTitle: string = 'Mock Discs';
+    public _discTitle: string = 'Mock Disc';
+    public _discCapacity: number = 80 * 60 * 512;
     public _tracks: Track[] = [
-        {
-            duration: 5 * 60 * 512,
-            encoding: Encoding.sp,
-            index: 0,
-            protected: TrackFlag.unprotected,
-            title: 'Mock Track 1',
-        },
-        {
-            duration: 5 * 60 * 512,
-            encoding: Encoding.sp,
-            index: 1,
-            protected: TrackFlag.unprotected,
-            title: 'Mock Track 2',
-        },
-        {
-            duration: 5 * 60 * 512,
-            encoding: Encoding.sp,
-            index: 2,
-            protected: TrackFlag.unprotected,
-            title: 'Mock Track 3',
-        },
-        {
-            duration: 5 * 60 * 512,
-            encoding: Encoding.sp,
-            index: 3,
-            protected: TrackFlag.unprotected,
-            title: 'Mock Track 4',
-        },
+        // {
+        //     duration: 5 * 60 * 512,
+        //     encoding: Encoding.sp,
+        //     index: 0,
+        //     protected: TrackFlag.unprotected,
+        //     title: 'Mock Track 1',
+        // },
+        // {
+        //     duration: 5 * 60 * 512,
+        //     encoding: Encoding.sp,
+        //     index: 1,
+        //     protected: TrackFlag.unprotected,
+        //     title: 'Mock Track 2',
+        // },
+        // {
+        //     duration: 5 * 60 * 512,
+        //     encoding: Encoding.sp,
+        //     index: 2,
+        //     protected: TrackFlag.unprotected,
+        //     title: 'Mock Track 3',
+        // },
+        // {
+        //     duration: 5 * 60 * 512,
+        //     encoding: Encoding.sp,
+        //     index: 3,
+        //     protected: TrackFlag.unprotected,
+        //     title: 'Mock Track 4',
+        // },
     ];
 
     _updateTrackIndexes() {
         for (let i = 0; i < this._tracks.length; i++) {
             this._tracks[i].index = i;
         }
+    }
+
+    _getUsed() {
+        let used = 0;
+        for (let t of this._tracks) {
+            used += t.duration;
+        }
+        return used;
     }
 
     async pair() {
@@ -58,9 +67,9 @@ class NetMDMockService implements NetMDService {
                 title: this._discTitle,
                 writeProtected: false,
                 writable: true,
-                left: 60 * 60 * 512,
-                used: 20 * 60 * 512,
-                total: 80 * 60 * 512,
+                left: this._discCapacity - this._getUsed(),
+                used: this._getUsed(),
+                total: this._discCapacity,
                 trackCount: this._tracks.length,
                 groups: [
                     {
@@ -74,7 +83,7 @@ class NetMDMockService implements NetMDService {
     }
 
     async getDeviceName() {
-        return `Mock MD Unit`;
+        return `Generic MD Unit`;
     }
 
     async finalize() {}
