@@ -80,11 +80,12 @@ export class FFMpegAudioExportService implements AudioExportService {
     }
 
     async export({ format }: { format: string }) {
+        let result: ArrayBuffer;
         if (format === `SP`) {
             const outFileName = `${this.outFileNameNoExt}.raw`;
             await this.ffmpegProcess.transcode(this.inFileName, outFileName, '-f s16be -ar 44100');
             let { data } = await this.ffmpegProcess.read(outFileName);
-            return data.buffer;
+            result = data.buffer;
         } else {
             const outFileName = `${this.outFileNameNoExt}.wav`;
             await this.ffmpegProcess.transcode(this.inFileName, outFileName, '-f wav -ar 44100');
@@ -101,8 +102,10 @@ export class FFMpegAudioExportService implements AudioExportService {
                     bitrate = `64`;
                     break;
             }
-            let result = await this.atracdencProcess!.encode(data.buffer, bitrate);
-            return result;
+            result = await this.atracdencProcess!.encode(data.buffer, bitrate);
         }
+        this.ffmpegProcess.worker.terminate();
+        this.atracdencProcess!.terminate();
+        return result;
     }
 }

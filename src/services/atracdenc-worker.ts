@@ -22,6 +22,10 @@ export class AtracdencProcess {
         return eventData.data.result as Uint8Array;
     }
 
+    terminate() {
+        this.worker.terminate();
+    }
+
     handleMessage(ev: MessageEvent) {
         this.messageCallback!(ev);
         this.messageCallback = undefined;
@@ -65,7 +69,6 @@ if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScop
                 },
                 [result]
             );
-            self.close();
         }
     };
 } else {

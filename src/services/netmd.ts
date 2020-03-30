@@ -111,6 +111,8 @@ export class NetMDUSBService implements NetMDService {
             written = writtenBytes;
             updateProgress();
         });
+
+        w.terminate();
     }
 
     async play() {
