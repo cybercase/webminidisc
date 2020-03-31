@@ -1,6 +1,6 @@
 // List of extra files to be precached for offline use.
 // WARNING: don't forget to update the revision before deploy
-var revision = "6";
+var revision = "7";
 self.__precacheManifest = (self.__precacheManifest || []).concat([
     {
         "revision": revision,

@@ -71,6 +71,7 @@ configure_ffmpeg() {
   \
   --disable-demuxers \
   --enable-demuxer=ffmetadata \
+  --enable-demuxer=aiff \
   --enable-demuxer=oma \
   --enable-demuxer=aac \
   --enable-demuxer=ac3 \
