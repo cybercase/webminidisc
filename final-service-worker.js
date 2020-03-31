@@ -1,6 +1,6 @@
 // List of extra files to be precached for offline use.
 // WARNING: don't forget to update the revision before deploy
-var revision = "6";
+var revision = "7";
 self.__precacheManifest = (self.__precacheManifest || []).concat([
     {
         "revision": revision,
@@ -31,7 +31,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/webminidisc/precache-manifest.883b724763c891b17d01eaf90d4ae452.js"
+  "/webminidisc/precache-manifest.280689a6da7ff827d197b91cd54ce401.js"
 );
 
 self.addEventListener('message', (event) => {
