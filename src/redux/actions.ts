@@ -6,8 +6,9 @@ import { actions as errorDialogAction } from './error-dialog-feature';
 import { actions as appStateActions } from './app-feature';
 import { actions as mainActions } from './main-feature';
 import serviceRegistry from '../services/registry';
-import { Wireformat } from 'netmd-js';
+import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
+import { getAvailableCharsForTrackTitle } from '../utils';
 
 export function pair() {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
@@ -54,8 +55,13 @@ export function listContent() {
 export function renameTrack({ index, newName }: { index: number; newName: string }) {
     return async function(dispatch: AppDispatch) {
         const { netmdService } = serviceRegistry;
-        await netmdService!.renameTrack(index, newName);
         dispatch(renameDialogActions.setVisible(false));
+        try {
+            await netmdService!.renameTrack(index, newName);
+        } catch (err) {
+            console.error(err);
+            dispatch(batchActions([errorDialogAction.setVisible(true), errorDialogAction.setErrorMessage(`Rename failed.`)]));
+        }
         listContent()(dispatch);
     };
 }
@@ -107,7 +113,7 @@ export const WireformatDict: { [k: string]: Wireformat } = {
 };
 
 export function convertAndUpload(files: File[], format: string) {
-    return async function(dispatch: AppDispatch, getState: (state: RootState) => void) {
+    return async function(dispatch: AppDispatch, getState: () => RootState) {
         const { audioExportService, netmdService } = serviceRegistry;
         const wireformat = WireformatDict[format];
 
@@ -178,6 +184,10 @@ export function convertAndUpload(files: File[], format: string) {
             }
         };
 
+        let disc = getState().main.disc;
+        let maxTitleLength = disc ? getAvailableCharsForTrackTitle(getTracks(disc).map(track => track.title || ``)) : -1;
+        maxTitleLength = Math.floor(maxTitleLength / files.length);
+
         let error: any;
         let errorMessage = ``;
         let i = 1;
@@ -188,6 +198,9 @@ export function convertAndUpload(files: File[], format: string) {
             const extStartIndex = title.lastIndexOf('.');
             if (extStartIndex > 0) {
                 title = title.substring(0, extStartIndex);
+            }
+            if (maxTitleLength > -1) {
+                title = title.substring(0, maxTitleLength);
             }
 
             trackUpdate.current = i++;

@@ -4,6 +4,7 @@ import { sleep } from '../utils';
 import { assert } from 'netmd-js/dist/utils';
 
 class NetMDMockService implements NetMDService {
+    public _tracksTitlesMaxLength = 1700;
     public _discTitle: string = 'Mock Disc';
     public _discCapacity: number = 80 * 60 * 512;
     public _tracks: Track[] = [
@@ -51,6 +52,10 @@ class NetMDMockService implements NetMDService {
         return used;
     }
 
+    _getTracksTitlesLength() {
+        return this._tracks.reduce((acc, track) => acc + (track.title?.length ?? 0), 0);
+    }
+
     async pair() {
         return true;
     }
@@ -89,6 +94,9 @@ class NetMDMockService implements NetMDService {
     async finalize() {}
 
     async renameTrack(index: number, newTitle: string) {
+        if (this._getTracksTitlesLength() + newTitle.length > this._tracksTitlesMaxLength) {
+            throw new Error(`Track's title too long`);
+        }
         this._tracks[index].title = newTitle;
     }
 
@@ -119,6 +127,11 @@ class NetMDMockService implements NetMDService {
         progressCallback: (progress: { written: number; encrypted: number; total: number }) => void
     ) {
         progressCallback({ written: 0, encrypted: 0, total: 100 });
+
+        if (this._getTracksTitlesLength() + title.length > this._tracksTitlesMaxLength) {
+            throw new Error(`Track's title too long`);
+        }
+
         await sleep(0.5);
         this._tracks.push({
             title,

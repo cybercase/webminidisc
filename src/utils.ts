@@ -44,4 +44,12 @@ export function loadPreference<T>(key: string, defaultValue: T): T {
     }
 }
 
+export function getAvailableCharsForTrackTitle(trackTitles: string[]) {
+    const maxChars = 1700; // see https://www.minidisc.org/md_toc.html
+    const usedChars = trackTitles.reduce((acc, title) => {
+        return acc + title.length;
+    }, 0);
+    return maxChars - usedChars;
+}
+
 declare let process: any;

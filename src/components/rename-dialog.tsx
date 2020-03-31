@@ -59,7 +59,7 @@ export const RenameDialog = (props: {}) => {
                         event.key === `Enter` && handleDoRename();
                     }}
                     onChange={event => {
-                        dispatch(renameDialogActions.setCurrentName(event.target.value));
+                        dispatch(renameDialogActions.setCurrentName(event.target.value.substring(0, 120))); // MAX title length
                     }}
                 />
             </DialogContent>
