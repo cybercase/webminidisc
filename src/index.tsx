@@ -15,7 +15,7 @@ import App from './components/app';
 import './index.css';
 import { FFMpegAudioExportService } from './services/audio-export';
 
-serviceRegistry.netmdService = new NetMDUSBService();
+serviceRegistry.netmdService = new NetMDUSBService({ debug: true });
 // serviceRegistry.netmdService = new NetMDMockService(); // Uncomment to work without a device attached
 serviceRegistry.audioExportService = new FFMpegAudioExportService();
 

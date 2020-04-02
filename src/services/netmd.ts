@@ -1,5 +1,6 @@
 import { openNewDevice, NetMDInterface, Disc, listContent, openPairedDevice, Wireformat, MDTrack, download } from 'netmd-js';
 import { makeGetAsyncPacketIteratorOnWorkerThread } from 'netmd-js/dist/web-encrypt-worker';
+import { Logger, ConsoleLogger, Level } from 'netmd-js/dist/logger';
 
 const Worker = require('worker-loader!netmd-js/dist/web-encrypt-worker.js'); // eslint-disable-line import/no-webpack-loader-syntax
 
@@ -29,9 +30,28 @@ export interface NetMDService {
 
 export class NetMDUSBService implements NetMDService {
     private netmdInterface?: NetMDInterface;
+    private logger?: Logger;
+
+    constructor({ debug = false }: { debug: boolean }) {
+        if (debug) {
+            // Logging a few methods that have been causing issues with some units
+            const _fn = (...args: any) => {
+                if (args && args[0] && args[0].method) {
+                    console.log(...args);
+                }
+            };
+            this.logger = {
+                debug: _fn,
+                info: _fn,
+                warn: _fn,
+                error: _fn,
+                child: () => this.logger!,
+            };
+        }
+    }
 
     async pair() {
-        let iface = await openNewDevice(navigator.usb);
+        let iface = await openNewDevice(navigator.usb, this.logger);
         if (iface === null) {
             return false;
         }
@@ -40,7 +60,7 @@ export class NetMDUSBService implements NetMDService {
     }
 
     async connect() {
-        let iface = await openPairedDevice(navigator.usb);
+        let iface = await openPairedDevice(navigator.usb, this.logger);
         if (iface === null) {
             return false;
         }
