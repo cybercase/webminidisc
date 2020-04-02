@@ -1,13 +1,5 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "96dc7a78fff34dda965350616a706fc5",
-    "url": "/webminidisc/5530d0d82e3e17dcc5cb.worker.js"
-  },
-  {
-    "revision": "2db20f781fcda8eaf16b6c6a656de7bf",
-    "url": "/webminidisc/5530d0d82e3e17dcc5cb.worker.js.LICENSE.txt"
-  },
-  {
     "revision": "4048ab76ae959dc7f48c2f5b70ffd572",
     "url": "/webminidisc/e377e8c841742c6b7530.worker.js"
   },
@@ -16,24 +8,32 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/e377e8c841742c6b7530.worker.js.LICENSE.txt"
   },
   {
-    "revision": "0102aa8d29f098c70a7623cf3e9065e2",
+    "revision": "443a2786d543acdaf17de18d97e0dffa",
+    "url": "/webminidisc/ff3100a0019baa5b3604.worker.js"
+  },
+  {
+    "revision": "2db20f781fcda8eaf16b6c6a656de7bf",
+    "url": "/webminidisc/ff3100a0019baa5b3604.worker.js.LICENSE.txt"
+  },
+  {
+    "revision": "09c0f661e5d6762639229f5e3c5df6c1",
     "url": "/webminidisc/index.html"
   },
   {
-    "revision": "884d278225965a562985",
+    "revision": "c4b0cbec3f024c464e03",
     "url": "/webminidisc/static/css/main.0b990f46.chunk.css"
   },
   {
-    "revision": "c2e8e2b828c170eaed45",
-    "url": "/webminidisc/static/js/2.16d5c5f3.chunk.js"
+    "revision": "ede886867df2b51f98f5",
+    "url": "/webminidisc/static/js/2.5a56faf6.chunk.js"
   },
   {
     "revision": "2e010bb9b670fcf3c9123c0544f4b757",
-    "url": "/webminidisc/static/js/2.16d5c5f3.chunk.js.LICENSE.txt"
+    "url": "/webminidisc/static/js/2.5a56faf6.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "884d278225965a562985",
-    "url": "/webminidisc/static/js/main.caa32d2c.chunk.js"
+    "revision": "c4b0cbec3f024c464e03",
+    "url": "/webminidisc/static/js/main.bc79d09a.chunk.js"
   },
   {
     "revision": "b873df5f5158f06b4f7b",
