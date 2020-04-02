@@ -173,6 +173,7 @@ export const Main = (props: {}) => {
             }
         }
     }
+    tracks.sort((l, r) => l.index - r.index);
 
     // Action Handlers
     const handleSelectClick = (event: React.MouseEvent, item: number) => {
