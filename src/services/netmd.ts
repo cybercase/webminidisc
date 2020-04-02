@@ -60,8 +60,10 @@ export class NetMDUSBService implements NetMDService {
         await this.netmdInterface!.netMd.finalize();
     }
 
-    async renameTrack(index: number, newTitle: string) {
-        await this.netmdInterface!.setTrackTitle(index, newTitle);
+    async renameTrack(index: number, title: string) {
+        // Removing non ascii chars... Sorry, I didn't implement char encoding.
+        title = title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
+        await this.netmdInterface!.setTrackTitle(index, title);
     }
 
     async renameDisc(newName: string) {
@@ -105,6 +107,8 @@ export class NetMDUSBService implements NetMDService {
             updateProgress();
         });
 
+        // Removing non ascii chars... Sorry, I didn't implement char encoding.
+        title = title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
         let mdTrack = new MDTrack(title, format, data, 0x80000, webWorkerAsyncPacketIterator);
 
         await download(this.netmdInterface!, mdTrack, ({ writtenBytes }) => {

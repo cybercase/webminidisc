@@ -94,6 +94,7 @@ class NetMDMockService implements NetMDService {
     async finalize() {}
 
     async renameTrack(index: number, newTitle: string) {
+        newTitle = newTitle.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
         if (this._getTracksTitlesLength() + newTitle.length > this._tracksTitlesMaxLength) {
             throw new Error(`Track's title too long`);
         }
@@ -128,8 +129,10 @@ class NetMDMockService implements NetMDService {
     ) {
         progressCallback({ written: 0, encrypted: 0, total: 100 });
 
+        title = title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
+
         if (this._getTracksTitlesLength() + title.length > this._tracksTitlesMaxLength) {
-            throw new Error(`Track's title too long`);
+            throw new Error(`Track's title too long`); // Simulates reject from device
         }
 
         await sleep(0.5);
