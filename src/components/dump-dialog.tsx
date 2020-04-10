@@ -79,6 +79,7 @@ export const DumpDialog = ({ trackIndexes }: { trackIndexes: number[] }) => {
 
     useEffect(() => {
         async function updateDeviceList() {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
             let devices = await navigator.mediaDevices.enumerateDevices();
             let inputDevices = devices
                 .filter(device => device.kind === 'audioinput')
