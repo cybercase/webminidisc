@@ -3,12 +3,13 @@ import { AppDispatch, RootState } from './store';
 import { actions as uploadDialogActions } from './upload-dialog-feature';
 import { actions as renameDialogActions } from './rename-dialog-feature';
 import { actions as errorDialogAction } from './error-dialog-feature';
+import { actions as recordDialogAction } from './record-dialog-feature';
 import { actions as appStateActions } from './app-feature';
 import { actions as mainActions } from './main-feature';
 import serviceRegistry from '../services/registry';
 import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
-import { getAvailableCharsForTrackTitle } from '../utils';
+import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep } from '../utils';
 
 export function pair() {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
@@ -102,6 +103,75 @@ export function moveTrack(srcIndex: number, destIndex: number) {
         const { netmdService } = serviceRegistry;
         await netmdService!.moveTrack(srcIndex, destIndex);
         listContent()(dispatch);
+    };
+}
+
+export function recordTracks(indexes: number[], deviceId: string) {
+    return async function(dispatch: AppDispatch, getState: () => RootState) {
+        dispatch(
+            batchActions([
+                recordDialogAction.setVisible(true),
+                recordDialogAction.setProgress({ trackTotal: indexes.length, trackDone: 0, trackCurrent: 0, titleCurrent: '' }),
+            ])
+        );
+
+        let disc = getState().main.disc;
+        let tracks = getTracks(disc!).filter(t => indexes.indexOf(t.index) >= 0);
+
+        const { netmdService, mediaRecorderService } = serviceRegistry;
+
+        for (let [i, track] of tracks.entries()) {
+            dispatch(
+                recordDialogAction.setProgress({
+                    trackTotal: tracks.length,
+                    trackDone: i,
+                    trackCurrent: -1,
+                    titleCurrent: track.title ?? '',
+                })
+            );
+
+            // Wait for the track to be ready to play from 0:00
+            await netmdService!.gotoTrack(track.index);
+            await netmdService!.play();
+            console.log('Waiting for track to be ready to play');
+            let position = await netmdService!.getPosition();
+            let expected = [track.index, 0, 0, 1];
+            while (position === null || !expected.every((_, i) => expected[i] === position![i])) {
+                await sleep(250);
+                position = await netmdService!.getPosition();
+            }
+            await netmdService!.pause();
+            await netmdService?.gotoTrack(track.index);
+            console.log('Track is ready to play');
+
+            // Start recording and play track
+            await mediaRecorderService?.initStream(deviceId);
+            await mediaRecorderService?.startRecording();
+            await netmdService!.play();
+
+            // Wait until track is finished
+            let durationInSec = framesToSec(track.duration);
+            // await sleep(durationInSec * 1000);
+            await sleepWithProgressCallback(durationInSec * 1000, (perc: number) => {
+                dispatch(
+                    recordDialogAction.setProgress({
+                        trackTotal: tracks.length,
+                        trackDone: i,
+                        trackCurrent: perc,
+                        titleCurrent: track.title ?? '',
+                    })
+                );
+            });
+
+            // Stop recording and download the wav
+            await mediaRecorderService?.stopRecording();
+            mediaRecorderService?.downloadRecorded(`${track.title}`);
+
+            await mediaRecorderService?.closeStream();
+        }
+
+        await netmdService!.stop();
+        dispatch(recordDialogAction.setVisible(false));
     };
 }
 

@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import { listContent, deleteTracks, moveTrack } from '../redux/actions';
 import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
 import { actions as convertDialogActions } from '../redux/convert-dialog-feature';
+import { actions as dumpDialogActions } from '../redux/dump-dialog-feature';
 
 import { formatTimeFromFrames, getTracks, Encoding } from 'netmd-js';
 
@@ -32,9 +33,11 @@ import { batchActions } from 'redux-batched-actions';
 
 import { RenameDialog } from './rename-dialog';
 import { UploadDialog } from './upload-dialog';
+import { RecordDialog } from './record-dialog';
 import { ErrorDialog } from './error-dialog';
 import { ConvertDialog } from './convert-dialog';
 import { AboutDialog } from './about-dialog';
+import { DumpDialog } from './dump-dialog';
 import { TopMenu } from './topmenu';
 import Checkbox from '@material-ui/core/Checkbox';
 import * as BadgeImpl from '@material-ui/core/Badge/Badge';
@@ -136,8 +139,12 @@ export const Main = (props: {}) => {
             dispatch(moveTrack(selected[0], destIndex));
             handleCloseMoveMenu();
         },
-        [dispatch, selected]
+        [dispatch, selected, handleCloseMoveMenu]
     );
+
+    const handleShowDumpDialog = useCallback(() => {
+        dispatch(dumpDialogActions.setVisible(true));
+    }, [dispatch]);
 
     useEffect(() => {
         dispatch(listContent());
@@ -248,7 +255,6 @@ export const Main = (props: {}) => {
                         {disc?.title || `Untitled Disc`}
                     </Typography>
                 )}
-
                 {selectedCount === 1 ? (
                     <React.Fragment>
                         <Tooltip title="Move to Position">
@@ -277,6 +283,16 @@ export const Main = (props: {}) => {
                                     );
                                 })}
                         </Menu>
+                    </React.Fragment>
+                ) : null}
+
+                {selectedCount > 0 ? (
+                    <React.Fragment>
+                        <Tooltip title="Record from MD">
+                            <Button aria-label="Record" onClick={handleShowDumpDialog}>
+                                Record
+                            </Button>
+                        </Tooltip>
                     </React.Fragment>
                 ) : null}
 
@@ -340,6 +356,8 @@ export const Main = (props: {}) => {
             <RenameDialog />
             <ErrorDialog />
             <ConvertDialog files={uploadedFiles} />
+            <RecordDialog />
+            <DumpDialog trackIndexes={selected} />
             <AboutDialog />
         </React.Fragment>
     );

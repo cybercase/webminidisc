@@ -7,6 +7,16 @@ export function sleep(ms: number) {
     });
 }
 
+export async function sleepWithProgressCallback(ms: number, cb: (perc: number) => void) {
+    let elapsedSecs = 1;
+    let interval = setInterval(() => {
+        elapsedSecs++;
+        cb(Math.min(100, ((elapsedSecs * 1000) / ms) * 100));
+    }, 1000);
+    await sleep(ms);
+    window.clearInterval(interval);
+}
+
 export function useShallowEqualSelector<TState = RootState, TSelected = unknown>(selector: (state: TState) => TSelected): TSelected {
     return useSelector(selector, shallowEqual);
 }

@@ -4,6 +4,7 @@ import { sleep, sanitizeTitle } from '../utils';
 import { assert } from 'netmd-js/dist/utils';
 
 class NetMDMockService implements NetMDService {
+    public _currentTrack: number = 0;
     public _tracksTitlesMaxLength = 1700;
     public _discTitle: string = 'Mock Disc';
     public _discCapacity: number = 80 * 60 * 512;
@@ -150,6 +151,9 @@ class NetMDMockService implements NetMDService {
     async play() {
         console.log('play');
     }
+    async pause() {
+        console.log('pause');
+    }
     async stop() {
         console.log('stop');
     }
@@ -158,6 +162,14 @@ class NetMDMockService implements NetMDService {
     }
     async prev() {
         console.log('prev');
+    }
+    async gotoTrack(index: number) {
+        this._currentTrack = index;
+        await sleep(500);
+    }
+
+    async getPosition() {
+        return [this._currentTrack, 0, 0, 1];
     }
 }
 

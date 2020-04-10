@@ -24,9 +24,12 @@ export interface NetMDService {
     ): Promise<void>;
 
     play(): Promise<void>;
+    pause(): Promise<void>;
     stop(): Promise<void>;
     next(): Promise<void>;
     prev(): Promise<void>;
+    gotoTrack(index: number): Promise<void>;
+    getPosition(): Promise<number[] | null>;
 }
 
 export class NetMDUSBService implements NetMDService {
@@ -144,6 +147,9 @@ export class NetMDUSBService implements NetMDService {
     async play() {
         await this.netmdInterface!.play();
     }
+    async pause() {
+        await this.netmdInterface!.pause();
+    }
     async stop() {
         await this.netmdInterface!.stop();
     }
@@ -152,5 +158,11 @@ export class NetMDUSBService implements NetMDService {
     }
     async prev() {
         await this.netmdInterface!.previousTrack();
+    }
+    async gotoTrack(index: number) {
+        await this.netmdInterface!.gotoTrack(index);
+    }
+    async getPosition() {
+        return await this.netmdInterface!.getPosition();
     }
 }
