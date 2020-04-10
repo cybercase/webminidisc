@@ -1,6 +1,6 @@
 // List of extra files to be precached for offline use.
 // WARNING: don't forget to update the revision before deploy
-var revision = "7";
+var revision = "8";
 self.__precacheManifest = (self.__precacheManifest || []).concat([
     {
         "revision": revision,
@@ -13,6 +13,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     {
         "revision": revision,
         "url": "/webminidisc/ffmpeg-core.js"
+    },
+    {
+        "revision": revision,
+        "url": "/webminidisc/recorderWorker.js"
     },
 ]);
 /**
@@ -31,7 +35,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/webminidisc/precache-manifest.aa380b14d7f91180c175f979234b7564.js"
+  "/webminidisc/precache-manifest.945a7fbb14c13acf8c3831c6bd8c806d.js"
 );
 
 self.addEventListener('message', (event) => {
