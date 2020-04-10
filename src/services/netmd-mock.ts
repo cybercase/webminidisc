@@ -1,6 +1,6 @@
 import { Disc, Track, Encoding, Wireformat, TrackFlag } from 'netmd-js';
 import { NetMDService } from './netmd';
-import { sleep } from '../utils';
+import { sleep, sanitizeTitle } from '../utils';
 import { assert } from 'netmd-js/dist/utils';
 
 class NetMDMockService implements NetMDService {
@@ -94,7 +94,7 @@ class NetMDMockService implements NetMDService {
     async finalize() {}
 
     async renameTrack(index: number, newTitle: string) {
-        newTitle = newTitle.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
+        newTitle = sanitizeTitle(newTitle);
         if (this._getTracksTitlesLength() + newTitle.length > this._tracksTitlesMaxLength) {
             throw new Error(`Track's title too long`);
         }
@@ -129,7 +129,7 @@ class NetMDMockService implements NetMDService {
     ) {
         progressCallback({ written: 0, encrypted: 0, total: 100 });
 
-        title = title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
+        title = sanitizeTitle(title);
 
         if (this._getTracksTitlesLength() + title.length > this._tracksTitlesMaxLength) {
             throw new Error(`Track's title too long`); // Simulates reject from device

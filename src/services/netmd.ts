@@ -1,6 +1,7 @@
 import { openNewDevice, NetMDInterface, Disc, listContent, openPairedDevice, Wireformat, MDTrack, download } from 'netmd-js';
 import { makeGetAsyncPacketIteratorOnWorkerThread } from 'netmd-js/dist/web-encrypt-worker';
 import { Logger, ConsoleLogger, Level } from 'netmd-js/dist/logger';
+import { sanitizeTitle } from '../utils';
 
 const Worker = require('worker-loader!netmd-js/dist/web-encrypt-worker.js'); // eslint-disable-line import/no-webpack-loader-syntax
 
@@ -82,7 +83,7 @@ export class NetMDUSBService implements NetMDService {
 
     async renameTrack(index: number, title: string) {
         // Removing non ascii chars... Sorry, I didn't implement char encoding.
-        title = title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
+        title = sanitizeTitle(title);
         await this.netmdInterface!.setTrackTitle(index, title);
     }
 
@@ -128,7 +129,7 @@ export class NetMDUSBService implements NetMDService {
         });
 
         // Removing non ascii chars... Sorry, I didn't implement char encoding.
-        title = title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
+        title = sanitizeTitle(title);
         let mdTrack = new MDTrack(title, format, data, 0x80000, webWorkerAsyncPacketIterator);
 
         await download(this.netmdInterface!, mdTrack, ({ writtenBytes }) => {

@@ -11,14 +11,6 @@ export function useShallowEqualSelector<TState = RootState, TSelected = unknown>
     return useSelector(selector, shallowEqual);
 }
 
-export function hasWebUSB(): boolean {
-    return !!navigator.usb;
-}
-
-export function getWebUSB(): USB {
-    return navigator.usb;
-}
-
 export function debugEnabled() {
     return process.env.NODE_ENV === 'development';
 }
@@ -50,6 +42,14 @@ export function getAvailableCharsForTrackTitle(trackTitles: string[]) {
         return acc + title.length;
     }, 0);
     return maxChars - usedChars;
+}
+
+export function framesToSec(frames: number) {
+    return frames / 512;
+}
+
+export function sanitizeTitle(title: string) {
+    return title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
 }
 
 declare let process: any;
