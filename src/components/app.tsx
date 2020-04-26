@@ -114,17 +114,6 @@ const App = () => {
                                 {new Date().getFullYear()}
                                 {'.'}
                             </Typography>
-                            <Link
-                                rel="noopener noreferrer"
-                                href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-                                className="twitter-share-button"
-                                data-via="thecybercase"
-                                data-hashtags="MiniDisc"
-                                data-dnt="true"
-                                data-show-count="false"
-                            >
-                                Tweet
-                            </Link>
                             <Box className={classes.controlsContainer}>{mainView === 'MAIN' ? <Controls /> : null}</Box>
                         </Box>
                     </Paper>
