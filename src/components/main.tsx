@@ -111,6 +111,10 @@ const useStyles = makeStyles(theme => ({
         zIndex: theme.zIndex.drawer + 1,
         color: '#fff',
     },
+    remainingTimeTooltip: {
+        textDecoration: 'underline',
+        textDecorationStyle: 'dotted',
+    },
 }));
 
 const EncodingName: { [k: number]: string } = {
@@ -229,9 +233,25 @@ export const Main = (props: {}) => {
                 <TopMenu />
             </Box>
             <Typography component="h2" variant="body2">
-                {disc !== null
-                    ? `${formatTimeFromFrames(disc.left, false)} left of ${formatTimeFromFrames(disc.total, false)}`
-                    : `Loading...`}
+                {disc !== null ? (
+                    <React.Fragment>
+                        <span>{`${formatTimeFromFrames(disc.left, false)} left of ${formatTimeFromFrames(disc.total, false)} `}</span>
+                        <Tooltip
+                            title={
+                                <React.Fragment>
+                                    <span>{`${formatTimeFromFrames(disc.left * 2, false)} left in LP2 Mode`}</span>
+                                    <br />
+                                    <span>{`${formatTimeFromFrames(disc.left * 4, false)} left in LP4 Mode`}</span>
+                                </React.Fragment>
+                            }
+                            arrow
+                        >
+                            <span className={classes.remainingTimeTooltip}>SP Mode</span>
+                        </Tooltip>
+                    </React.Fragment>
+                ) : (
+                    `Loading...`
+                )}
             </Typography>
             <Toolbar
                 className={clsx(classes.toolbar, {
