@@ -27,6 +27,9 @@ const useStyles = makeStyles(theme => ({
             marginLeft: 'auto',
             marginRight: 'auto',
         },
+        [theme.breakpoints.up(700 + theme.spacing(2) * 2)]: {
+            width: 700,
+        },
     },
 
     paper: {
@@ -40,6 +43,9 @@ const useStyles = makeStyles(theme => ({
             marginBottom: theme.spacing(6),
             padding: theme.spacing(3),
             height: 600,
+        },
+        [theme.breakpoints.up(700 + theme.spacing(2) * 2)]: {
+            height: 700,
         },
     },
     copyright: {
