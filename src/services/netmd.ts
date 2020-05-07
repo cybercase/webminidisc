@@ -1,6 +1,6 @@
 import { openNewDevice, NetMDInterface, Disc, listContent, openPairedDevice, Wireformat, MDTrack, download } from 'netmd-js';
 import { makeGetAsyncPacketIteratorOnWorkerThread } from 'netmd-js/dist/web-encrypt-worker';
-import { Logger, ConsoleLogger, Level } from 'netmd-js/dist/logger';
+import { Logger } from 'netmd-js/dist/logger';
 import { sanitizeTitle, sleep } from '../utils';
 
 const Worker = require('worker-loader!netmd-js/dist/web-encrypt-worker.js'); // eslint-disable-line import/no-webpack-loader-syntax
