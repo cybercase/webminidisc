@@ -91,9 +91,28 @@ export class NetMDUSBService implements NetMDService {
     }
 
     async renameDisc(newName: string) {
+        // TODO: This whole function should be moved in netmd-js
         const oldName = await this.netmdInterface!.getDiscTitle();
-        let newNameWithGroups = await this.netmdInterface!._getDiscTitle();
-        newNameWithGroups = newNameWithGroups.replace(oldName, newName);
+        const oldRawName = await this.netmdInterface!._getDiscTitle();
+        const hasGroups = oldRawName.indexOf('//') >= 0;
+        const hasGroupsAndTitle = oldRawName.startsWith('0;');
+
+        if (newName === oldName) {
+            return;
+        }
+
+        let newNameWithGroups;
+
+        if (hasGroups) {
+            if (hasGroupsAndTitle) {
+                newNameWithGroups = oldRawName.replace(/^0;.*?\/\//, newName !== '' ? `0;${newName}//` : ``); // Replace or delete the old title
+            } else {
+                newNameWithGroups = `0;${newName}//${oldRawName}`; // Add the new title
+            }
+        } else {
+            newNameWithGroups = newName;
+        }
+
         await this.netmdInterface!.cacheTOC();
         await this.netmdInterface!.setDiscTitle(newNameWithGroups);
         await this.netmdInterface!.syncTOC();
