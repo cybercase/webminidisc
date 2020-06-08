@@ -1441,6 +1441,11 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
+"@types/dom-mediacapture-record@^1.0.4":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@types/dom-mediacapture-record/-/dom-mediacapture-record-1.0.6.tgz#37624219f180fc517b99a266512b6209352dd1ba"
+  integrity sha512-N7+dsk8WPIvC59xZfbtvuTxfZI0I21uBLehhbz5Kx4Da9K26IdzqNuVX3ldWAxzYLVIsXr82MK9nlsKLxmka9A==
+
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
@@ -6049,6 +6054,11 @@ istanbul-reports@^2.2.6:
   dependencies:
     html-escaper "^2.0.0"
 
+jconv@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/jconv/-/jconv-0.1.5.tgz#c650edba4cc2ce6dd292bf3910b123433c4b47f5"
+  integrity sha1-xlDtukzCzm3Skr85ELEjQzxLR/U=
+
 jest-changed-files@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/jest-changed-files/-/jest-changed-files-24.9.0.tgz#08d8c15eb79a7fa3fc98269bc14b451ee82f8039"
@@ -7424,14 +7434,16 @@ neo-async@^2.5.0, neo-async@^2.6.1:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.1.tgz#ac27ada66167fa8849a6addd837f6b189ad2081c"
   integrity sha512-iyam8fBuCUpWeKPGpaNMetEocMt364qkCsfL9JuhjXX6dRnguRVOfk2GZaDpPjcOKiiXCPINZC1GczQ7iTq3Zw==
 
-netmd-js@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/netmd-js/-/netmd-js-1.0.3.tgz#5793737ffd8fe7eda0c919ae655dd74bd27bc08b"
-  integrity sha512-1HhC6UK7YcT1OGYuNXXNc8qq75clhcwTOTGtOqstrpsL+F891lEnZvHPm4/cSq/SffUn9r8s2y/WetMiCGnfTg==
+netmd-js@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/netmd-js/-/netmd-js-1.0.9.tgz#2a7f9ec05b8e7243330459a2f33e6e06b2bdde22"
+  integrity sha512-SWOva5NgmSVjgoq1fCklCPEWo5K3Kr7tmYfnrCxyUm3DQ9OIlXBZ9pA42mVIVieOyLBoNf2LaUQ2GsfhM8Ib1w==
   dependencies:
     browser-bunyan "^1.5.3"
+    buffer "^5.5.0"
     bunyan "^1.8.12"
     crypto-js "^4.0.0"
+    jconv "^0.1.5"
     jsbi "^3.1.1"
     webusb "^2.0.1"
     yargs "^15.1.0"
@@ -9398,6 +9410,11 @@ realpath-native@^1.1.0:
   dependencies:
     util.promisify "^1.0.0"
 
+recorderjs@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/recorderjs/-/recorderjs-1.0.1.tgz#f8211a0f90bdcdcfa2f431a597b6cb94a1b93571"
+  integrity sha1-+CEaD5C9zc+i9DGll7bLlKG5NXE=
+
 recursive-readdir@2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/recursive-readdir/-/recursive-readdir-2.2.2.tgz#9946fb3274e1628de6e36b2f6714953b4845094f"
@@ -11299,9 +11316,9 @@ websocket-driver@>=0.5.1:
     websocket-extensions ">=0.1.1"
 
 websocket-extensions@>=0.1.1:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.3.tgz#5d2ff22977003ec687a4b87073dfbbac146ccf29"
-  integrity sha512-nqHUnMXmBzT0w570r2JpJxfiSD1IzoI+HGVdd3aZ0yNi3ngvQ4jv1dtHt5VGxfI2yj5yqImPhOK4vmIh2xMbGg==
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.4.tgz#7f8473bc839dfd87608adb95d7eb075211578a42"
+  integrity sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==
 
 webusb@^2.0.1:
   version "2.0.1"
