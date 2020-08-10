@@ -143,6 +143,7 @@ class NetMDMockService implements NetMDService {
             encoding: Encoding.sp,
             index: this._tracks.length,
             protected: TrackFlag.unprotected,
+            channel: 0,
         });
         await sleep(0.5);
         progressCallback({ written: 100, encrypted: 100, total: 100 });
