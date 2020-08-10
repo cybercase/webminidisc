@@ -52,9 +52,9 @@ After a quick inspection to the source code I realized the project could be easi
 That's it. It was a LOT of fun :).
 
 ### Some OSS I've used
-- [FFmpeg](https://www.ffmpeg.org/) and [ffmpegjs](https://github.com/ffmpegjs/FFmpeg), to read your audio files (wav, mp3, ogg, mp4, etc...).
+- [FFmpeg](https://www.ffmpeg.org/) and [ffmpegjs](https://github.com/ffmpegjs/FFmpeg), to read audio files (wav, mp3, ogg, mp4, etc...).
 - [Atracdenc](https://github.com/dcherednik/atracdenc/), to support atrac3 encoding (lp2, lp4 audio formats).
 - [Emscripten](https://emscripten.org/), to run both FFmpeg and Atracdenc in the browser.
 - [netmd-js](https://github.com/cybercase/netmd-js), to send commands to NetMD devices using Javascript.
-- [linux-minidisc](https://github.com/glaubitz/linux-minidisc), to have made the netmd-js project possible.
 - [material-ui](https://material-ui.com/), to build the user interface.
+- [linux-minidisc](https://github.com/linux-minidisc/linux-minidisc), to build the netmd-js library.
