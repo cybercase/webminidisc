@@ -87,7 +87,9 @@ export class NetMDUSBService implements NetMDService {
     async renameTrack(index: number, title: string) {
         // Removing non ascii chars... Sorry, I didn't implement char encoding.
         title = sanitizeTitle(title);
+        await this.netmdInterface!.cacheTOC();
         await this.netmdInterface!.setTrackTitle(index, title);
+        await this.netmdInterface!.syncTOC();
     }
 
     async renameDisc(newName: string) {
