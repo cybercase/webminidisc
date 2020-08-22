@@ -9,7 +9,7 @@ mkdir build
 cd build
 emcmake cmake .. -DBUILD_TESTING=false -DENABLE_EXTERNAL_LIBS=false -DCMAKE_INSTALL_PREFIX=./installation
 emmake make
-emmake install
+emmake make install
 exit
 ```
 
@@ -21,6 +21,7 @@ cd atracdenc
 # cp -r ../libsndfile/build/installation libsndfile
 cd src
 # Remove the TEST_BIG_ENDIAN block in CMakeFile.txt. WASM is little endian.
+cd ..
 docker run -ti -v`pwd`:/src trzeci/emscripten-upstream sh -c bash
 mkdir build
 cd build
