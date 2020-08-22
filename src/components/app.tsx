@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
             marginLeft: 'auto',
             marginRight: 'auto',
         },
-        [theme.breakpoints.up(700 + theme.spacing(2) * 2)]: {
+        [theme.breakpoints.up(700 + theme.spacing(2) * 2) + ` and (min-height: 750px)`]: {
             width: 700,
         },
     },
@@ -44,7 +44,7 @@ const useStyles = makeStyles(theme => ({
             padding: theme.spacing(3),
             height: 600,
         },
-        [theme.breakpoints.up(700 + theme.spacing(2) * 2)]: {
+        [theme.breakpoints.up(700 + theme.spacing(2) * 2) + ` and (min-height: 750px)`]: {
             height: 700,
         },
     },
