@@ -20,8 +20,12 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import { Controls } from './controls';
 import Box from '@material-ui/core/Box';
 import serviceRegistry from '../services/registry';
+import { TransitionProps } from '@material-ui/core/transitions';
 
-const Transition = React.forwardRef(function Transition(props, ref) {
+const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & { children?: React.ReactElement<any, any> },
+    ref: React.Ref<unknown>
+) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 

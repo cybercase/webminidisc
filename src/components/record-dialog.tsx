@@ -10,6 +10,7 @@ import Slide from '@material-ui/core/Slide';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
+import { TransitionProps } from '@material-ui/core/transitions';
 
 const useStyles = makeStyles(theme => ({
     progressPerc: {
@@ -20,7 +21,10 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const Transition = React.forwardRef(function Transition(props, ref) {
+const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & { children?: React.ReactElement<any, any> },
+    ref: React.Ref<unknown>
+) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
