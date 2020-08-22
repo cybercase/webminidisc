@@ -57,6 +57,7 @@ configure_ffmpeg() {
   --disable-bsfs \
   --disable-parsers \
   --enable-parser=aac \
+  --enable-parser=alac \
   --enable-parser=ac3 \
   --enable-parser=mpegaudio \
   --enable-parser=vorbis \
@@ -70,6 +71,7 @@ configure_ffmpeg() {
   --enable-rdft \
   \
   --disable-demuxers \
+  --enable-demuxer=alac \
   --enable-demuxer=ffmetadata \
   --enable-demuxer=aiff \
   --enable-demuxer=oma \
@@ -128,6 +130,7 @@ configure_ffmpeg() {
   --enable-muxer=pcm_u24le \
   \
   --disable-decoders \
+  --enable-decoder=alac \
   --enable-decoder=opus \
   --enable-decoder=aac \
   --enable-decoder=ac3 \
