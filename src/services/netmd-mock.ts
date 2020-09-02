@@ -1,4 +1,4 @@
-import { Disc, Track, Encoding, Wireformat, TrackFlag } from 'netmd-js';
+import { Channels, Track, Encoding, Wireformat, TrackFlag } from 'netmd-js';
 import { NetMDService } from './netmd';
 import { sleep, sanitizeTitle } from '../utils';
 import { assert } from 'netmd-js/dist/utils';
@@ -13,6 +13,7 @@ class NetMDMockService implements NetMDService {
         //     duration: 5 * 60 * 512,
         //     encoding: Encoding.sp,
         //     index: 0,
+        //     channel: Channels.stereo,
         //     protected: TrackFlag.unprotected,
         //     title: 'Mock Track 1',
         // },
@@ -20,6 +21,7 @@ class NetMDMockService implements NetMDService {
         //     duration: 5 * 60 * 512,
         //     encoding: Encoding.sp,
         //     index: 1,
+        //     channel: Channels.stereo,
         //     protected: TrackFlag.unprotected,
         //     title: 'Mock Track 2',
         // },
@@ -27,6 +29,7 @@ class NetMDMockService implements NetMDService {
         //     duration: 5 * 60 * 512,
         //     encoding: Encoding.sp,
         //     index: 2,
+        //     channel: Channels.stereo,
         //     protected: TrackFlag.unprotected,
         //     title: 'Mock Track 3',
         // },
@@ -34,6 +37,7 @@ class NetMDMockService implements NetMDService {
         //     duration: 5 * 60 * 512,
         //     encoding: Encoding.sp,
         //     index: 3,
+        //     channel: Channels.stereo,
         //     protected: TrackFlag.unprotected,
         //     title: 'Mock Track 4',
         // },

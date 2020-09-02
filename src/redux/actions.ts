@@ -78,6 +78,12 @@ export function renameDisc({ newName }: { newName: string }) {
 
 export function deleteTracks(indexes: number[]) {
     return async function(dispatch: AppDispatch) {
+        const confirmation = window.confirm(
+            `Proceed with Delete Track${indexes.length !== 1 ? 's' : ''}? This operation cannot be undone.`
+        );
+        if (!confirmation) {
+            return;
+        }
         const { netmdService } = serviceRegistry;
         dispatch(appStateActions.setLoading(true));
         indexes = indexes.sort();
@@ -91,6 +97,10 @@ export function deleteTracks(indexes: number[]) {
 
 export function wipeDisc() {
     return async function(dispatch: AppDispatch) {
+        const confirmation = window.confirm(`Proceed with Wipe Disc? This operation cannot be undone.`);
+        if (!confirmation) {
+            return;
+        }
         const { netmdService } = serviceRegistry;
         dispatch(appStateActions.setLoading(true));
         await netmdService!.wipeDisc();
