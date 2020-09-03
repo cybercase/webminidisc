@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useShallowEqualSelector } from '../utils';
 
@@ -25,9 +25,9 @@ export const ErrorDialog = (props: {}) => {
 
     let { visible, error } = useShallowEqualSelector(state => state.errorDialog);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         dispatch(errorDialogActions.setVisible(false));
-    };
+    }, [dispatch]);
 
     return (
         <Dialog
