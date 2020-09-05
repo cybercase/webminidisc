@@ -35,6 +35,7 @@ import { RenameDialog } from './rename-dialog';
 import { UploadDialog } from './upload-dialog';
 import { RecordDialog } from './record-dialog';
 import { ErrorDialog } from './error-dialog';
+import { PanicDialog } from './panic-dialog';
 import { ConvertDialog } from './convert-dialog';
 import { AboutDialog } from './about-dialog';
 import { DumpDialog } from './dump-dialog';
@@ -379,6 +380,7 @@ export const Main = (props: {}) => {
             <RecordDialog />
             <DumpDialog trackIndexes={selected} />
             <AboutDialog />
+            <PanicDialog />
         </React.Fragment>
     );
 };
