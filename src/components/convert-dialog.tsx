@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useShallowEqualSelector } from '../utils';
 
@@ -13,11 +13,10 @@ import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import Input from '@material-ui/core/Input';
-import MenuItem from '@material-ui/core/MenuItem';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { TransitionProps } from '@material-ui/core/transitions';
+import { Typography } from '@material-ui/core';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
@@ -34,6 +33,14 @@ const useStyles = makeStyles(theme => ({
     formControl: {
         minWidth: 120,
     },
+    toggleButton: {
+        minWidth: 40,
+    },
+    dialogContent: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
 }));
 
 export const ConvertDialog = (props: { files: File[] }) => {
@@ -42,18 +49,21 @@ export const ConvertDialog = (props: { files: File[] }) => {
 
     let { visible, format } = useShallowEqualSelector(state => state.convertDialog);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         dispatch(convertDialogActions.setVisible(false));
-    };
+    }, [dispatch]);
 
-    const handleChange = (ev: React.ChangeEvent<{ value: unknown }>) => {
-        dispatch(convertDialogActions.setFormat(ev.target.value as string));
-    };
+    const handleChange = useCallback(
+        (ev: React.MouseEvent<HTMLElement>, newFormat: string) => {
+            dispatch(convertDialogActions.setFormat(newFormat));
+        },
+        [dispatch]
+    );
 
-    const handleConvert = () => {
+    const handleConvert = useCallback(() => {
         handleClose();
         dispatch(convertAndUpload(props.files, format));
-    };
+    }, [dispatch, props, format]);
 
     return (
         <Dialog
@@ -65,23 +75,22 @@ export const ConvertDialog = (props: { files: File[] }) => {
             aria-describedby="convert-dialog-slide-description"
         >
             <DialogTitle id="convert-dialog-slide-title">Upload Settings</DialogTitle>
-            <DialogContent>
+            <DialogContent className={classes.dialogContent}>
                 <FormControl className={classes.formControl}>
-                    <InputLabel color="secondary" id="convert-dialog-format">
-                        Format
-                    </InputLabel>
-                    <Select
-                        labelId="convert-dialog-format-label"
-                        id="convert-dialog-format"
-                        value={format}
-                        color="secondary"
-                        onChange={handleChange}
-                        input={<Input />}
-                    >
-                        <MenuItem value={`SP`}>SP</MenuItem>
-                        <MenuItem value={`LP2`}>LP2</MenuItem>
-                        <MenuItem value={`LP4`}>LP4</MenuItem>
-                    </Select>
+                    <Typography component="label" variant="caption" color="textSecondary">
+                        Mode
+                    </Typography>
+                    <ToggleButtonGroup value={format} exclusive onChange={handleChange} size="small">
+                        <ToggleButton className={classes.toggleButton} value="SP">
+                            SP
+                        </ToggleButton>
+                        <ToggleButton className={classes.toggleButton} value="LP2">
+                            LP2
+                        </ToggleButton>
+                        <ToggleButton className={classes.toggleButton} value="LP4">
+                            LP4
+                        </ToggleButton>
+                    </ToggleButtonGroup>
                 </FormControl>
             </DialogContent>
             <DialogActions>
