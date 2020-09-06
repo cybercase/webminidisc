@@ -10,6 +10,8 @@ import serviceRegistry from '../services/registry';
 import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
 import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep } from '../utils';
+import jsmediatags from 'jsmediatags';
+import { TitleSourceType, TitleFormatType } from './convert-dialog-feature';
 
 export function pair() {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
@@ -192,7 +194,41 @@ export const WireformatDict: { [k: string]: Wireformat } = {
     LP4: Wireformat.lp4,
 };
 
-export function convertAndUpload(files: File[], format: string) {
+async function getTrackNameFromMediaTags(file: File, titleFormat: TitleFormatType) {
+    const fileData = await file.arrayBuffer();
+    return await new Promise<string>((resolve, reject) => {
+        jsmediatags.read(new Blob([fileData]), {
+            onSuccess: data => {
+                const title = data.tags.title ?? 'Unknown Title';
+                const artist = data.tags.artist ?? 'Unknown Artist';
+                const album = data.tags.album ?? 'Unknown Album';
+                switch (titleFormat) {
+                    case 'title': {
+                        resolve(title);
+                        break;
+                    }
+                    case 'artist-title': {
+                        resolve(`${artist} - ${title}`);
+                        break;
+                    }
+                    case 'album-title': {
+                        resolve(`${album} - ${title}`);
+                        break;
+                    }
+                    case 'artist-album-title': {
+                        resolve(`${artist} - ${album} - ${title}`);
+                        break;
+                    }
+                }
+            },
+            onError: error => {
+                reject(error);
+            },
+        });
+    });
+}
+
+export function convertAndUpload(files: File[], format: string, titleSource: TitleSourceType, titleFormat: TitleFormatType) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         const { audioExportService, netmdService } = serviceRegistry;
         const wireformat = WireformatDict[format];
@@ -275,6 +311,14 @@ export function convertAndUpload(files: File[], format: string) {
             const { file, data } = item;
 
             let title = file.name;
+            if (titleSource === 'media') {
+                try {
+                    title = await getTrackNameFromMediaTags(file, titleFormat);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
             const extStartIndex = title.lastIndexOf('.');
             if (extStartIndex > 0) {
                 title = title.substring(0, extStartIndex);

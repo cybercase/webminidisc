@@ -17,6 +17,9 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Typography } from '@material-ui/core';
+import Select from '@material-ui/core/Select';
+import Input from '@material-ui/core/Input';
+import MenuItem from '@material-ui/core/MenuItem';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
@@ -31,7 +34,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: 'row',
     },
     formControl: {
-        minWidth: 120,
+        minWidth: 60,
     },
     toggleButton: {
         minWidth: 40,
@@ -41,29 +44,56 @@ const useStyles = makeStyles(theme => ({
         flexWrap: 'wrap',
         justifyContent: 'space-between',
     },
+    rightBlock: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    titleFormControl: {
+        marginTop: theme.spacing(1),
+    },
 }));
 
 export const ConvertDialog = (props: { files: File[] }) => {
     const dispatch = useDispatch();
     const classes = useStyles();
 
-    let { visible, format } = useShallowEqualSelector(state => state.convertDialog);
+    let { visible, format, titleSource, titleFormat } = useShallowEqualSelector(state => state.convertDialog);
 
     const handleClose = useCallback(() => {
         dispatch(convertDialogActions.setVisible(false));
     }, [dispatch]);
 
-    const handleChange = useCallback(
-        (ev: React.MouseEvent<HTMLElement>, newFormat: string) => {
-            dispatch(convertDialogActions.setFormat(newFormat));
+    const handleChangeFormat = useCallback(
+        (ev, newFormat) => {
+            if (newFormat === null) {
+                return;
+            }
+            dispatch(convertDialogActions.setFormat(newFormat as string));
+        },
+        [dispatch]
+    );
+
+    const handleChangeTitleSource = useCallback(
+        (ev, newTitleSource) => {
+            if (newTitleSource === null) {
+                return;
+            }
+            dispatch(convertDialogActions.setTitleSource(newTitleSource));
+        },
+        [dispatch]
+    );
+
+    const handleChangeTitleFormat = useCallback(
+        (event: React.ChangeEvent<{ value: any }>) => {
+            dispatch(convertDialogActions.setTitleFormat(event.target.value));
         },
         [dispatch]
     );
 
     const handleConvert = useCallback(() => {
         handleClose();
-        dispatch(convertAndUpload(props.files, format));
-    }, [dispatch, props, format]);
+        dispatch(convertAndUpload(props.files, format, titleSource, titleFormat));
+    }, [dispatch, props, format, titleSource, titleFormat]);
 
     return (
         <Dialog
@@ -76,11 +106,11 @@ export const ConvertDialog = (props: { files: File[] }) => {
         >
             <DialogTitle id="convert-dialog-slide-title">Upload Settings</DialogTitle>
             <DialogContent className={classes.dialogContent}>
-                <FormControl className={classes.formControl}>
+                <FormControl>
                     <Typography component="label" variant="caption" color="textSecondary">
-                        Mode
+                        Recording Mode
                     </Typography>
-                    <ToggleButtonGroup value={format} exclusive onChange={handleChange} size="small">
+                    <ToggleButtonGroup value={format} exclusive onChange={handleChangeFormat} size="small">
                         <ToggleButton className={classes.toggleButton} value="SP">
                             SP
                         </ToggleButton>
@@ -92,6 +122,31 @@ export const ConvertDialog = (props: { files: File[] }) => {
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </FormControl>
+                <div className={classes.rightBlock}>
+                    <FormControl className={classes.formControl}>
+                        <Typography component="label" variant="caption" color="textSecondary">
+                            Track title
+                        </Typography>
+                        <ToggleButtonGroup value={titleSource} exclusive onChange={handleChangeTitleSource} size="small">
+                            <ToggleButton className={classes.toggleButton} value="file">
+                                Filename
+                            </ToggleButton>
+                            <ToggleButton className={classes.toggleButton} value="media">
+                                Media tags
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </FormControl>
+                    {titleSource === 'media' ? (
+                        <FormControl className={classes.titleFormControl}>
+                            <Select value={titleFormat} color="secondary" input={<Input />} onChange={handleChangeTitleFormat}>
+                                <MenuItem value={`title`}>Title</MenuItem>
+                                <MenuItem value={`album-title`}>Album - Title</MenuItem>
+                                <MenuItem value={`artist-title`}>Artist - Title</MenuItem>
+                                <MenuItem value={`artist-album-title`}>Artist - Album - Title</MenuItem>
+                            </Select>
+                        </FormControl>
+                    ) : null}
+                </div>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>

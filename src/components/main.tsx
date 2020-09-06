@@ -167,7 +167,11 @@ export const Main = (props: {}) => {
         },
         [dispatch]
     );
-    const { getRootProps, getInputProps, isDragActive, open } = useDropzone({ onDrop, accept: `audio/*`, noClick: true });
+    const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+        onDrop,
+        accept: [`audio/*`, `video/mp4`],
+        noClick: true,
+    });
 
     const classes = useStyles();
 
