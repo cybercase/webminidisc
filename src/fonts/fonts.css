@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'LCDDot';
+    src: url('./LCDDot-Regular.eot');
+    src: url('./LCDDot-Regular.eot?#iefix') format('embedded-opentype'),
+        url('./LCDDot-Regular.woff2') format('woff2'),
+        url('./LCDDot-Regular.woff') format('woff'),
+        url('./LCDDot-Regular.ttf') format('truetype'),
+        url('./LCDDot-Regular.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
