@@ -1,47 +1,55 @@
-import { Channels, Track, Encoding, Wireformat, TrackFlag } from 'netmd-js';
+import { Track, Channels, Encoding, Wireformat, TrackFlag, DeviceStatus } from 'netmd-js';
 import { NetMDService } from './netmd';
-import { sleep, sanitizeTitle } from '../utils';
+import { sleep, sanitizeTitle, asyncMutex } from '../utils';
 import { assert } from 'netmd-js/dist/utils';
+import { Mutex } from 'async-mutex';
 
 class NetMDMockService implements NetMDService {
-    public _currentTrack: number = 0;
+    public statusMonitorTimer: any;
+    public mutex = new Mutex();
     public _tracksTitlesMaxLength = 1700;
     public _discTitle: string = 'Mock Disc';
     public _discCapacity: number = 80 * 60 * 512;
     public _tracks: Track[] = [
-        // {
-        //     duration: 5 * 60 * 512,
-        //     encoding: Encoding.sp,
-        //     index: 0,
-        //     channel: Channels.stereo,
-        //     protected: TrackFlag.unprotected,
-        //     title: 'Mock Track 1',
-        // },
-        // {
-        //     duration: 5 * 60 * 512,
-        //     encoding: Encoding.sp,
-        //     index: 1,
-        //     channel: Channels.stereo,
-        //     protected: TrackFlag.unprotected,
-        //     title: 'Mock Track 2',
-        // },
-        // {
-        //     duration: 5 * 60 * 512,
-        //     encoding: Encoding.sp,
-        //     index: 2,
-        //     channel: Channels.stereo,
-        //     protected: TrackFlag.unprotected,
-        //     title: 'Mock Track 3',
-        // },
-        // {
-        //     duration: 5 * 60 * 512,
-        //     encoding: Encoding.sp,
-        //     index: 3,
-        //     channel: Channels.stereo,
-        //     protected: TrackFlag.unprotected,
-        //     title: 'Mock Track 4',
-        // },
+        {
+            duration: 5 * 60 * 512,
+            encoding: Encoding.sp,
+            index: 0,
+            channel: Channels.stereo,
+            protected: TrackFlag.unprotected,
+            title: 'Long name for - Mock Track 1 - by some artist -12398729837198723',
+        },
+        {
+            duration: 5 * 60 * 512,
+            encoding: Encoding.sp,
+            index: 1,
+            channel: Channels.stereo,
+            protected: TrackFlag.unprotected,
+            title: 'Mock Track 2',
+        },
+        {
+            duration: 5 * 60 * 512,
+            encoding: Encoding.sp,
+            index: 2,
+            channel: Channels.stereo,
+            protected: TrackFlag.unprotected,
+            title: 'Mock Track 3',
+        },
+        {
+            duration: 5 * 60 * 512,
+            encoding: Encoding.sp,
+            index: 3,
+            channel: Channels.stereo,
+            protected: TrackFlag.unprotected,
+            title: 'Mock Track 4',
+        },
     ];
+    public _status: DeviceStatus = {
+        discPresent: true,
+        track: 0,
+        time: { minute: 0, second: 0, frame: 4 },
+        state: 'ready',
+    };
 
     _updateTrackIndexes() {
         for (let i = 0; i < this._tracks.length; i++) {
@@ -90,6 +98,10 @@ class NetMDMockService implements NetMDService {
                 ],
             })
         );
+    }
+
+    async getDeviceStatus() {
+        return JSON.parse(JSON.stringify(this._status));
     }
 
     async getDeviceName() {
@@ -153,28 +165,47 @@ class NetMDMockService implements NetMDService {
         progressCallback({ written: 100, encrypted: 100, total: 100 });
     }
 
+    @asyncMutex
     async play() {
-        console.log('play');
+        this._status.state = 'playing';
     }
+
+    @asyncMutex
     async pause() {
         console.log('pause');
     }
+
+    @asyncMutex
     async stop() {
-        console.log('stop');
+        this._status.state = 'ready';
     }
+
+    @asyncMutex
     async next() {
-        console.log('next');
+        if (this._status.track === null) {
+            return;
+        }
+        this._status.track = Math.min(this._status.track + 1, this._tracks.length - 1) % this._tracks.length;
     }
+
+    @asyncMutex
     async prev() {
-        console.log('prev');
+        if (this._status.track === null) {
+            return;
+        }
+        this._status.track = Math.max(this._status.track - 1, 0) % this._tracks.length;
     }
+
     async gotoTrack(index: number) {
-        this._currentTrack = index;
+        this._status.track = index;
         await sleep(500);
     }
 
     async getPosition() {
-        return [this._currentTrack, 0, 0, 1];
+        if (this._status.track === null || this._status.time === null) {
+            return null;
+        }
+        return [this._status.track, 0, this._status.time.minute, this._status.time.second, this._status.time.frame];
     }
 }
 

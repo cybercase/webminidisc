@@ -1,15 +1,17 @@
-import { Disc } from 'netmd-js';
+import { Disc, DeviceStatus } from 'netmd-js';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { enableBatching } from 'redux-batched-actions';
 
 export interface MainState {
     disc: Disc | null;
     deviceName: string;
+    deviceStatus: DeviceStatus | null;
 }
 
 const initialState: MainState = {
     disc: null,
     deviceName: '',
+    deviceStatus: null,
 };
 
 export const slice = createSlice({
@@ -21,6 +23,9 @@ export const slice = createSlice({
         },
         setDeviceName: (state, action: PayloadAction<string>) => {
             state.deviceName = action.payload;
+        },
+        setDeviceStatus: (state, action: PayloadAction<DeviceStatus>) => {
+            state.deviceStatus = action.payload;
         },
     },
 });

@@ -13,6 +13,35 @@ import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback,
 import jsmediatags from 'jsmediatags';
 import { TitleSourceType, TitleFormatType } from './convert-dialog-feature';
 
+export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', params?: unknown) {
+    return async function(dispatch: AppDispatch, getState: () => RootState) {
+        switch (action) {
+            case 'play':
+                await serviceRegistry.netmdService!.play();
+                break;
+            case 'stop':
+                await serviceRegistry.netmdService!.stop();
+                break;
+            case 'next':
+                await serviceRegistry.netmdService!.next();
+                break;
+            case 'prev':
+                await serviceRegistry.netmdService!.prev();
+                break;
+            case 'goto':
+                if (params && typeof params === 'number' && params >= 0) {
+                    await serviceRegistry.netmdService!.gotoTrack(params);
+                }
+                break;
+        }
+        // CAVEAT: change-track might take a up to a few seconds to complete.
+        // We wait 500ms and let the monitor do further updates
+        await sleep(500);
+        let deviceStatus = await serviceRegistry.netmdService!.getDeviceStatus();
+        dispatch(mainActions.setDeviceStatus(deviceStatus));
+    };
+}
+
 export function pair() {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         dispatch(appStateActions.setPairingFailed(false));
@@ -51,7 +80,15 @@ export function listContent() {
         dispatch(appStateActions.setLoading(true));
         let disc = await serviceRegistry.netmdService!.listContent();
         let deviceName = await serviceRegistry.netmdService!.getDeviceName();
-        dispatch(batchActions([mainActions.setDisc(disc), mainActions.setDeviceName(deviceName), appStateActions.setLoading(false)]));
+        let deviceStatus = await serviceRegistry.netmdService!.getDeviceStatus();
+        dispatch(
+            batchActions([
+                mainActions.setDisc(disc),
+                mainActions.setDeviceName(deviceName),
+                mainActions.setDeviceStatus(deviceStatus),
+                appStateActions.setLoading(false),
+            ])
+        );
     };
 }
 
@@ -131,6 +168,7 @@ export function recordTracks(indexes: number[], deviceId: string) {
         let tracks = getTracks(disc!).filter(t => indexes.indexOf(t.index) >= 0);
 
         const { netmdService, mediaRecorderService } = serviceRegistry;
+        await serviceRegistry.netmdService!.stop();
 
         for (let [i, track] of tracks.entries()) {
             dispatch(
@@ -233,6 +271,7 @@ export function convertAndUpload(files: File[], format: string, titleSource: Tit
         const { audioExportService, netmdService } = serviceRegistry;
         const wireformat = WireformatDict[format];
 
+        await netmdService?.stop();
         dispatch(uploadDialogActions.setVisible(true));
 
         const updateProgressCallback = ({ written, encrypted, total }: { written: number; encrypted: number; total: number }) => {

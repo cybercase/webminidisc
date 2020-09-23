@@ -36,6 +36,7 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'flex-end',
         justifyContent: 'space-between',
         marginRight: -theme.spacing(2),
+        flexFlow: 'wrap',
     },
     formControl: {
         minWidth: 120,

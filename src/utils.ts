@@ -1,5 +1,8 @@
+import { Disc, formatTimeFromFrames, Encoding } from 'netmd-js';
 import { useSelector, shallowEqual } from 'react-redux';
 import { RootState } from './redux/store';
+import { Mutex } from 'async-mutex';
+import { Theme } from '@material-ui/core';
 
 export function sleep(ms: number) {
     return new Promise(resolve => {
@@ -60,6 +63,58 @@ export function framesToSec(frames: number) {
 
 export function sanitizeTitle(title: string) {
     return title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
+}
+
+const EncodingName: { [k: number]: string } = {
+    [Encoding.sp]: 'SP',
+    [Encoding.lp2]: 'LP2',
+    [Encoding.lp4]: 'LP4',
+};
+
+export function getSortedTracks(disc: Disc | null) {
+    let tracks: { index: number; title: string; group: string; duration: string; encoding: string }[] = [];
+    if (disc !== null) {
+        for (let group of disc.groups) {
+            for (let track of group.tracks) {
+                tracks.push({
+                    index: track.index,
+                    title: track.title ?? `Unknown Title`,
+                    group: group.title ?? ``,
+                    encoding: EncodingName[track.encoding],
+                    duration: formatTimeFromFrames(track.duration, false),
+                });
+            }
+        }
+    }
+    tracks.sort((l, r) => l.index - r.index);
+    return tracks;
+}
+
+export function asyncMutex(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    // This is meant to be used only with classes having a "mutex" instance property
+    const oldValue = descriptor.value;
+    descriptor.value = async function(...args: any) {
+        const mutex = (this as any).mutex as Mutex;
+        const release = await mutex.acquire();
+        try {
+            return await oldValue.apply(this, args);
+        } finally {
+            release();
+        }
+    };
+    return descriptor;
+}
+
+export function forAnyDesktop(theme: Theme) {
+    return theme.breakpoints.up(600 + theme.spacing(2) * 2);
+}
+
+export function belowDesktop(theme: Theme) {
+    return theme.breakpoints.down(600 + theme.spacing(2) * 2);
+}
+
+export function forWideDesktop(theme: Theme) {
+    return theme.breakpoints.up(700 + theme.spacing(2) * 2) + ` and (min-height: 750px)`;
 }
 
 declare let process: any;

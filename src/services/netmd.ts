@@ -1,11 +1,25 @@
-import { openNewDevice, NetMDInterface, Disc, listContent, openPairedDevice, Wireformat, MDTrack, download } from 'netmd-js';
+import {
+    openNewDevice,
+    NetMDInterface,
+    Disc,
+    listContent,
+    openPairedDevice,
+    Wireformat,
+    MDTrack,
+    download,
+    getDeviceStatus,
+    DeviceStatus,
+} from 'netmd-js';
 import { makeGetAsyncPacketIteratorOnWorkerThread } from 'netmd-js/dist/web-encrypt-worker';
 import { Logger } from 'netmd-js/dist/logger';
-import { sanitizeTitle, sleep } from '../utils';
+import { asyncMutex, sanitizeTitle, sleep } from '../utils';
+import { Mutex } from 'async-mutex';
 
 const Worker = require('worker-loader!netmd-js/dist/web-encrypt-worker.js'); // eslint-disable-line import/no-webpack-loader-syntax
 
 export interface NetMDService {
+    mutex: Mutex;
+    getDeviceStatus(): Promise<DeviceStatus>;
     pair(): Promise<boolean>;
     connect(): Promise<boolean>;
     listContent(): Promise<Disc>;
@@ -35,6 +49,8 @@ export interface NetMDService {
 export class NetMDUSBService implements NetMDService {
     private netmdInterface?: NetMDInterface;
     private logger?: Logger;
+    public mutex = new Mutex();
+    public statusMonitorTimer: any;
 
     constructor({ debug = false }: { debug: boolean }) {
         if (debug) {
@@ -72,18 +88,27 @@ export class NetMDUSBService implements NetMDService {
         return true;
     }
 
+    @asyncMutex
     async listContent() {
         return await listContent(this.netmdInterface!);
     }
 
+    @asyncMutex
+    async getDeviceStatus() {
+        return await getDeviceStatus(this.netmdInterface!);
+    }
+
+    @asyncMutex
     async getDeviceName() {
         return await this.netmdInterface!.netMd.getDeviceName();
     }
 
+    @asyncMutex
     async finalize() {
         await this.netmdInterface!.netMd.finalize();
     }
 
+    @asyncMutex
     async renameTrack(index: number, title: string) {
         // Removing non ascii chars... Sorry, I didn't implement char encoding.
         title = sanitizeTitle(title);
@@ -92,6 +117,7 @@ export class NetMDUSBService implements NetMDService {
         await this.netmdInterface!.syncTOC();
     }
 
+    @asyncMutex
     async renameDisc(newName: string) {
         // TODO: This whole function should be moved in netmd-js
         const oldName = await this.netmdInterface!.getDiscTitle();
@@ -120,15 +146,18 @@ export class NetMDUSBService implements NetMDService {
         await this.netmdInterface!.syncTOC();
     }
 
+    @asyncMutex
     async deleteTrack(index: number) {
         await this.netmdInterface!.eraseTrack(index);
         await sleep(100);
     }
 
+    @asyncMutex
     async wipeDisc() {
         await this.netmdInterface!.eraseDisc();
     }
 
+    @asyncMutex
     async moveTrack(src: number, dst: number) {
         await this.netmdInterface!.moveTrack(src, dst);
     }
@@ -165,24 +194,33 @@ export class NetMDUSBService implements NetMDService {
         w.terminate();
     }
 
+    @asyncMutex
     async play() {
         await this.netmdInterface!.play();
     }
+    @asyncMutex
     async pause() {
         await this.netmdInterface!.pause();
     }
+    @asyncMutex
     async stop() {
         await this.netmdInterface!.stop();
     }
+    @asyncMutex
     async next() {
         await this.netmdInterface!.nextTrack();
     }
+    @asyncMutex
     async prev() {
         await this.netmdInterface!.previousTrack();
     }
+
+    @asyncMutex
     async gotoTrack(index: number) {
         await this.netmdInterface!.gotoTrack(index);
     }
+
+    @asyncMutex
     async getPosition() {
         return await this.netmdInterface!.getPosition();
     }

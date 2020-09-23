@@ -22,7 +22,7 @@
     "husky": "^4.2.5",
     "jsmediatags": "^3.9.3",
     "lint-staged": "^10.2.13",
-    "netmd-js": "^1.0.11",
+    "netmd-js": "^1.1.0",
     "prettier": "^1.19.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@types/dom-mediacapture-record": "^1.0.7",
+    "async-mutex": "^0.2.4",
     "gh-pages": "^2.2.0"
   }
 }

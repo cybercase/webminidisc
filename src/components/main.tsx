@@ -7,9 +7,9 @@ import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
 import { actions as convertDialogActions } from '../redux/convert-dialog-feature';
 import { actions as dumpDialogActions } from '../redux/dump-dialog-feature';
 
-import { formatTimeFromFrames, getTracks, Encoding } from 'netmd-js';
+import { formatTimeFromFrames, getTracks } from 'netmd-js';
 
-import { useShallowEqualSelector } from '../utils';
+import { belowDesktop, forAnyDesktop, getSortedTracks, useShallowEqualSelector } from '../utils';
 
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -51,14 +51,21 @@ const useStyles = makeStyles(theme => ({
         position: 'absolute',
         bottom: theme.spacing(3),
         right: theme.spacing(3),
+        [belowDesktop(theme)]: {
+            bottom: theme.spacing(2),
+        },
     },
     main: {
         overflowY: 'auto',
         flex: '1 1 auto',
         marginBottom: theme.spacing(3),
-        marginLeft: theme.spacing(-2),
-        marginRight: theme.spacing(-2),
         outline: 'none',
+        marginLeft: theme.spacing(-1),
+        marginRight: theme.spacing(-1),
+        [forAnyDesktop(theme)]: {
+            marginLeft: theme.spacing(-2),
+            marginRight: theme.spacing(-2),
+        },
     },
     toolbar: {
         marginTop: theme.spacing(3),
@@ -96,12 +103,21 @@ const useStyles = makeStyles(theme => ({
         display: 'inline-flex',
         border: `2px solid ${theme.palette.background.paper}`,
         padding: '0 4px',
+        verticalAlign: 'middle',
+        width: theme.spacing(4.5),
+        marginRight: theme.spacing(0.5),
     },
     titleCell: {
         overflow: 'hidden',
         maxWidth: '40ch',
         textOverflow: 'ellipsis',
         // whiteSpace: 'nowrap',
+    },
+    durationCell: {
+        whiteSpace: 'nowrap',
+    },
+    durationCellTime: {
+        verticalAlign: 'middle',
     },
     indexCell: {
         whiteSpace: 'nowrap',
@@ -117,12 +133,6 @@ const useStyles = makeStyles(theme => ({
         textDecorationStyle: 'dotted',
     },
 }));
-
-const EncodingName: { [k: number]: string } = {
-    [Encoding.sp]: 'SP',
-    [Encoding.lp2]: 'LP2',
-    [Encoding.lp4]: 'LP4',
-};
 
 export const Main = (props: {}) => {
     let dispatch = useDispatch();
@@ -174,22 +184,7 @@ export const Main = (props: {}) => {
     });
 
     const classes = useStyles();
-
-    let tracks: { index: number; title: string; group: string; duration: string; encoding: string }[] = [];
-    if (disc !== null) {
-        for (let group of disc.groups) {
-            for (let track of group.tracks) {
-                tracks.push({
-                    index: track.index,
-                    title: track.title ?? `Unknown Title`,
-                    group: group.title ?? ``,
-                    encoding: EncodingName[track.encoding],
-                    duration: formatTimeFromFrames(track.duration, false),
-                });
-            }
-        }
-    }
-    tracks.sort((l, r) => l.index - r.index);
+    const tracks = getSortedTracks(disc);
 
     // Action Handlers
     const handleSelectClick = (event: React.MouseEvent, item: number) => {
@@ -344,7 +339,6 @@ export const Main = (props: {}) => {
                         <TableRow>
                             <TableCell className={classes.indexCell}>#</TableCell>
                             <TableCell>Title</TableCell>
-                            <TableCell>Format</TableCell>
                             <TableCell align="right">Duration</TableCell>
                         </TableRow>
                     </TableHead>
@@ -361,10 +355,10 @@ export const Main = (props: {}) => {
                                 <TableCell className={classes.titleCell} title={track.title}>
                                     {track.title || `No Title`}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell align="right" className={classes.durationCell}>
                                     <span className={classes.formatBadge}>{track.encoding}</span>
+                                    <span className={classes.durationCellTime}>{track.duration}</span>
                                 </TableCell>
-                                <TableCell align="right">{track.duration}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

@@ -1,6 +1,5 @@
 import React from 'react';
-import { useShallowEqualSelector } from '../utils';
-import { actions as appActions } from '../redux/app-feature';
+import { belowDesktop, forAnyDesktop, forWideDesktop, useShallowEqualSelector } from '../utils';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -14,20 +13,18 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 import Box from '@material-ui/core/Box';
-import Brightness2Icon from '@material-ui/icons/Brightness2';
-import IconButton from '@material-ui/core/IconButton';
 import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
     layout: {
         width: 'auto',
         height: '100%',
-        [theme.breakpoints.up(600 + theme.spacing(2) * 2)]: {
+        [forAnyDesktop(theme)]: {
             width: 600,
             marginLeft: 'auto',
             marginRight: 'auto',
         },
-        [theme.breakpoints.up(700 + theme.spacing(2) * 2) + ` and (min-height: 750px)`]: {
+        [forWideDesktop(theme)]: {
             width: 700,
         },
     },
@@ -37,23 +34,28 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         flexDirection: 'column',
         padding: theme.spacing(2),
-        height: '100%',
-        [theme.breakpoints.up(600 + theme.spacing(2) * 2)]: {
-            marginTop: theme.spacing(6),
-            marginBottom: theme.spacing(6),
+        height: 'calc(100% - 20px)',
+        [forAnyDesktop(theme)]: {
+            marginTop: theme.spacing(2),
+            marginBottom: theme.spacing(1),
             padding: theme.spacing(3),
             height: 600,
         },
-        [theme.breakpoints.up(700 + theme.spacing(2) * 2) + ` and (min-height: 750px)`]: {
+        [forWideDesktop(theme)]: {
             height: 700,
         },
     },
-    copyright: {
+    bottomBar: {
         display: 'flex',
         alignItems: 'center',
-        [theme.breakpoints.down(600 + theme.spacing(2) * 2)]: {
+        [belowDesktop(theme)]: {
             flexWrap: 'wrap',
         },
+        marginLeft: -theme.spacing(2),
+    },
+    copyrightTypography: {
+        marginRight: theme.spacing(1),
+        textAlign: 'center',
     },
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
@@ -63,12 +65,10 @@ const useStyles = makeStyles(theme => ({
         width: 48,
     },
     controlsContainer: {
-        flex: '1 1 auto',
-        paddingLeft: theme.spacing(3),
+        flex: '0 0 auto',
+        width: '100%',
         paddingRight: theme.spacing(8),
-        [theme.breakpoints.down(600 + theme.spacing(2) * 2)]: {
-            order: -1,
-            width: '100%',
+        [belowDesktop(theme)]: {
             paddingLeft: 0,
         },
     },
@@ -108,21 +108,16 @@ const App = () => {
                         {mainView === 'WELCOME' ? <Welcome /> : null}
                         {mainView === 'MAIN' ? <Main /> : null}
 
-                        <Box className={classes.copyright}>
-                            <IconButton onClick={() => dispatch(appActions.setDarkMode(!darkMode))}>
-                                <Brightness2Icon color={darkMode ? 'secondary' : undefined} />
-                            </IconButton>
-                            <Typography variant="body2" color="textSecondary" style={{ marginRight: `8px` }}>
-                                {'© '}
-                                <Link rel="noopener noreferrer" color="inherit" target="_blank" href="https://stefano.brilli.me/">
-                                    Stefano Brilli
-                                </Link>{' '}
-                                {new Date().getFullYear()}
-                                {'.'}
-                            </Typography>
-                            <Box className={classes.controlsContainer}>{mainView === 'MAIN' ? <Controls /> : null}</Box>
-                        </Box>
+                        <Box className={classes.controlsContainer}>{mainView === 'MAIN' ? <Controls /> : null}</Box>
                     </Paper>
+                    <Typography variant="body2" color="textSecondary" className={classes.copyrightTypography}>
+                        {'© '}
+                        <Link rel="noopener noreferrer" color="inherit" target="_blank" href="https://stefano.brilli.me/">
+                            Stefano Brilli
+                        </Link>{' '}
+                        {new Date().getFullYear()}
+                        {'.'}
+                    </Typography>
                 </main>
 
                 <Backdrop className={classes.backdrop} open={loading}>
