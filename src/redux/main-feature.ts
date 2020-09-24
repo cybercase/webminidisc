@@ -24,7 +24,7 @@ export const slice = createSlice({
         setDeviceName: (state, action: PayloadAction<string>) => {
             state.deviceName = action.payload;
         },
-        setDeviceStatus: (state, action: PayloadAction<DeviceStatus>) => {
+        setDeviceStatus: (state, action: PayloadAction<DeviceStatus | null>) => {
             state.deviceStatus = action.payload;
         },
     },

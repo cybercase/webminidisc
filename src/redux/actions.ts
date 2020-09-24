@@ -37,8 +37,12 @@ export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', para
         // CAVEAT: change-track might take a up to a few seconds to complete.
         // We wait 500ms and let the monitor do further updates
         await sleep(500);
-        let deviceStatus = await serviceRegistry.netmdService!.getDeviceStatus();
-        dispatch(mainActions.setDeviceStatus(deviceStatus));
+        try {
+            let deviceStatus = await serviceRegistry.netmdService!.getDeviceStatus();
+            dispatch(mainActions.setDeviceStatus(deviceStatus));
+        } catch (e) {
+            console.log('control: Cannot get device status');
+        }
     };
 }
 
@@ -80,7 +84,12 @@ export function listContent() {
         dispatch(appStateActions.setLoading(true));
         let disc = await serviceRegistry.netmdService!.listContent();
         let deviceName = await serviceRegistry.netmdService!.getDeviceName();
-        let deviceStatus = await serviceRegistry.netmdService!.getDeviceStatus();
+        let deviceStatus = null;
+        try {
+            deviceStatus = await serviceRegistry.netmdService!.getDeviceStatus();
+        } catch (e) {
+            console.log('listContent: Cannot get device status');
+        }
         dispatch(
             batchActions([
                 mainActions.setDisc(disc),
