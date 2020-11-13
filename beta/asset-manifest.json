@@ -1,0 +1,34 @@
+{
+  "files": {
+    "main.css": "/webminidisc/beta/static/css/main.6f13b01b.chunk.css",
+    "main.js": "/webminidisc/beta/static/js/main.574941a6.chunk.js",
+    "main.js.map": "/webminidisc/beta/static/js/main.574941a6.chunk.js.map",
+    "runtime-main.js": "/webminidisc/beta/static/js/runtime-main.792784c4.js",
+    "runtime-main.js.map": "/webminidisc/beta/static/js/runtime-main.792784c4.js.map",
+    "static/js/2.e5665fb3.chunk.js": "/webminidisc/beta/static/js/2.e5665fb3.chunk.js",
+    "static/js/2.e5665fb3.chunk.js.map": "/webminidisc/beta/static/js/2.e5665fb3.chunk.js.map",
+    "0aba6782ae4344385c04.worker.js": "/webminidisc/beta/0aba6782ae4344385c04.worker.js",
+    "0aba6782ae4344385c04.worker.js.LICENSE.txt": "/webminidisc/beta/0aba6782ae4344385c04.worker.js.LICENSE.txt",
+    "0aba6782ae4344385c04.worker.js.map": "/webminidisc/beta/0aba6782ae4344385c04.worker.js.map",
+    "7a2cdea617fc7c50ff57.worker.js": "/webminidisc/beta/7a2cdea617fc7c50ff57.worker.js",
+    "7a2cdea617fc7c50ff57.worker.js.LICENSE.txt": "/webminidisc/beta/7a2cdea617fc7c50ff57.worker.js.LICENSE.txt",
+    "7a2cdea617fc7c50ff57.worker.js.map": "/webminidisc/beta/7a2cdea617fc7c50ff57.worker.js.map",
+    "index.html": "/webminidisc/beta/index.html",
+    "precache-manifest.d74cb0529eaf81c49a270155a9cbc85d.js": "/webminidisc/beta/precache-manifest.d74cb0529eaf81c49a270155a9cbc85d.js",
+    "service-worker.js": "/webminidisc/beta/service-worker.js",
+    "static/css/main.6f13b01b.chunk.css.map": "/webminidisc/beta/static/css/main.6f13b01b.chunk.css.map",
+    "static/js/2.e5665fb3.chunk.js.LICENSE.txt": "/webminidisc/beta/static/js/2.e5665fb3.chunk.js.LICENSE.txt",
+    "static/media/fonts.css": "/webminidisc/beta/static/media/LCDDot-Regular.f9fc1d8a.eot",
+    "static/media/chrome-icon.svg": "/webminidisc/beta/static/media/chrome-icon.f3b6c54c.svg",
+    "static/media/md0.a7574f83.svg": "/webminidisc/beta/static/media/md0.a7574f83.svg",
+    "static/media/md1.1ffb5f6c.svg": "/webminidisc/beta/static/media/md1.1ffb5f6c.svg",
+    "static/media/md2.33dd03b3.svg": "/webminidisc/beta/static/media/md2.33dd03b3.svg",
+    "static/media/md3.80f42826.svg": "/webminidisc/beta/static/media/md3.80f42826.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.792784c4.js",
+    "static/js/2.e5665fb3.chunk.js",
+    "static/css/main.6f13b01b.chunk.css",
+    "static/js/main.574941a6.chunk.js"
+  ]
+}
