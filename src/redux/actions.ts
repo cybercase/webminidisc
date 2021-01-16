@@ -10,8 +10,9 @@ import serviceRegistry from '../services/registry';
 import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
 import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep } from '../utils';
-import jsmediatags from 'jsmediatags';
+import * as mm from 'music-metadata';
 import { TitleSourceType, TitleFormatType } from './convert-dialog-feature';
+import { fileURLToPath } from 'url';
 
 export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', params?: unknown) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
@@ -243,35 +244,38 @@ export const WireformatDict: { [k: string]: Wireformat } = {
 
 async function getTrackNameFromMediaTags(file: File, titleFormat: TitleFormatType) {
     const fileData = await file.arrayBuffer();
-    return await new Promise<string>((resolve, reject) => {
-        jsmediatags.read(new Blob([fileData]), {
-            onSuccess: data => {
-                const title = data.tags.title ?? 'Unknown Title';
-                const artist = data.tags.artist ?? 'Unknown Artist';
-                const album = data.tags.album ?? 'Unknown Album';
-                switch (titleFormat) {
-                    case 'title': {
-                        resolve(title);
-                        break;
-                    }
-                    case 'artist-title': {
-                        resolve(`${artist} - ${title}`);
-                        break;
-                    }
-                    case 'album-title': {
-                        resolve(`${album} - ${title}`);
-                        break;
-                    }
-                    case 'artist-album-title': {
-                        resolve(`${artist} - ${album} - ${title}`);
-                        break;
-                    }
+    var buf = Buffer.alloc(fileData.byteLength);
+    var view = new Uint8Array(fileData);
+    for (var i = 0; i < buf.length; ++i) {
+        buf[i] = view[i];
+    }
+    return await new Promise<string>(async (resolve, reject) => {
+        try {
+            const metadata = await mm.parseBuffer(buf, 'audio/*');
+            const title = metadata.common.title ?? 'Unknown Title';
+            const artist = metadata.common.artist ?? 'Unknown Artist';
+            const album = metadata.common.album ?? 'Unknown Album';
+            switch (titleFormat) {
+                case 'title': {
+                    resolve(title);
+                    break;
                 }
-            },
-            onError: error => {
-                reject(error);
-            },
-        });
+                case 'artist-title': {
+                    resolve(`${artist} - ${title}`);
+                    break;
+                }
+                case 'album-title': {
+                    resolve(`${album} - ${title}`);
+                    break;
+                }
+                case 'artist-album-title': {
+                    resolve(`${artist} - ${album} - ${title}`);
+                    break;
+                }
+            }
+        } catch (error) {
+            reject(error);
+        }
     });
 }
 
