@@ -76,7 +76,7 @@ export const TopMenu = function() {
             ])
         );
         handleMenuClose();
-    }, [dispatch, handleMenuClose]);
+    }, [dispatch, handleMenuClose, discTitle]);
 
     const handleExit = useCallback(() => {
         dispatch(appActions.setState('WELCOME'));

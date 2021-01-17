@@ -11,7 +11,7 @@ import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core';
 import { belowDesktop, getSortedTracks, useShallowEqualSelector } from '../utils';
 import { control } from '../redux/actions';
-import { shallowEqual, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { ReactComponent as MDIcon0 } from '../images/md0.svg';
 import { ReactComponent as MDIcon1 } from '../images/md1.svg';

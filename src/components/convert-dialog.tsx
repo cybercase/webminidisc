@@ -93,7 +93,7 @@ export const ConvertDialog = (props: { files: File[] }) => {
     const handleConvert = useCallback(() => {
         handleClose();
         dispatch(convertAndUpload(props.files, format, titleSource, titleFormat));
-    }, [dispatch, props, format, titleSource, titleFormat]);
+    }, [dispatch, props, format, titleSource, titleFormat, handleClose]);
 
     return (
         <Dialog
