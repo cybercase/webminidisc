@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { useShallowEqualSelector } from '../utils';
+
+import { actions as uploadDialogActions } from '../redux/upload-dialog-feature';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -11,6 +14,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import { TransitionProps } from '@material-ui/core/transitions';
+import { Button } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
     progressPerc: {
@@ -33,9 +37,11 @@ const Transition = React.forwardRef(function Transition(
 
 export const UploadDialog = (props: {}) => {
     const classes = useStyles();
+    const dispatch = useDispatch();
 
     let {
         visible,
+        cancelled,
         writtenProgress,
         encryptedProgress,
         totalProgress,
@@ -46,6 +52,10 @@ export const UploadDialog = (props: {}) => {
         titleCurrent,
         titleConverting,
     } = useShallowEqualSelector(state => state.uploadDialog);
+
+    const handleCancelUpload = useCallback(() => {
+        dispatch(uploadDialogActions.setCancelUpload(true));
+    }, [dispatch]);
 
     let progressValue = Math.floor((writtenProgress / totalProgress) * 100);
     let bufferValue = Math.floor((encryptedProgress / totalProgress) * 100);
@@ -86,7 +96,11 @@ export const UploadDialog = (props: {}) => {
                 />
                 <Box className={classes.progressPerc}>{progressValue}%</Box>
             </DialogContent>
-            <DialogActions></DialogActions>
+            <DialogActions>
+                <Button disabled={cancelled} onClick={handleCancelUpload}>
+                    {cancelled ? `Stopping after current track...` : `Cancel Recording`}
+                </Button>
+            </DialogActions>
         </Dialog>
     );
 };

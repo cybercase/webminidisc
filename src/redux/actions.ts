@@ -282,10 +282,14 @@ export function convertAndUpload(files: File[], format: string, titleSource: Tit
         const wireformat = WireformatDict[format];
 
         await netmdService?.stop();
-        dispatch(uploadDialogActions.setVisible(true));
+        dispatch(batchActions([uploadDialogActions.setVisible(true), uploadDialogActions.setCancelUpload(false)]));
 
         const updateProgressCallback = ({ written, encrypted, total }: { written: number; encrypted: number; total: number }) => {
             dispatch(uploadDialogActions.setWriteProgress({ written, encrypted, total }));
+        };
+
+        const hasUploadBeenCancelled = () => {
+            return getState().uploadDialog.cancelled;
         };
 
         let trackUpdate: {
@@ -310,7 +314,7 @@ export function convertAndUpload(files: File[], format: string, titleSource: Tit
 
             let i = 0;
             function convertNext() {
-                if (i === files.length) {
+                if (i === files.length || hasUploadBeenCancelled()) {
                     trackUpdate.converting = i;
                     trackUpdate.titleConverting = ``;
                     updateTrack();
@@ -357,6 +361,10 @@ export function convertAndUpload(files: File[], format: string, titleSource: Tit
         let errorMessage = ``;
         let i = 1;
         for await (let item of conversionIterator(files)) {
+            if (hasUploadBeenCancelled()) {
+                break;
+            }
+
             const { file, data } = item;
 
             let title = file.name;

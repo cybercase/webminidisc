@@ -3,6 +3,8 @@ import { enableBatching } from 'redux-batched-actions';
 
 export interface LoadingDialogState {
     visible: boolean;
+    cancelled: boolean;
+
     writtenProgress: number;
     encryptedProgress: number;
     totalProgress: number;
@@ -17,6 +19,8 @@ export interface LoadingDialogState {
 
 const initialState: LoadingDialogState = {
     visible: false,
+    cancelled: false,
+
     // Current Track Upload
     writtenProgress: 0,
     encryptedProgress: 0,
@@ -41,6 +45,9 @@ export const slice = createSlice({
             state.encryptedProgress = action.payload.encrypted;
             state.writtenProgress = action.payload.written;
             state.totalProgress = action.payload.total;
+        },
+        setCancelUpload: (state, action: PayloadAction<boolean>) => {
+            state.cancelled = action.payload;
         },
         setTrackProgress: (
             state,
