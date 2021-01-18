@@ -10,7 +10,7 @@ import serviceRegistry from '../services/registry';
 import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
 import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep } from '../utils';
-import jsmediatags from 'jsmediatags';
+import * as mm from 'music-metadata-browser';
 import { TitleSourceType, TitleFormatType } from './convert-dialog-feature';
 
 export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', params?: unknown) {
@@ -243,35 +243,36 @@ export const WireformatDict: { [k: string]: Wireformat } = {
 
 async function getTrackNameFromMediaTags(file: File, titleFormat: TitleFormatType) {
     const fileData = await file.arrayBuffer();
-    return await new Promise<string>((resolve, reject) => {
-        jsmediatags.read(new Blob([fileData]), {
-            onSuccess: data => {
-                const title = data.tags.title ?? 'Unknown Title';
-                const artist = data.tags.artist ?? 'Unknown Artist';
-                const album = data.tags.album ?? 'Unknown Album';
-                switch (titleFormat) {
-                    case 'title': {
-                        resolve(title);
-                        break;
-                    }
-                    case 'artist-title': {
-                        resolve(`${artist} - ${title}`);
-                        break;
-                    }
-                    case 'album-title': {
-                        resolve(`${album} - ${title}`);
-                        break;
-                    }
-                    case 'artist-album-title': {
-                        resolve(`${artist} - ${album} - ${title}`);
-                        break;
-                    }
-                }
-            },
-            onError: error => {
-                reject(error);
-            },
-        });
+    const blob = new Blob([new Uint8Array(fileData)]);
+    return await new Promise<string>(async (resolve, reject) => {
+        let metadata;
+        try {
+            metadata = await mm.parseBlob(blob);
+        } catch (error) {
+            reject(error);
+            return;
+        }
+        const title = metadata.common.title ?? 'Unknown Title';
+        const artist = metadata.common.artist ?? 'Unknown Artist';
+        const album = metadata.common.album ?? 'Unknown Album';
+        switch (titleFormat) {
+            case 'title': {
+                resolve(title);
+                break;
+            }
+            case 'artist-title': {
+                resolve(`${artist} - ${title}`);
+                break;
+            }
+            case 'album-title': {
+                resolve(`${album} - ${title}`);
+                break;
+            }
+            case 'artist-album-title': {
+                resolve(`${artist} - ${album} - ${title}`);
+                break;
+            }
+        }
     });
 }
 
