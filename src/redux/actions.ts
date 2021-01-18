@@ -244,36 +244,24 @@ export const WireformatDict: { [k: string]: Wireformat } = {
 async function getTrackNameFromMediaTags(file: File, titleFormat: TitleFormatType) {
     const fileData = await file.arrayBuffer();
     const blob = new Blob([new Uint8Array(fileData)]);
-    return await new Promise<string>(async (resolve, reject) => {
-        let metadata;
-        try {
-            metadata = await mm.parseBlob(blob);
-        } catch (error) {
-            reject(error);
-            return;
+    let metadata = await mm.parseBlob(blob);
+    const title = metadata.common.title ?? 'Unknown Title';
+    const artist = metadata.common.artist ?? 'Unknown Artist';
+    const album = metadata.common.album ?? 'Unknown Album';
+    switch (titleFormat) {
+        case 'title': {
+            return title;
         }
-        const title = metadata.common.title ?? 'Unknown Title';
-        const artist = metadata.common.artist ?? 'Unknown Artist';
-        const album = metadata.common.album ?? 'Unknown Album';
-        switch (titleFormat) {
-            case 'title': {
-                resolve(title);
-                break;
-            }
-            case 'artist-title': {
-                resolve(`${artist} - ${title}`);
-                break;
-            }
-            case 'album-title': {
-                resolve(`${album} - ${title}`);
-                break;
-            }
-            case 'artist-album-title': {
-                resolve(`${artist} - ${album} - ${title}`);
-                break;
-            }
+        case 'artist-title': {
+            return `${artist} - ${title}`;
         }
-    });
+        case 'album-title': {
+            return `${album} - ${title}`;
+        }
+        case 'artist-album-title': {
+            return `${artist} - ${album} - ${title}`;
+        }
+    }
 }
 
 export function convertAndUpload(files: File[], format: string, titleSource: TitleSourceType, titleFormat: TitleFormatType) {
@@ -370,7 +358,7 @@ export function convertAndUpload(files: File[], format: string, titleSource: Tit
             let title = file.name;
             if (titleSource === 'media') {
                 try {
-                    title = await getTrackNameFromMediaTags(file, titleFormat);
+                    title = (await getTrackNameFromMediaTags(file, titleFormat)) ?? file.name;
                 } catch (err) {
                     console.error(err);
                 }
