@@ -68,7 +68,7 @@ export const ConvertDialog = (props: { files: File[] }) => {
             if (newFormat === null) {
                 return;
             }
-            dispatch(convertDialogActions.setFormat(newFormat as string));
+            dispatch(convertDialogActions.setFormat(newFormat));
         },
         [dispatch]
     );
