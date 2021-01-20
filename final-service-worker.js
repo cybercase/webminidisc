@@ -35,7 +35,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/webminidisc/precache-manifest.54524a83821e19b41c07f0e0784c478d.js"
+  "/webminidisc/precache-manifest.d7e81b850f98fbdf289fa23256d1903b.js"
 );
 
 self.addEventListener('message', (event) => {
