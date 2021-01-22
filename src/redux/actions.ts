@@ -11,7 +11,7 @@ import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
 import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep } from '../utils';
 import * as mm from 'music-metadata-browser';
-import { TitleSourceType, TitleFormatType, UploadFormat } from './convert-dialog-feature';
+import { TitleFormatType, UploadFormat } from './convert-dialog-feature';
 
 export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', params?: unknown) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
@@ -261,10 +261,13 @@ async function getTrackNameFromMediaTags(file: File, titleFormat: TitleFormatTyp
         case 'artist-album-title': {
             return `${artist} - ${album} - ${title}`;
         }
+        case 'filename': {
+            return file.name;
+        }
     }
 }
 
-export function convertAndUpload(files: File[], format: UploadFormat, titleSource: TitleSourceType, titleFormat: TitleFormatType) {
+export function convertAndUpload(files: File[], format: UploadFormat, titleFormat: TitleFormatType) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         const { audioExportService, netmdService } = serviceRegistry;
         const wireformat = WireformatDict[format];
@@ -356,12 +359,10 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleSourc
             const { file, data } = item;
 
             let title = file.name;
-            if (titleSource === 'media') {
-                try {
-                    title = (await getTrackNameFromMediaTags(file, titleFormat)) ?? file.name;
-                } catch (err) {
-                    console.error(err);
-                }
+            try {
+                title = await getTrackNameFromMediaTags(file, titleFormat);
+            } catch (err) {
+                console.error(err);
             }
 
             const extStartIndex = title.lastIndexOf('.');
