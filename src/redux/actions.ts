@@ -262,7 +262,13 @@ async function getTrackNameFromMediaTags(file: File, titleFormat: TitleFormatTyp
             return `${artist} - ${album} - ${title}`;
         }
         case 'filename': {
-            return file.name;
+            let title = file.name;
+            // Remove file extension
+            const extStartIndex = title.lastIndexOf('.');
+            if (extStartIndex > 0) {
+                title = title.substring(0, extStartIndex);
+            }
+            return title;
         }
     }
 }
@@ -365,10 +371,6 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
                 console.error(err);
             }
 
-            const extStartIndex = title.lastIndexOf('.');
-            if (extStartIndex > 0) {
-                title = title.substring(0, extStartIndex);
-            }
             if (maxTitleLength > -1) {
                 title = title.substring(0, maxTitleLength);
             }
