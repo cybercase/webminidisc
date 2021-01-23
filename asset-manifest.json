@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "/webminidisc/static/css/main.6d9c03e4.chunk.css",
-    "main.js": "/webminidisc/static/js/main.ec094e9a.chunk.js",
-    "main.js.map": "/webminidisc/static/js/main.ec094e9a.chunk.js.map",
+    "main.js": "/webminidisc/static/js/main.1aed9c03.chunk.js",
+    "main.js.map": "/webminidisc/static/js/main.1aed9c03.chunk.js.map",
     "runtime-main.js": "/webminidisc/static/js/runtime-main.114d47b9.js",
     "runtime-main.js.map": "/webminidisc/static/js/runtime-main.114d47b9.js.map",
-    "static/js/2.254aeff7.chunk.js": "/webminidisc/static/js/2.254aeff7.chunk.js",
-    "static/js/2.254aeff7.chunk.js.map": "/webminidisc/static/js/2.254aeff7.chunk.js.map",
+    "static/js/2.ec89a630.chunk.js": "/webminidisc/static/js/2.ec89a630.chunk.js",
+    "static/js/2.ec89a630.chunk.js.map": "/webminidisc/static/js/2.ec89a630.chunk.js.map",
     "8880d26e7a47551cd42e.worker.js": "/webminidisc/8880d26e7a47551cd42e.worker.js",
     "8880d26e7a47551cd42e.worker.js.LICENSE.txt": "/webminidisc/8880d26e7a47551cd42e.worker.js.LICENSE.txt",
     "8880d26e7a47551cd42e.worker.js.map": "/webminidisc/8880d26e7a47551cd42e.worker.js.map",
@@ -14,10 +14,10 @@
     "ffb88193b05ec63929fd.worker.js.LICENSE.txt": "/webminidisc/ffb88193b05ec63929fd.worker.js.LICENSE.txt",
     "ffb88193b05ec63929fd.worker.js.map": "/webminidisc/ffb88193b05ec63929fd.worker.js.map",
     "index.html": "/webminidisc/index.html",
-    "precache-manifest.d7e81b850f98fbdf289fa23256d1903b.js": "/webminidisc/precache-manifest.d7e81b850f98fbdf289fa23256d1903b.js",
+    "precache-manifest.d33f70d72bb2c8db8f2a277c1acf3d63.js": "/webminidisc/precache-manifest.d33f70d72bb2c8db8f2a277c1acf3d63.js",
     "service-worker.js": "/webminidisc/service-worker.js",
     "static/css/main.6d9c03e4.chunk.css.map": "/webminidisc/static/css/main.6d9c03e4.chunk.css.map",
-    "static/js/2.254aeff7.chunk.js.LICENSE.txt": "/webminidisc/static/js/2.254aeff7.chunk.js.LICENSE.txt",
+    "static/js/2.ec89a630.chunk.js.LICENSE.txt": "/webminidisc/static/js/2.ec89a630.chunk.js.LICENSE.txt",
     "static/media/fonts.css": "/webminidisc/static/media/LCDDot-Regular.f9fc1d8a.eot",
     "static/media/chrome-icon.svg": "/webminidisc/static/media/chrome-icon.f3b6c54c.svg",
     "static/media/md0.a7574f83.svg": "/webminidisc/static/media/md0.a7574f83.svg",
@@ -27,8 +27,8 @@
   },
   "entrypoints": [
     "static/js/runtime-main.114d47b9.js",
-    "static/js/2.254aeff7.chunk.js",
+    "static/js/2.ec89a630.chunk.js",
     "static/css/main.6d9c03e4.chunk.css",
-    "static/js/main.ec094e9a.chunk.js"
+    "static/js/main.1aed9c03.chunk.js"
   ]
 }
