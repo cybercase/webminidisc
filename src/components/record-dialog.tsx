@@ -11,6 +11,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import { TransitionProps } from '@material-ui/core/transitions';
+import { W95RecordDialog } from './win95/record-dialog';
 
 const useStyles = makeStyles(theme => ({
     progressPerc: {
@@ -34,6 +35,20 @@ export const RecordDialog = (props: {}) => {
     let { visible, trackTotal, trackDone, trackCurrent, titleCurrent } = useShallowEqualSelector(state => state.recordDialog);
 
     let progressValue = Math.round(trackCurrent);
+
+    const vintageMode = useShallowEqualSelector(state => state.appState.vintageMode);
+    if (vintageMode) {
+        const p = {
+            visible,
+            trackTotal,
+            trackDone,
+            trackCurrent,
+            titleCurrent,
+            progressValue,
+        };
+        return <W95RecordDialog {...p} />;
+    }
+
     return (
         <Dialog
             open={visible}

@@ -13,7 +13,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 import Box from '@material-ui/core/Box';
-import { useDispatch } from 'react-redux';
+import { W95App } from './win95/app';
 
 const useStyles = makeStyles(theme => ({
     layout: {
@@ -94,9 +94,11 @@ const lightTheme = createMuiTheme({
 
 const App = () => {
     const classes = useStyles();
+    const { mainView, loading, darkMode, vintageMode } = useShallowEqualSelector(state => state.appState);
 
-    const dispatch = useDispatch();
-    let { mainView, loading, darkMode } = useShallowEqualSelector(state => state.appState);
+    if (vintageMode) {
+        return <W95App></W95App>;
+    }
 
     return (
         <React.Fragment>

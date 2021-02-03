@@ -12,6 +12,7 @@ import TextField from '@material-ui/core/TextField';
 import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import { TransitionProps } from '@material-ui/core/transitions';
+import { W95RenameDialog } from './win95/rename-dialog';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
@@ -41,6 +42,27 @@ export const RenameDialog = (props: {}) => {
         }
     };
 
+    const handleChange = useCallback(
+        (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+            dispatch(renameDialogActions.setCurrentName(event.target.value.substring(0, 120))); // MAX title length
+        },
+        [dispatch]
+    );
+
+    const { vintageMode } = useShallowEqualSelector(state => state.appState);
+    if (vintageMode) {
+        const p = {
+            renameDialogVisible,
+            renameDialogTitle,
+            renameDialogIndex,
+            what,
+            handleCancelRename,
+            handleDoRename,
+            handleChange,
+        };
+        return <W95RenameDialog {...p} />;
+    }
+
     return (
         <Dialog
             open={renameDialogVisible}
@@ -62,9 +84,7 @@ export const RenameDialog = (props: {}) => {
                     onKeyDown={event => {
                         event.key === `Enter` && handleDoRename();
                     }}
-                    onChange={event => {
-                        dispatch(renameDialogActions.setCurrentName(event.target.value.substring(0, 120))); // MAX title length
-                    }}
+                    onChange={handleChange}
                 />
             </DialogContent>
             <DialogActions>

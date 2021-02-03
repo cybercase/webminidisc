@@ -13,6 +13,7 @@ import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import { TransitionProps } from '@material-ui/core/transitions';
+import { W95AboutDialog } from './win95/about-dialog';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
@@ -25,10 +26,19 @@ export const AboutDialog = (props: {}) => {
     const dispatch = useDispatch();
 
     let visible = useShallowEqualSelector(state => state.appState.aboutDialogVisible);
+    const vintageMode = useShallowEqualSelector(state => state.appState.vintageMode);
 
     const handleClose = () => {
         dispatch(appActions.showAboutDialog(false));
     };
+
+    if (vintageMode) {
+        const p = {
+            visible,
+            handleClose,
+        };
+        return <W95AboutDialog {...p} />;
+    }
 
     return (
         <Dialog

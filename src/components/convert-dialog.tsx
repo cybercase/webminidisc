@@ -36,6 +36,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Radio from '@material-ui/core/Radio';
 import { useDropzone } from 'react-dropzone';
 import Backdrop from '@material-ui/core/Backdrop';
+import { W95ConvertDialog } from './win95/convert-dialog';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
@@ -237,7 +238,44 @@ export const ConvertDialog = (props: { files: File[] }) => {
         if (dialogVisible && files.length === 0) {
             handleClose();
         }
-    }, [files, dialogVisible]);
+    }, [files, dialogVisible, handleClose]);
+
+    const vintageMode = useShallowEqualSelector(state => state.appState.vintageMode);
+    if (vintageMode) {
+        const p = {
+            visible,
+            format,
+            titleFormat,
+
+            files,
+            setFiles,
+            selectedTrackIndex,
+            setSelectedTrack,
+
+            moveFileUp,
+            moveFileDown,
+
+            handleClose,
+            handleChangeFormat,
+            handleChangeTitleFormat,
+            handleConvert,
+
+            tracksOrderVisible,
+            setTracksOrderVisible,
+            handleToggleTracksOrder,
+            selectedTrackRef,
+
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            open,
+
+            disableRemove,
+            handleRemoveSelectedTrack,
+            dialogVisible,
+        };
+        return <W95ConvertDialog {...p} />;
+    }
 
     return (
         <Dialog

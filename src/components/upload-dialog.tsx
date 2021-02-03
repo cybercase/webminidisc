@@ -15,6 +15,7 @@ import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Button } from '@material-ui/core';
+import { W95UploadDialog } from './win95/upload-dialog';
 
 const useStyles = makeStyles(theme => ({
     progressPerc: {
@@ -60,6 +61,29 @@ export const UploadDialog = (props: {}) => {
     let progressValue = Math.floor((writtenProgress / totalProgress) * 100);
     let bufferValue = Math.floor((encryptedProgress / totalProgress) * 100);
     let convertedValue = Math.floor((trackConverting / trackTotal) * 100);
+
+    const vintageMode = useShallowEqualSelector(state => state.appState.vintageMode);
+    if (vintageMode) {
+        const p = {
+            visible,
+            cancelled,
+            writtenProgress,
+            encryptedProgress,
+            totalProgress,
+
+            trackTotal,
+            trackCurrent,
+            trackConverting,
+            titleCurrent,
+            titleConverting,
+
+            handleCancelUpload,
+            progressValue,
+            bufferValue,
+            convertedValue,
+        };
+        return <W95UploadDialog {...p} />;
+    }
     return (
         <Dialog
             open={visible}

@@ -17,6 +17,7 @@ import { ReactComponent as MDIcon0 } from '../images/md0.svg';
 import { ReactComponent as MDIcon1 } from '../images/md1.svg';
 import { ReactComponent as MDIcon2 } from '../images/md2.svg';
 import { ReactComponent as MDIcon3 } from '../images/md3.svg';
+import { W95Controls } from './win95/controls';
 
 const frames = [MDIcon0, MDIcon1, MDIcon2, MDIcon3];
 
@@ -179,6 +180,26 @@ export const Controls = () => {
     }, [deviceState, lcdIconFrame]);
 
     const DiscFrame = frames[lcdIconFrame];
+
+    const vintageMode = useShallowEqualSelector(state => state.appState.vintageMode);
+    if (vintageMode) {
+        const p = {
+            handlePrev,
+            handlePlay,
+            handleStop,
+            handleNext,
+
+            message,
+            discPresent,
+            lcdScroll,
+            lcdRef,
+            lcdScrollDuration,
+
+            classes,
+        };
+        return <W95Controls {...p} />;
+    }
+
     return (
         <Box className={classes.container}>
             <IconButton aria-label="prev" onClick={handlePrev} className={classes.button}>

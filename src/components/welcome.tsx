@@ -15,6 +15,7 @@ import Link from '@material-ui/core/Link';
 import { AboutDialog } from './about-dialog';
 import { TopMenu } from './topmenu';
 import ChromeIconPath from '../images/chrome-icon.svg';
+import { W95Welcome } from './win95/welcome';
 
 const useStyles = makeStyles(theme => ({
     main: {
@@ -49,9 +50,8 @@ const useStyles = makeStyles(theme => ({
 
 export const Welcome = (props: {}) => {
     const classes = useStyles();
-
     const dispatch = useDispatch();
-    const { browserSupported, pairingFailed, pairingMessage } = useShallowEqualSelector(state => state.appState);
+    const { browserSupported, pairingFailed, pairingMessage, vintageMode } = useShallowEqualSelector(state => state.appState);
     if (pairingMessage.toLowerCase().match(/denied/)) {
         // show linux instructions
     }
@@ -62,6 +62,15 @@ export const Welcome = (props: {}) => {
         event.preventDefault();
         setWhyUnsupported(true);
     };
+
+    if (vintageMode) {
+        const p = {
+            dispatch,
+            pairingFailed,
+            pairingMessage,
+        };
+        return <W95Welcome {...p}></W95Welcome>;
+    }
 
     return (
         <React.Fragment>

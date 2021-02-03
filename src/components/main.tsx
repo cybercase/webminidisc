@@ -45,6 +45,7 @@ import * as BadgeImpl from '@material-ui/core/Badge/Badge';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import { W95Main } from './win95/main';
 
 const useStyles = makeStyles(theme => ({
     add: {
@@ -227,6 +228,41 @@ export const Main = (props: {}) => {
     const handleDeleteSelected = (event: React.MouseEvent) => {
         dispatch(deleteTracks(selected));
     };
+
+    if (vintageMode) {
+        const p = {
+            disc,
+            deviceName,
+
+            selected,
+            setSelected,
+            selectedCount,
+
+            tracks,
+            uploadedFiles,
+            setUploadedFiles,
+
+            onDrop,
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            open,
+
+            moveMenuAnchorEl,
+            setMoveMenuAnchorEl,
+
+            handleShowMoveMenu,
+            handleCloseMoveMenu,
+            handleMoveSelectedTrack,
+            handleShowDumpDialog,
+            handleDeleteSelected,
+            handleRenameActionClick,
+            handleRenameDoubleClick,
+            handleSelectAllClick,
+            handleSelectClick,
+        };
+        return <W95Main {...p} />;
+    }
 
     return (
         <React.Fragment>

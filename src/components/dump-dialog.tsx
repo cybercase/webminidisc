@@ -21,6 +21,7 @@ import { Controls } from './controls';
 import Box from '@material-ui/core/Box';
 import serviceRegistry from '../services/registry';
 import { TransitionProps } from '@material-ui/core/transitions';
+import { W95DumpDialog } from './win95/dump-dialog';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & { children?: React.ReactElement<any, any> },
@@ -95,6 +96,20 @@ export const DumpDialog = ({ trackIndexes }: { trackIndexes: number[] }) => {
             updateDeviceList();
         }
     }, [visible, setDevices]);
+
+    const vintageMode = useShallowEqualSelector(state => state.appState.vintageMode);
+
+    if (vintageMode) {
+        const p = {
+            handleClose,
+            handleChange,
+            handleStartTransfer,
+            visible,
+            devices,
+            inputDeviceId,
+        };
+        return <W95DumpDialog {...p} />;
+    }
 
     return (
         <Dialog

@@ -11,6 +11,7 @@ export interface AppState {
     pairingMessage: string;
     browserSupported: boolean;
     darkMode: boolean;
+    vintageMode: boolean;
     aboutDialogVisible: boolean;
 }
 
@@ -21,6 +22,7 @@ const initialState: AppState = {
     pairingMessage: ``,
     browserSupported: true,
     darkMode: loadPreference('darkMode', false),
+    vintageMode: loadPreference('vintageMode', false),
     aboutDialogVisible: false,
 };
 
@@ -46,6 +48,10 @@ export const slice = createSlice({
         setDarkMode: (state, action: PayloadAction<boolean>) => {
             state.darkMode = action.payload;
             savePreference('darkMode', state.darkMode);
+        },
+        setVintageMode: (state, action: PayloadAction<boolean>) => {
+            state.vintageMode = action.payload;
+            savePreference('vintageMode', state.vintageMode);
         },
         showAboutDialog: (state, action: PayloadAction<boolean>) => {
             state.aboutDialogVisible = action.payload;

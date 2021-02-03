@@ -24,6 +24,9 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import InfoIcon from '@material-ui/icons/Info';
 import ToggleOffIcon from '@material-ui/icons/ToggleOff';
 import ToggleOnIcon from '@material-ui/icons/ToggleOn';
+import Win95Icon from '../images/win95/win95.png';
+
+import { W95TopMenu } from './win95/topmenu';
 
 const useStyles = makeStyles(theme => ({
     listItemIcon: {
@@ -31,11 +34,11 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export const TopMenu = function() {
+export const TopMenu = function(props: { onClick?: () => void }) {
     const classes = useStyles();
     const dispatch = useDispatch();
 
-    let { mainView, darkMode } = useShallowEqualSelector(state => state.appState);
+    let { mainView, darkMode, vintageMode } = useShallowEqualSelector(state => state.appState);
     let discTitle = useShallowEqualSelector(state => state.main.disc?.title ?? ``);
 
     const githubLinkRef = React.useRef<null | HTMLAnchorElement>(null);
@@ -52,6 +55,10 @@ export const TopMenu = function() {
     const handleDarkMode = useCallback(() => {
         dispatch(appActions.setDarkMode(!darkMode));
     }, [dispatch, darkMode]);
+
+    const handleVintageMode = useCallback(() => {
+        dispatch(appActions.setVintageMode(!vintageMode));
+    }, [dispatch, vintageMode]);
 
     const handleMenuClose = useCallback(() => {
         setMenuAnchorEl(null);
@@ -144,6 +151,16 @@ export const TopMenu = function() {
             <ListItemText>Dark Mode</ListItemText>
         </MenuItem>
     );
+    if (mainView === 'MAIN') {
+        menuItems.push(
+            <MenuItem key="vintageMode" onClick={handleVintageMode}>
+                <ListItemIcon className={classes.listItemIcon}>
+                    <img alt="Windows 95" src={Win95Icon} width="24px" height="24px" />
+                </ListItemIcon>
+                <ListItemText>Retro Mode (beta)</ListItemText>
+            </MenuItem>
+        );
+    }
     menuItems.push(
         <MenuItem key="about" onClick={handleShowAbout}>
             <ListItemIcon className={classes.listItemIcon}>
@@ -171,6 +188,19 @@ export const TopMenu = function() {
         </MenuItem>
     );
 
+    if (vintageMode) {
+        const p = {
+            mainView,
+            onClick: props.onClick,
+            handleWipeDisc,
+            handleRefresh,
+            handleRenameDisc,
+            handleExit,
+            handleShowAbout,
+            handleVintageMode,
+        };
+        return <W95TopMenu {...p} />;
+    }
     return (
         <React.Fragment>
             <IconButton aria-label="actions" aria-controls="actions-menu" aria-haspopup="true" onClick={handleMenuOpen}>
