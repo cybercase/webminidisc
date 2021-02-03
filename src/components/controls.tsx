@@ -123,7 +123,7 @@ export const Controls = () => {
         message = 'READING TOC';
     } else if (tracks.length === 0) {
         message = `BLANKDISC`;
-    } else if (deviceStatus && deviceStatus.track !== null) {
+    } else if (deviceStatus && deviceStatus.track !== null && tracks[deviceStatus.track]) {
         message = `${deviceStatus.track + 1} - ` + tracks[deviceStatus.track].title;
     }
 

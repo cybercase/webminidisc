@@ -138,17 +138,21 @@ export const Main = (props: {}) => {
     let dispatch = useDispatch();
     let disc = useShallowEqualSelector(state => state.main.disc);
     let deviceName = useShallowEqualSelector(state => state.main.deviceName);
+    const { vintageMode } = useShallowEqualSelector(state => state.appState);
 
     const [selected, setSelected] = React.useState<number[]>([]);
     const selectedCount = selected.length;
 
     const [moveMenuAnchorEl, setMoveMenuAnchorEl] = React.useState<null | HTMLElement>(null);
-    const handleShowMoveMenu = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        setMoveMenuAnchorEl(event.currentTarget);
-    }, []);
+    const handleShowMoveMenu = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            setMoveMenuAnchorEl(event.currentTarget);
+        },
+        [setMoveMenuAnchorEl]
+    );
     const handleCloseMoveMenu = useCallback(() => {
         setMoveMenuAnchorEl(null);
-    }, []);
+    }, [setMoveMenuAnchorEl]);
     const handleMoveSelectedTrack = useCallback(
         (destIndex: number) => {
             dispatch(moveTrack(selected[0], destIndex));

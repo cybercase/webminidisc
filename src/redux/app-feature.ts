@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { enableBatching } from 'redux-batched-actions';
 import { savePreference, loadPreference } from '../utils';
 
-type Views = 'WELCOME' | 'MAIN';
+export type Views = 'WELCOME' | 'MAIN';
 
 export interface AppState {
     mainView: Views;

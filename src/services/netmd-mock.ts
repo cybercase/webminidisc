@@ -152,7 +152,13 @@ class NetMDMockService implements NetMDService {
             throw new Error(`Track's title too long`); // Simulates reject from device
         }
 
-        await sleep(0.5);
+        const totalSteps = 3;
+        for (let step = 0; step <= totalSteps; step++) {
+            const written = (100 / totalSteps) * step;
+            progressCallback({ written, encrypted: 100, total: 100 });
+            await sleep(1000);
+        }
+
         this._tracks.push({
             title,
             duration: 5 * 60 * 512,
@@ -161,7 +167,8 @@ class NetMDMockService implements NetMDService {
             protected: TrackFlag.unprotected,
             channel: 0,
         });
-        await sleep(0.5);
+
+        await sleep(1000);
         progressCallback({ written: 100, encrypted: 100, total: 100 });
     }
 
