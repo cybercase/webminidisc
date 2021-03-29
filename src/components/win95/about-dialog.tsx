@@ -17,6 +17,7 @@ export const W95AboutDialog = (props: { visible: boolean; handleClose: () => voi
                     </Button>
                 </WindowHeader>
                 <DialogWindowContent>
+                    Web MiniDisc uses
                     <ul>
                         <li>
                             <Anchor rel="noopener noreferrer" href="https://www.ffmpeg.org/" target="_blank">
@@ -51,6 +52,12 @@ export const W95AboutDialog = (props: { visible: boolean; handleClose: () => voi
                                 linux-minidisc
                             </Anchor>
                             , to make the netmd-js project possible.
+                        </li>
+                        <li>
+                            <Anchor rel="noopener noreferrer" href="https://react95.io/" target="_blank">
+                                react85
+                            </Anchor>
+                            , to build the vintage user interface.
                         </li>
                         <li>
                             <Anchor rel="noopener noreferrer" href="https://material-ui.com/" target="_blank">

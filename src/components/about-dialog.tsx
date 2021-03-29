@@ -50,7 +50,7 @@ export const AboutDialog = (props: {}) => {
         >
             <DialogTitle id="about-dialog-slide-title">About Web MiniDisc</DialogTitle>
             <DialogContent>
-                <DialogContentText>Web MiniDisc has been made possible by</DialogContentText>
+                <DialogContentText>Web MiniDisc uses</DialogContentText>
                 <ul>
                     <li>
                         <Link rel="noopener noreferrer" href="https://www.ffmpeg.org/" target="_blank">
@@ -85,6 +85,12 @@ export const AboutDialog = (props: {}) => {
                             linux-minidisc
                         </Link>
                         , to make the netmd-js project possible.
+                    </li>
+                    <li>
+                        <Link rel="noopener noreferrer" href="https://react95.io/" target="_blank">
+                            react95
+                        </Link>
+                        , to build the vintage user interface.
                     </li>
                     <li>
                         <Link rel="noopener noreferrer" href="https://material-ui.com/" target="_blank">
