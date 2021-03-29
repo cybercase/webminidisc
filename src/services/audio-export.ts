@@ -83,12 +83,12 @@ export class FFMpegAudioExportService implements AudioExportService {
         let result: ArrayBuffer;
         if (format === `SP`) {
             const outFileName = `${this.outFileNameNoExt}.raw`;
-            await this.ffmpegProcess.transcode(this.inFileName, outFileName, '-f s16be -ar 44100');
+            await this.ffmpegProcess.transcode(this.inFileName, outFileName, '-ac 2 -ar 44100 -f s16be');
             let { data } = await this.ffmpegProcess.read(outFileName);
             result = data.buffer;
         } else {
             const outFileName = `${this.outFileNameNoExt}.wav`;
-            await this.ffmpegProcess.transcode(this.inFileName, outFileName, '-f wav -ar 44100');
+            await this.ffmpegProcess.transcode(this.inFileName, outFileName, '-f wav -ar 44100 -ac 2');
             let { data } = await this.ffmpegProcess.read(outFileName);
             let bitrate: string = `0`;
             switch (format) {
