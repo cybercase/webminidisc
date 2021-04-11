@@ -1,34 +1,35 @@
 {
   "files": {
     "main.css": "/webminidisc/static/css/main.1b93ab93.chunk.css",
-    "main.js": "/webminidisc/static/js/main.1db53300.chunk.js",
-    "main.js.map": "/webminidisc/static/js/main.1db53300.chunk.js.map",
+    "main.js": "/webminidisc/static/js/main.d8bb94e1.chunk.js",
+    "main.js.map": "/webminidisc/static/js/main.d8bb94e1.chunk.js.map",
     "runtime-main.js": "/webminidisc/static/js/runtime-main.114d47b9.js",
     "runtime-main.js.map": "/webminidisc/static/js/runtime-main.114d47b9.js.map",
-    "static/js/2.e2e745c2.chunk.js": "/webminidisc/static/js/2.e2e745c2.chunk.js",
-    "static/js/2.e2e745c2.chunk.js.map": "/webminidisc/static/js/2.e2e745c2.chunk.js.map",
-    "ca36764ba8cb3858a392.worker.js": "/webminidisc/ca36764ba8cb3858a392.worker.js",
-    "ca36764ba8cb3858a392.worker.js.LICENSE.txt": "/webminidisc/ca36764ba8cb3858a392.worker.js.LICENSE.txt",
-    "ca36764ba8cb3858a392.worker.js.map": "/webminidisc/ca36764ba8cb3858a392.worker.js.map",
+    "static/js/2.98c06924.chunk.js": "/webminidisc/static/js/2.98c06924.chunk.js",
+    "static/js/2.98c06924.chunk.js.map": "/webminidisc/static/js/2.98c06924.chunk.js.map",
     "d1774be5196455a6a08f.worker.js": "/webminidisc/d1774be5196455a6a08f.worker.js",
     "d1774be5196455a6a08f.worker.js.LICENSE.txt": "/webminidisc/d1774be5196455a6a08f.worker.js.LICENSE.txt",
     "d1774be5196455a6a08f.worker.js.map": "/webminidisc/d1774be5196455a6a08f.worker.js.map",
+    "e40438b6922e6e1880d0.worker.js": "/webminidisc/e40438b6922e6e1880d0.worker.js",
+    "e40438b6922e6e1880d0.worker.js.LICENSE.txt": "/webminidisc/e40438b6922e6e1880d0.worker.js.LICENSE.txt",
+    "e40438b6922e6e1880d0.worker.js.map": "/webminidisc/e40438b6922e6e1880d0.worker.js.map",
     "index.html": "/webminidisc/index.html",
-    "precache-manifest.21d64baad94545e27890258c5b80c76a.js": "/webminidisc/precache-manifest.21d64baad94545e27890258c5b80c76a.js",
+    "precache-manifest.5a1c2a7999a176ac3492919fbb282b94.js": "/webminidisc/precache-manifest.5a1c2a7999a176ac3492919fbb282b94.js",
     "service-worker.js": "/webminidisc/service-worker.js",
     "static/css/main.1b93ab93.chunk.css.map": "/webminidisc/static/css/main.1b93ab93.chunk.css.map",
-    "static/js/2.e2e745c2.chunk.js.LICENSE.txt": "/webminidisc/static/js/2.e2e745c2.chunk.js.LICENSE.txt",
+    "static/js/2.98c06924.chunk.js.LICENSE.txt": "/webminidisc/static/js/2.98c06924.chunk.js.LICENSE.txt",
     "static/media/fonts.css": "/webminidisc/static/media/ms_sans_serif_bold.cb1c7473.woff2",
     "static/media/chrome-icon.svg": "/webminidisc/static/media/chrome-icon.f3b6c54c.svg",
     "static/media/md0.a7574f83.svg": "/webminidisc/static/media/md0.a7574f83.svg",
     "static/media/md1.1ffb5f6c.svg": "/webminidisc/static/media/md1.1ffb5f6c.svg",
     "static/media/md2.33dd03b3.svg": "/webminidisc/static/media/md2.33dd03b3.svg",
-    "static/media/md3.80f42826.svg": "/webminidisc/static/media/md3.80f42826.svg"
+    "static/media/md3.80f42826.svg": "/webminidisc/static/media/md3.80f42826.svg",
+    "static/media/record-complete-notification-icon.png": "/webminidisc/static/media/record-complete-notification-icon.f6ae1070.png"
   },
   "entrypoints": [
     "static/js/runtime-main.114d47b9.js",
-    "static/js/2.e2e745c2.chunk.js",
+    "static/js/2.98c06924.chunk.js",
     "static/css/main.1b93ab93.chunk.css",
-    "static/js/main.1db53300.chunk.js"
+    "static/js/main.d8bb94e1.chunk.js"
   ]
 }
