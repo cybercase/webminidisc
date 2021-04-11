@@ -1,5 +1,5 @@
 import React from 'react';
-import { WindowHeader, Button, Progress } from 'react95';
+import { WindowHeader, Button, Progress, Checkbox } from 'react95';
 import { DialogOverlay, DialogWindow, DialogFooter, DialogWindowContent } from './common';
 
 export const W95UploadDialog = (props: {
@@ -17,6 +17,9 @@ export const W95UploadDialog = (props: {
     progressValue: number;
     bufferValue: number;
     convertedValue: number;
+    notifyWhenFinished: boolean;
+    hasNotificationSupport: boolean;
+    handleNotifyWhenFinishedChanged: () => void;
 }) => {
     if (!props.visible) {
         return null;
@@ -42,6 +45,15 @@ export const W95UploadDialog = (props: {
                     <Progress value={props.progressValue} />
 
                     <DialogFooter>
+                        {props.hasNotificationSupport ? (
+                            <Checkbox
+                                name="notifyOnEnd"
+                                label="Notify when completed"
+                                checked={props.notifyWhenFinished}
+                                onChange={props.handleNotifyWhenFinishedChanged}
+                            />
+                        ) : null}
+                        <div style={{ flex: '1 1 auto' }}></div>
                         <Button disabled={props.cancelled} onClick={props.handleCancelUpload}>
                             {props.cancelled ? `Stopping after current track...` : `Cancel Recording`}
                         </Button>

@@ -117,4 +117,22 @@ export function forWideDesktop(theme: Theme) {
     return theme.breakpoints.up(700 + theme.spacing(2) * 2) + ` and (min-height: 750px)`;
 }
 
+export function askNotificationPermission(): Promise<NotificationPermission> {
+    // Adapted from: https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API
+    function checkNotificationPromise() {
+        try {
+            Notification.requestPermission().then();
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+
+    if (checkNotificationPromise()) {
+        return Notification.requestPermission();
+    } else {
+        return new Promise(resolve => Notification.requestPermission(resolve));
+    }
+}
+
 declare let process: any;

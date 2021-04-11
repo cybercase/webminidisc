@@ -9,9 +9,10 @@ import { actions as mainActions } from './main-feature';
 import serviceRegistry from '../services/registry';
 import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
-import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep } from '../utils';
+import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep, askNotificationPermission } from '../utils';
 import * as mm from 'music-metadata-browser';
 import { TitleFormatType, UploadFormat } from './convert-dialog-feature';
+import NotificationCompleteIconUrl from '../images/record-complete-notification-icon.png';
 
 export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', params?: unknown) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
@@ -234,6 +235,24 @@ export function recordTracks(indexes: number[], deviceId: string) {
     };
 }
 
+export function setNotifyWhenFinished(value: boolean) {
+    return async function(dispatch: AppDispatch, getState: () => RootState) {
+        if (Notification.permission !== 'granted') {
+            const confirmation = window.confirm(`Enable Notification on recording completed?`);
+            if (!confirmation) {
+                return;
+            }
+            const result = await askNotificationPermission();
+            if (result !== 'granted') {
+                dispatch(appStateActions.setNotificationSupport(false));
+                dispatch(appStateActions.setNotifyWhenFinished(false));
+                return;
+            }
+        }
+        dispatch(appStateActions.setNotifyWhenFinished(value));
+    };
+}
+
 export const WireformatDict: { [k: string]: Wireformat } = {
     SP: Wireformat.pcm,
     LP2: Wireformat.lp2,
@@ -288,6 +307,20 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
         const hasUploadBeenCancelled = () => {
             return getState().uploadDialog.cancelled;
         };
+
+        function showFinishedNotificationIfNeeded() {
+            const { notifyWhenFinished, hasNotificationSupport } = getState().appState;
+            if (!hasNotificationSupport || !notifyWhenFinished) {
+                return;
+            }
+            const notification = new Notification('MiniDisc recording completed', {
+                icon: NotificationCompleteIconUrl,
+            });
+            notification.onclick = function() {
+                window.focus();
+                this.close();
+            };
+        }
 
         let trackUpdate: {
             current: number;
@@ -399,6 +432,7 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
         }
 
         dispatch(batchActions(actionToDispatch));
+        showFinishedNotificationIfNeeded();
         listContent()(dispatch);
     };
 }

@@ -42,6 +42,11 @@ serviceRegistry.mediaRecorderService = new MediaRecorderService();
         store.dispatch(appActions.setBrowserSupported(false));
     }
 
+    if (!('Notification' in window) || Notification.permission === 'denied') {
+        store.dispatch(appActions.setNotificationSupport(false));
+        store.dispatch(appActions.setNotifyWhenFinished(false));
+    }
+
     // eslint-disable-next-line
     let deferredPrompt: any;
     window.addEventListener('beforeinstallprompt', (e: any) => {

@@ -13,6 +13,8 @@ export interface AppState {
     darkMode: boolean;
     vintageMode: boolean;
     aboutDialogVisible: boolean;
+    notifyWhenFinished: boolean;
+    hasNotificationSupport: boolean;
 }
 
 const initialState: AppState = {
@@ -24,6 +26,8 @@ const initialState: AppState = {
     darkMode: loadPreference('darkMode', false),
     vintageMode: loadPreference('vintageMode', false),
     aboutDialogVisible: false,
+    notifyWhenFinished: loadPreference('notifyWhenFinished', false),
+    hasNotificationSupport: true,
 };
 
 export const slice = createSlice({
@@ -48,6 +52,13 @@ export const slice = createSlice({
         setDarkMode: (state, action: PayloadAction<boolean>) => {
             state.darkMode = action.payload;
             savePreference('darkMode', state.darkMode);
+        },
+        setNotifyWhenFinished: (state, action: PayloadAction<boolean>) => {
+            state.notifyWhenFinished = action.payload;
+            savePreference('notifyWhenFinished', action.payload);
+        },
+        setNotificationSupport: (state, action: PayloadAction<boolean>) => {
+            state.hasNotificationSupport = action.payload;
         },
         setVintageMode: (state, action: PayloadAction<boolean>) => {
             state.vintageMode = action.payload;

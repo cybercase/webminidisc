@@ -15,7 +15,10 @@ import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Button } from '@material-ui/core';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import { W95UploadDialog } from './win95/upload-dialog';
+import { setNotifyWhenFinished } from '../redux/actions';
 
 const useStyles = makeStyles(theme => ({
     progressPerc: {
@@ -26,6 +29,12 @@ const useStyles = makeStyles(theme => ({
     },
     uploadLabel: {
         marginTop: theme.spacing(3),
+    },
+    spacer: {
+        flex: '1 1 auto',
+    },
+    checkBox: {
+        marginLeft: 0,
     },
 }));
 
@@ -53,16 +62,20 @@ export const UploadDialog = (props: {}) => {
         titleCurrent,
         titleConverting,
     } = useShallowEqualSelector(state => state.uploadDialog);
+    const { vintageMode, notifyWhenFinished, hasNotificationSupport } = useShallowEqualSelector(state => state.appState);
 
     const handleCancelUpload = useCallback(() => {
         dispatch(uploadDialogActions.setCancelUpload(true));
     }, [dispatch]);
 
+    const handleNotifyWhenFinishedChanged = useCallback(() => {
+        dispatch(setNotifyWhenFinished(!notifyWhenFinished));
+    }, [dispatch, notifyWhenFinished]);
+
     let progressValue = Math.floor((writtenProgress / totalProgress) * 100);
     let bufferValue = Math.floor((encryptedProgress / totalProgress) * 100);
     let convertedValue = Math.floor((trackConverting / trackTotal) * 100);
 
-    const vintageMode = useShallowEqualSelector(state => state.appState.vintageMode);
     if (vintageMode) {
         const p = {
             visible,
@@ -81,6 +94,9 @@ export const UploadDialog = (props: {}) => {
             progressValue,
             bufferValue,
             convertedValue,
+            notifyWhenFinished,
+            hasNotificationSupport,
+            handleNotifyWhenFinishedChanged,
         };
         return <W95UploadDialog {...p} />;
     }
@@ -121,6 +137,15 @@ export const UploadDialog = (props: {}) => {
                 <Box className={classes.progressPerc}>{progressValue}%</Box>
             </DialogContent>
             <DialogActions>
+                {hasNotificationSupport ? (
+                    <FormControlLabel
+                        className={classes.checkBox}
+                        disabled={!hasNotificationSupport}
+                        control={<Checkbox checked={notifyWhenFinished} onChange={handleNotifyWhenFinishedChanged} name="notifyOnEnd" />}
+                        label="Notify when completed"
+                    />
+                ) : null}
+                <div className={classes.spacer}></div>
                 <Button disabled={cancelled} onClick={handleCancelUpload}>
                     {cancelled ? `Stopping after current track...` : `Cancel Recording`}
                 </Button>
