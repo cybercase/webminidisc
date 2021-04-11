@@ -416,7 +416,7 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
                 await netmdService?.upload(title, data, wireformat, updateProgressCallback);
             } catch (err) {
                 error = err;
-                errorMessage = `${file.name}: Error uploading to device`;
+                errorMessage = `${file.name}: Error uploading to device. There might not be enough space left.`;
                 break;
             }
         }
