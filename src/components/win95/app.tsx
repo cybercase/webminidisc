@@ -79,6 +79,10 @@ export const W95App = () => {
         setMenuOpen(!isMenuOpen);
     }, [isMenuOpen, setMenuOpen]);
 
+    const handleHelpClick = useCallback(() => {
+        window.open('https://github.com/cybercase/webminidisc/wiki/Support-and-FAQ', '_blank');
+    }, []);
+
     const currentTheme = original;
     const theme = {
         ...currentTheme,
@@ -105,6 +109,9 @@ export const W95App = () => {
                     <Toolbar>
                         <Button variant="menu" size="sm" active={isMenuOpen} onClick={toggleMenu}>
                             File
+                        </Button>
+                        <Button variant="menu" size="sm" onClick={handleHelpClick}>
+                            Help
                         </Button>
                         {isMenuOpen ? <TopMenu onClick={closeMenu} /> : null}
                     </Toolbar>

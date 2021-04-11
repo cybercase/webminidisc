@@ -16,6 +16,7 @@ import { AboutDialog } from './about-dialog';
 import { TopMenu } from './topmenu';
 import ChromeIconPath from '../images/chrome-icon.svg';
 import { W95Welcome } from './win95/welcome';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const useStyles = makeStyles(theme => ({
     main: {
@@ -45,6 +46,20 @@ const useStyles = makeStyles(theme => ({
     headBox: {
         display: 'flex',
         justifyContent: 'space-between',
+    },
+    connectContainer: {
+        flex: '1 1 auto',
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    supportContainer: {
+        flex: '1 1 auto',
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        alignItems: 'center',
     },
 }));
 
@@ -86,17 +101,35 @@ export const Welcome = (props: {}) => {
             <Box className={classes.main}>
                 {browserSupported ? (
                     <React.Fragment>
-                        <Typography component="h2" variant="subtitle1" align="center" className={classes.spacing}>
-                            Press the button to connect to a NetMD device
-                        </Typography>
+                        <div className={classes.connectContainer}>
+                            <Typography component="h2" variant="subtitle1" align="center" className={classes.spacing}>
+                                Press the button to connect to a NetMD device
+                            </Typography>
 
-                        <Button variant="contained" color="primary" onClick={() => dispatch(pair())} className={classes.button}>
-                            Connect
-                        </Button>
+                            <Button variant="contained" color="primary" onClick={() => dispatch(pair())} className={classes.button}>
+                                Connect
+                            </Button>
 
-                        <FormControl error={true} className={classes.spacing} style={{ visibility: pairingFailed ? 'visible' : 'hidden' }}>
-                            <FormHelperText>{pairingMessage}</FormHelperText>
-                        </FormControl>
+                            <FormControl
+                                error={true}
+                                className={classes.spacing}
+                                style={{ visibility: pairingFailed ? 'visible' : 'hidden' }}
+                            >
+                                <FormHelperText>{pairingMessage}</FormHelperText>
+                            </FormControl>
+                        </div>
+                        <div>
+                            <Typography component="h2" variant="subtitle1" align="center" className={classes.spacing}>
+                                <Link
+                                    rel="noopener noreferrer"
+                                    target="_blank"
+                                    href="https://github.com/cybercase/webminidisc/wiki/Support-and-FAQ"
+                                >
+                                    <span style={{ verticalAlign: 'middle' }}>Support and FAQ</span>{' '}
+                                    <OpenInNewIcon style={{ verticalAlign: 'middle' }} fontSize="inherit" />
+                                </Link>
+                            </Typography>
+                        </div>
                     </React.Fragment>
                 ) : (
                     <React.Fragment>

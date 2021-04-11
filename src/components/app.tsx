@@ -54,7 +54,6 @@ const useStyles = makeStyles(theme => ({
         marginLeft: -theme.spacing(2),
     },
     copyrightTypography: {
-        marginRight: theme.spacing(1),
         textAlign: 'center',
     },
     backdrop: {

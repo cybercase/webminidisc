@@ -25,6 +25,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import ToggleOffIcon from '@material-ui/icons/ToggleOff';
 import ToggleOnIcon from '@material-ui/icons/ToggleOn';
 import Win95Icon from '../images/win95/win95.png';
+import HelpIcon from '@material-ui/icons/Help';
 
 import { W95TopMenu } from './win95/topmenu';
 
@@ -42,6 +43,7 @@ export const TopMenu = function(props: { onClick?: () => void }) {
     let discTitle = useShallowEqualSelector(state => state.main.disc?.title ?? ``);
 
     const githubLinkRef = React.useRef<null | HTMLAnchorElement>(null);
+    const helpLinkRef = React.useRef<null | HTMLAnchorElement>(null);
     const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
     const menuOpen = Boolean(menuAnchorEl);
 
@@ -101,6 +103,18 @@ export const TopMenu = function(props: { onClick?: () => void }) {
             if (event.target !== githubLinkRef.current) {
                 // Prevent opening the link twice
                 githubLinkRef.current?.click();
+            }
+            handleMenuClose();
+        },
+        [handleMenuClose]
+    );
+
+    const handleHelpLink = useCallback(
+        (event: React.MouseEvent<HTMLElement>) => {
+            event.stopPropagation();
+            if (event.target !== helpLinkRef.current) {
+                // Prevent opening the link twice
+                helpLinkRef.current?.click();
             }
             handleMenuClose();
         },
@@ -167,6 +181,24 @@ export const TopMenu = function(props: { onClick?: () => void }) {
                 <InfoIcon fontSize="small" />
             </ListItemIcon>
             <ListItemText>About</ListItemText>
+        </MenuItem>
+    );
+    menuItems.push(
+        <MenuItem key="support" onClick={handleHelpLink}>
+            <ListItemIcon className={classes.listItemIcon}>
+                <HelpIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>
+                <Link
+                    rel="noopener noreferrer"
+                    href="https://github.com/cybercase/webminidisc/wiki/Support-and-FAQ"
+                    target="_blank"
+                    ref={helpLinkRef}
+                    onClick={handleHelpLink}
+                >
+                    Support and FAQs
+                </Link>
+            </ListItemText>
         </MenuItem>
     );
     menuItems.push(
