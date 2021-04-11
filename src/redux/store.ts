@@ -6,7 +6,7 @@ import panicDialog, { actions as panicDialogActions } from './panic-dialog-featu
 import convertDialog from './convert-dialog-feature';
 import dumpDialog from './dump-dialog-feature';
 import recordDialog from './record-dialog-feature';
-import appState, { actions as appActions } from './app-feature';
+import appState, { actions as appActions, buildInitialState as buildInitialAppState } from './app-feature';
 import main from './main-feature';
 
 const errorCatcher: Middleware = store => next => async action => {
@@ -30,12 +30,15 @@ let reducer = combineReducers({
     main,
 });
 
-const resetStateAction = appActions.setState.toString();
+const resetStateAction = appActions.setMainView.toString();
 const resetStatePayoload = 'WELCOME';
 const resetStateReducer: typeof reducer = function(...args) {
     const [state, action] = args;
     if (action.type === resetStateAction && action.payload === resetStatePayoload) {
-        return initialState;
+        return {
+            ...initialState,
+            appState: buildInitialAppState(),
+        };
     }
     return reducer(...args);
 };

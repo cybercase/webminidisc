@@ -56,7 +56,7 @@ export function pair() {
         try {
             let connected = await serviceRegistry.netmdService!.connect();
             if (connected) {
-                dispatch(appStateActions.setState('MAIN'));
+                dispatch(appStateActions.setMainView('MAIN'));
                 return;
             }
         } catch (err) {
@@ -67,7 +67,7 @@ export function pair() {
         try {
             let paired = await serviceRegistry.netmdService!.pair();
             if (paired) {
-                dispatch(appStateActions.setState('MAIN'));
+                dispatch(appStateActions.setMainView('MAIN'));
                 return;
             }
             dispatch(batchActions([appStateActions.setPairingMessage(`Connection Failed`), appStateActions.setPairingFailed(true)]));

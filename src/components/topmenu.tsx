@@ -88,7 +88,7 @@ export const TopMenu = function(props: { onClick?: () => void }) {
     }, [dispatch, handleMenuClose, discTitle]);
 
     const handleExit = useCallback(() => {
-        dispatch(appActions.setState('WELCOME'));
+        dispatch(appActions.setMainView('WELCOME'));
         handleMenuClose();
     }, [dispatch, handleMenuClose]);
 
@@ -196,7 +196,7 @@ export const TopMenu = function(props: { onClick?: () => void }) {
                     ref={helpLinkRef}
                     onClick={handleHelpLink}
                 >
-                    Support and FAQs
+                    Support and FAQ
                 </Link>
             </ListItemText>
         </MenuItem>

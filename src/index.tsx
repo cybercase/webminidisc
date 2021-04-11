@@ -36,7 +36,7 @@ serviceRegistry.mediaRecorderService = new MediaRecorderService();
 
     if (navigator && navigator.usb) {
         navigator.usb.ondisconnect = function() {
-            store.dispatch(appActions.setState('WELCOME'));
+            store.dispatch(appActions.setMainView('WELCOME'));
         };
     } else {
         store.dispatch(appActions.setBrowserSupported(false));

@@ -17,24 +17,29 @@ export interface AppState {
     hasNotificationSupport: boolean;
 }
 
-const initialState: AppState = {
-    mainView: 'WELCOME',
-    loading: false,
-    pairingFailed: false,
-    pairingMessage: ``,
-    browserSupported: true,
-    darkMode: loadPreference('darkMode', false),
-    vintageMode: loadPreference('vintageMode', false),
-    aboutDialogVisible: false,
-    notifyWhenFinished: loadPreference('notifyWhenFinished', false),
-    hasNotificationSupport: true,
+export const buildInitialState = (): AppState => {
+    return {
+        mainView: 'WELCOME',
+        loading: false,
+        pairingFailed: false,
+        pairingMessage: ``,
+        browserSupported: true,
+        darkMode: loadPreference('darkMode', false),
+        vintageMode: loadPreference('vintageMode', false),
+        aboutDialogVisible: false,
+        notifyWhenFinished: loadPreference('notifyWhenFinished', false),
+        hasNotificationSupport: true,
+    };
 };
+
+const initialState: AppState = buildInitialState();
 
 export const slice = createSlice({
     name: 'app',
     initialState,
     reducers: {
-        setState: (state, action: PayloadAction<Views>) => {
+        setMainView: (state, action: PayloadAction<Views>) => {
+            // CAVEAT: There's a middleware that resets the state when mainView is set to WELCOME
             state.mainView = action.payload;
         },
         setLoading: (state, action: PayloadAction<boolean>) => {
@@ -62,7 +67,7 @@ export const slice = createSlice({
         },
         setVintageMode: (state, action: PayloadAction<boolean>) => {
             state.vintageMode = action.payload;
-            savePreference('vintageMode', state.vintageMode);
+            savePreference('vintageMode', action.payload);
         },
         showAboutDialog: (state, action: PayloadAction<boolean>) => {
             state.aboutDialogVisible = action.payload;

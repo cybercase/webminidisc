@@ -68,7 +68,7 @@ export const W95App = () => {
     const [isMenuOpen, setMenuOpen] = useState(false);
 
     const handleExit = useCallback(() => {
-        dispatch(appActions.setState('WELCOME'));
+        dispatch(appActions.setMainView('WELCOME'));
     }, [dispatch]);
 
     const closeMenu = useCallback(() => {
