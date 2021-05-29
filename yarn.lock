@@ -7797,9 +7797,9 @@
   "version" "2.6.1"
 
 "netmd-js@^1.2.2":
-  "integrity" "sha512-KgJKdFTFBYCLy0P51ozjFjVmzYNapcpw9IxZ/BtKfVa9mwq2p1M159IYCYV33lfsD0FlfyXDe7Y0LaUel4jD5g=="
-  "resolved" "https://registry.npmjs.org/netmd-js/-/netmd-js-1.2.2.tgz"
-  "version" "1.2.2"
+  "integrity" "sha512-Fyyz31+4ajnlmHnkdTMVvxejjYdfAkdJPvoAEYbvFSdxSTk/iSM7JxYpUflkEOXH7gwbS2lWs/ywC6Z2z1wryQ=="
+  "resolved" "https://registry.npmjs.org/netmd-js/-/netmd-js-1.3.0.tgz"
+  "version" "1.3.0"
   dependencies:
     "browser-bunyan" "^1.5.3"
     "buffer" "^5.5.0"
