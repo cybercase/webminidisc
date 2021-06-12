@@ -6,6 +6,7 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
+import PauseIcon from '@material-ui/icons/Pause';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
@@ -32,6 +33,7 @@ export const W95Controls = (props: {
     handlePrev: () => void;
     handlePlay: () => void;
     handleStop: () => void;
+    handlePause: () => void;
     handleNext: () => void;
     message: string;
     discPresent: boolean;
@@ -48,6 +50,9 @@ export const W95Controls = (props: {
             </Button>
             <Button onClick={props.handlePlay}>
                 <PlayArrowIcon />
+            </Button>
+            <Button onClick={props.handlePause}>
+                <PauseIcon />
             </Button>
             <Button onClick={props.handleStop}>
                 <StopIcon />

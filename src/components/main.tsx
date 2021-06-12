@@ -8,6 +8,7 @@ import { actions as convertDialogActions } from '../redux/convert-dialog-feature
 import { actions as dumpDialogActions } from '../redux/dump-dialog-feature';
 
 import { formatTimeFromFrames, getTracks } from 'netmd-js';
+import { control } from '../redux/actions';
 
 import { belowDesktop, forAnyDesktop, getSortedTracks, useShallowEqualSelector } from '../utils';
 
@@ -19,6 +20,8 @@ import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import Backdrop from '@material-ui/core/Backdrop';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import PauseIcon from '@material-ui/icons/Pause'
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -133,12 +136,53 @@ const useStyles = makeStyles(theme => ({
         textDecoration: 'underline',
         textDecorationStyle: 'dotted',
     },
+    controlButtonInTrackCommon: {
+        width: '.5em',
+        verticalAlign: 'middle',
+    },
+    playButtonInTrackListPlaying: {
+        color: theme.palette.primary.main,
+        display: 'none',
+    },
+    pauseButtonInTrackListPlaying: {
+        color: theme.palette.primary.main,
+        display: 'none',
+    },
+    currentControlButton: {
+        display: 'inline-block',
+    },
+    playButtonInTrackListNotPlaying: {
+        visibility: 'hidden',
+    },
+    trackRow: {
+        '&:hover': {
+            /* For the tracks that aren't currently playing */
+            "& $playButtonInTrackListNotPlaying":{
+                visibility: 'visible',
+            },
+            "& $trackIndex":{
+                display: 'none',
+            },
+
+            /* For the current track */
+            "& svg:not($currentControlButton)": {
+                display: 'inline-block',
+            },
+            "& $currentControlButton": {
+                display: 'none',
+            }
+        },
+    },
+    trackIndex:{
+        display: 'inline-block',
+    }
 }));
 
 export const Main = (props: {}) => {
     let dispatch = useDispatch();
     let disc = useShallowEqualSelector(state => state.main.disc);
     let deviceName = useShallowEqualSelector(state => state.main.deviceName);
+    const deviceStatus = useShallowEqualSelector(state => state.main.deviceStatus);
     const { vintageMode } = useShallowEqualSelector(state => state.appState);
 
     const [selected, setSelected] = React.useState<number[]>([]);
@@ -228,6 +272,20 @@ export const Main = (props: {}) => {
     const handleDeleteSelected = (event: React.MouseEvent) => {
         dispatch(deleteTracks(selected));
     };
+
+    const handlePlayTrack = async (event: React.MouseEvent, track: number) => {
+        if(deviceStatus?.track !== track)
+            dispatch(control('goto', track));
+        if(deviceStatus?.state !== 'playing')
+            dispatch(control('play'));
+    };
+
+    const handleCurrentClick = async (event: React.MouseEvent) => {
+        if(deviceStatus?.state === 'playing')
+            dispatch(control('pause'));
+        else
+            dispatch(control('play'));
+    }
 
     if (vintageMode) {
         const p = {
@@ -390,8 +448,26 @@ export const Main = (props: {}) => {
                                 key={track.index}
                                 onDoubleClick={event => handleRenameDoubleClick(event, track.index)}
                                 onClick={event => handleSelectClick(event, track.index)}
+                                className={classes.trackRow}
                             >
-                                <TableCell className={classes.indexCell}>{track.index + 1}</TableCell>
+                                <TableCell className={classes.indexCell}>
+                                    {track.index === deviceStatus?.track ?
+                                        <span>
+                                            <PlayArrowIcon
+                                                className={`${classes.controlButtonInTrackCommon} ${classes.playButtonInTrackListPlaying} ${deviceStatus?.state === 'playing' ? classes.currentControlButton : ''}`}
+                                                onClick={event => {handleCurrentClick(event); event.stopPropagation();}} />
+                                            <PauseIcon
+                                                className={`${classes.controlButtonInTrackCommon} ${classes.pauseButtonInTrackListPlaying} ${deviceStatus?.state !== 'playing' ? classes.currentControlButton : ''}`}
+                                                onClick={event => {handleCurrentClick(event); event.stopPropagation()}} />
+                                        </span> :
+                                        <span>
+                                            <span className={classes.trackIndex}>{track.index + 1}</span>
+                                            <PlayArrowIcon
+                                                className={`${classes.controlButtonInTrackCommon} ${classes.playButtonInTrackListNotPlaying}`}
+                                                onClick={event => {handlePlayTrack(event, track.index); event.stopPropagation();}}
+                                            />
+                                        </span>}
+                                    </TableCell>
                                 <TableCell className={classes.titleCell} title={track.title}>
                                     {track.title || `No Title`}
                                 </TableCell>
