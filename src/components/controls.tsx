@@ -141,7 +141,7 @@ export const Controls = () => {
     } else if (tracks.length === 0) {
         message = `BLANKDISC`;
     } else if (deviceStatus && deviceStatus.track !== null && tracks[deviceStatus.track]) {
-        message = `${deviceStatus.track + 1} - ` + tracks[deviceStatus.track].title;
+        message = (deviceStatus.track + 1).toString().padStart(3, '0') + (tracks[deviceStatus.track].title ? ' - ' + tracks[deviceStatus.track].title : '');
     }
 
     const [lcdScroll, setLcdScroll] = useState(0);

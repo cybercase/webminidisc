@@ -451,13 +451,13 @@ export const Main = (props: {}) => {
                                 className={classes.trackRow}
                             >
                                 <TableCell className={classes.indexCell}>
-                                    {track.index === deviceStatus?.track ?
+                                    {track.index === deviceStatus?.track && (["playing", "paused"].includes(deviceStatus?.state)) ?
                                         <span>
                                             <PlayArrowIcon
                                                 className={`${classes.controlButtonInTrackCommon} ${classes.playButtonInTrackListPlaying} ${deviceStatus?.state === 'playing' ? classes.currentControlButton : ''}`}
                                                 onClick={event => {handleCurrentClick(event); event.stopPropagation();}} />
                                             <PauseIcon
-                                                className={`${classes.controlButtonInTrackCommon} ${classes.pauseButtonInTrackListPlaying} ${deviceStatus?.state !== 'playing' ? classes.currentControlButton : ''}`}
+                                                className={`${classes.controlButtonInTrackCommon} ${classes.pauseButtonInTrackListPlaying} ${deviceStatus?.state === 'paused' ? classes.currentControlButton : ''}`}
                                                 onClick={event => {handleCurrentClick(event); event.stopPropagation()}} />
                                         </span> :
                                         <span>
