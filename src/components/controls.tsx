@@ -1,10 +1,11 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
+import clsx from 'clsx';
 
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
-import PauseIcon from '@material-ui/icons/Pause'
+import PauseIcon from '@material-ui/icons/Pause';
 
 import IconButton from '@material-ui/core/IconButton';
 import Box from '@material-ui/core/Box';
@@ -94,11 +95,11 @@ const useStyles = makeStyles(theme => ({
         top: 15,
         left: 1,
     },
-    lcdBlink:{
+    lcdBlink: {
         animationName: '$blink',
         animationTimingFunction: 'step-end',
         animationDuration: '1s',
-        animationIterationCount: 'infinite'
+        animationIterationCount: 'infinite',
     },
     button: {
         // padding: 8,
@@ -132,7 +133,7 @@ export const Controls = () => {
     let trackIndex = deviceStatus?.track ?? null;
     let deviceState = deviceStatus?.state ?? null;
     let discPresent = deviceStatus?.discPresent ?? false;
-    let paused = deviceStatus?.state === "paused";
+    let paused = deviceStatus?.state === 'paused';
     const tracks = getSortedTracks(disc);
     if (!discPresent) {
         message = ``;
@@ -141,7 +142,9 @@ export const Controls = () => {
     } else if (tracks.length === 0) {
         message = `BLANKDISC`;
     } else if (deviceStatus && deviceStatus.track !== null && tracks[deviceStatus.track]) {
-        message = (deviceStatus.track + 1).toString().padStart(3, '0') + (tracks[deviceStatus.track].title ? ' - ' + tracks[deviceStatus.track].title : '');
+        message =
+            (deviceStatus.track + 1).toString().padStart(3, '0') +
+            (tracks[deviceStatus.track].title ? ' - ' + tracks[deviceStatus.track].title : '');
     }
 
     const [lcdScroll, setLcdScroll] = useState(0);
@@ -248,7 +251,9 @@ export const Controls = () => {
                         {message}
                     </span>
                 </div>
-                <div className={classes.lcdDisc}>{discPresent && <DiscFrame className={classes.lcdDiscIcon + (paused ? ' ' + classes.lcdBlink : '')} />}</div>
+                <div className={classes.lcdDisc}>
+                    {discPresent && <DiscFrame className={clsx(classes.lcdDiscIcon, { [classes.lcdBlink]: paused })} />}
+                </div>
             </div>
         </Box>
     );

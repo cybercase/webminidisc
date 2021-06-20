@@ -21,7 +21,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import Backdrop from '@material-ui/core/Backdrop';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import PauseIcon from '@material-ui/icons/Pause'
+import PauseIcon from '@material-ui/icons/Pause';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -137,8 +137,9 @@ const useStyles = makeStyles(theme => ({
         textDecorationStyle: 'dotted',
     },
     controlButtonInTrackCommon: {
-        width: '.5em',
+        width: `16px`,
         verticalAlign: 'middle',
+        marginLeft: theme.spacing(-0.5),
     },
     playButtonInTrackListPlaying: {
         color: theme.palette.primary.main,
@@ -157,25 +158,25 @@ const useStyles = makeStyles(theme => ({
     trackRow: {
         '&:hover': {
             /* For the tracks that aren't currently playing */
-            "& $playButtonInTrackListNotPlaying":{
+            '& $playButtonInTrackListNotPlaying': {
                 visibility: 'visible',
             },
-            "& $trackIndex":{
+            '& $trackIndex': {
                 display: 'none',
             },
 
             /* For the current track */
-            "& svg:not($currentControlButton)": {
+            '& svg:not($currentControlButton)': {
                 display: 'inline-block',
             },
-            "& $currentControlButton": {
+            '& $currentControlButton': {
                 display: 'none',
-            }
+            },
         },
     },
-    trackIndex:{
+    trackIndex: {
         display: 'inline-block',
-    }
+    },
 }));
 
 export const Main = (props: {}) => {
@@ -274,18 +275,19 @@ export const Main = (props: {}) => {
     };
 
     const handlePlayTrack = async (event: React.MouseEvent, track: number) => {
-        if(deviceStatus?.track !== track)
+        if (deviceStatus?.track !== track) {
             dispatch(control('goto', track));
-        if(deviceStatus?.state !== 'playing')
+        }
+        if (deviceStatus?.state !== 'playing') {
             dispatch(control('play'));
+        }
     };
 
     const handleCurrentClick = async (event: React.MouseEvent) => {
-        if(deviceStatus?.state === 'playing')
+        if (deviceStatus?.state === 'playing') {
             dispatch(control('pause'));
-        else
-            dispatch(control('play'));
-    }
+        } else dispatch(control('play'));
+    };
 
     if (vintageMode) {
         const p = {
@@ -451,23 +453,43 @@ export const Main = (props: {}) => {
                                 className={classes.trackRow}
                             >
                                 <TableCell className={classes.indexCell}>
-                                    {track.index === deviceStatus?.track && (["playing", "paused"].includes(deviceStatus?.state)) ?
+                                    {track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state) ? (
                                         <span>
                                             <PlayArrowIcon
-                                                className={`${classes.controlButtonInTrackCommon} ${classes.playButtonInTrackListPlaying} ${deviceStatus?.state === 'playing' ? classes.currentControlButton : ''}`}
-                                                onClick={event => {handleCurrentClick(event); event.stopPropagation();}} />
+                                                className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackListPlaying, {
+                                                    [classes.currentControlButton]: deviceStatus?.state === 'playing',
+                                                })}
+                                                onClick={event => {
+                                                    handleCurrentClick(event);
+                                                    event.stopPropagation();
+                                                }}
+                                            />
                                             <PauseIcon
-                                                className={`${classes.controlButtonInTrackCommon} ${classes.pauseButtonInTrackListPlaying} ${deviceStatus?.state === 'paused' ? classes.currentControlButton : ''}`}
-                                                onClick={event => {handleCurrentClick(event); event.stopPropagation()}} />
-                                        </span> :
+                                                className={clsx(classes.controlButtonInTrackCommon, classes.pauseButtonInTrackListPlaying, {
+                                                    [classes.currentControlButton]: deviceStatus?.state === 'paused',
+                                                })}
+                                                onClick={event => {
+                                                    handleCurrentClick(event);
+                                                    event.stopPropagation();
+                                                }}
+                                            />
+                                        </span>
+                                    ) : (
                                         <span>
                                             <span className={classes.trackIndex}>{track.index + 1}</span>
                                             <PlayArrowIcon
-                                                className={`${classes.controlButtonInTrackCommon} ${classes.playButtonInTrackListNotPlaying}`}
-                                                onClick={event => {handlePlayTrack(event, track.index); event.stopPropagation();}}
+                                                className={clsx(
+                                                    classes.controlButtonInTrackCommon,
+                                                    classes.playButtonInTrackListNotPlaying
+                                                )}
+                                                onClick={event => {
+                                                    handlePlayTrack(event, track.index);
+                                                    event.stopPropagation();
+                                                }}
                                             />
-                                        </span>}
-                                    </TableCell>
+                                        </span>
+                                    )}
+                                </TableCell>
                                 <TableCell className={classes.titleCell} title={track.title}>
                                     {track.title || `No Title`}
                                 </TableCell>
