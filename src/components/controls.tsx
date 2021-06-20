@@ -1,9 +1,11 @@
 import React, { useCallback, useRef, useEffect, useState } from 'react';
+import clsx from 'clsx';
 
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
+import PauseIcon from '@material-ui/icons/Pause';
 
 import IconButton from '@material-ui/core/IconButton';
 import Box from '@material-ui/core/Box';
@@ -27,6 +29,11 @@ const useStyles = makeStyles(theme => ({
             transform: `translateX(0%)`,
         },
         to: {},
+    },
+    '@keyframes blink': {
+        '50%': {
+            visibility: 'hidden',
+        },
     },
     container: {
         display: 'flex',
@@ -88,6 +95,12 @@ const useStyles = makeStyles(theme => ({
         top: 15,
         left: 1,
     },
+    lcdBlink: {
+        animationName: '$blink',
+        animationTimingFunction: 'step-end',
+        animationDuration: '1s',
+        animationIterationCount: 'infinite',
+    },
     button: {
         // padding: 8,
     },
@@ -112,11 +125,15 @@ export const Controls = () => {
     const handleNext = useCallback(() => {
         dispatch(control('next'));
     }, [dispatch]);
+    const handlePause = useCallback(() => {
+        dispatch(control('pause'));
+    }, [dispatch]);
 
     let message = ``;
     let trackIndex = deviceStatus?.track ?? null;
     let deviceState = deviceStatus?.state ?? null;
     let discPresent = deviceStatus?.discPresent ?? false;
+    let paused = deviceStatus?.state === 'paused';
     const tracks = getSortedTracks(disc);
     if (!discPresent) {
         message = ``;
@@ -125,7 +142,9 @@ export const Controls = () => {
     } else if (tracks.length === 0) {
         message = `BLANKDISC`;
     } else if (deviceStatus && deviceStatus.track !== null && tracks[deviceStatus.track]) {
-        message = `${deviceStatus.track + 1} - ` + tracks[deviceStatus.track].title;
+        message =
+            (deviceStatus.track + 1).toString().padStart(3, '0') +
+            (tracks[deviceStatus.track].title ? ' - ' + tracks[deviceStatus.track].title : '');
     }
 
     const [lcdScroll, setLcdScroll] = useState(0);
@@ -187,6 +206,7 @@ export const Controls = () => {
             handlePrev,
             handlePlay,
             handleStop,
+            handlePause,
             handleNext,
 
             message,
@@ -208,6 +228,9 @@ export const Controls = () => {
             <IconButton aria-label="play" onClick={handlePlay} className={classes.button}>
                 <PlayArrowIcon />
             </IconButton>
+            <IconButton aria-label="pause" onClick={handlePause} className={classes.button}>
+                <PauseIcon />
+            </IconButton>
             <IconButton aria-label="stop" onClick={handleStop} className={classes.button}>
                 <StopIcon />
             </IconButton>
@@ -228,7 +251,9 @@ export const Controls = () => {
                         {message}
                     </span>
                 </div>
-                <div className={classes.lcdDisc}>{discPresent && <DiscFrame className={classes.lcdDiscIcon} />}</div>
+                <div className={classes.lcdDisc}>
+                    {discPresent && <DiscFrame className={clsx(classes.lcdDiscIcon, { [classes.lcdBlink]: paused })} />}
+                </div>
             </div>
         </Box>
     );

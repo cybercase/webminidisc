@@ -13,8 +13,9 @@ import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback,
 import * as mm from 'music-metadata-browser';
 import { TitleFormatType, UploadFormat } from './convert-dialog-feature';
 import NotificationCompleteIconUrl from '../images/record-complete-notification-icon.png';
+import { assertNumber } from 'netmd-js/dist/utils';
 
-export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', params?: unknown) {
+export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto' | 'pause', params?: unknown) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         switch (action) {
             case 'play':
@@ -29,10 +30,12 @@ export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', para
             case 'prev':
                 await serviceRegistry.netmdService!.prev();
                 break;
+            case 'pause':
+                await serviceRegistry.netmdService!.pause();
+                break;
             case 'goto':
-                if (params && typeof params === 'number' && params >= 0) {
-                    await serviceRegistry.netmdService!.gotoTrack(params);
-                }
+                const trackNumber = assertNumber(params, 'Invalid track number for "goto" command');
+                await serviceRegistry.netmdService!.gotoTrack(trackNumber);
                 break;
         }
         // CAVEAT: change-track might take a up to a few seconds to complete.
