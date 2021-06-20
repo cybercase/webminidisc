@@ -14,7 +14,7 @@ import * as mm from 'music-metadata-browser';
 import { TitleFormatType, UploadFormat } from './convert-dialog-feature';
 import NotificationCompleteIconUrl from '../images/record-complete-notification-icon.png';
 
-export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', params?: unknown) {
+export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto' | 'pause', params?: unknown) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         switch (action) {
             case 'play':
@@ -29,8 +29,11 @@ export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto', para
             case 'prev':
                 await serviceRegistry.netmdService!.prev();
                 break;
+            case 'pause':
+                await serviceRegistry.netmdService!.pause();
+                break;
             case 'goto':
-                if (params && typeof params === 'number' && params >= 0) {
+                if (params !== null && params !== undefined && typeof params === 'number' && params >= 0) {
                     await serviceRegistry.netmdService!.gotoTrack(params);
                 }
                 break;
