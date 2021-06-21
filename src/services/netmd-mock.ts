@@ -1,6 +1,6 @@
 import { Track, Channels, Encoding, Wireformat, TrackFlag, DeviceStatus } from 'netmd-js';
 import { NetMDService } from './netmd';
-import { sleep, sanitizeTitle, asyncMutex } from '../utils';
+import { sleep, sanitizeHalfWidthTitle, asyncMutex } from '../utils';
 import { assert } from 'netmd-js/dist/utils';
 import { Mutex } from 'async-mutex';
 
@@ -111,7 +111,7 @@ class NetMDMockService implements NetMDService {
     async finalize() {}
 
     async renameTrack(index: number, newTitle: string) {
-        newTitle = sanitizeTitle(newTitle);
+        newTitle = sanitizeHalfWidthTitle(newTitle);
         if (this._getTracksTitlesLength() + newTitle.length > this._tracksTitlesMaxLength) {
             throw new Error(`Track's title too long`);
         }
@@ -146,7 +146,7 @@ class NetMDMockService implements NetMDService {
     ) {
         progressCallback({ written: 0, encrypted: 0, total: 100 });
 
-        title = sanitizeTitle(title);
+        title = sanitizeHalfWidthTitle(title);
 
         if (this._getTracksTitlesLength() + title.length > this._tracksTitlesMaxLength) {
             throw new Error(`Track's title too long`); // Simulates reject from device

@@ -12,7 +12,7 @@ import {
 } from 'netmd-js';
 import { makeGetAsyncPacketIteratorOnWorkerThread } from 'netmd-js/dist/web-encrypt-worker';
 import { Logger } from 'netmd-js/dist/logger';
-import { asyncMutex, sanitizeTitle, sleep } from '../utils';
+import { asyncMutex, sanitizeHalfWidthTitle, sleep } from '../utils';
 import { Mutex } from 'async-mutex';
 
 const Worker = require('worker-loader!netmd-js/dist/web-encrypt-worker.js'); // eslint-disable-line import/no-webpack-loader-syntax
@@ -110,8 +110,7 @@ export class NetMDUSBService implements NetMDService {
 
     @asyncMutex
     async renameTrack(index: number, title: string) {
-        // Removing non ascii chars... Sorry, I didn't implement char encoding.
-        title = sanitizeTitle(title);
+        title = sanitizeHalfWidthTitle(title);
         await this.netmdInterface!.cacheTOC();
         await this.netmdInterface!.setTrackTitle(index, title);
         await this.netmdInterface!.syncTOC();
@@ -124,6 +123,8 @@ export class NetMDUSBService implements NetMDService {
         const oldRawName = await this.netmdInterface!._getDiscTitle();
         const hasGroups = oldRawName.indexOf('//') >= 0;
         const hasGroupsAndTitle = oldRawName.startsWith('0;');
+
+        newName = sanitizeHalfWidthTitle(newName);
 
         if (newName === oldName) {
             return;
@@ -182,8 +183,7 @@ export class NetMDUSBService implements NetMDService {
             updateProgress();
         });
 
-        // Removing non ascii chars... Sorry, I didn't implement char encoding.
-        title = sanitizeTitle(title);
+        title = sanitizeHalfWidthTitle(title);
         let mdTrack = new MDTrack(title, format, data, 0x80000, webWorkerAsyncPacketIterator);
 
         await download(this.netmdInterface!, mdTrack, ({ writtenBytes }) => {

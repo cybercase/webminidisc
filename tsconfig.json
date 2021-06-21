@@ -20,7 +20,8 @@
     "noEmit": true,
     "jsx": "react",
     "downlevelIteration": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "typeRoots": ["./node_modules/@types", "./typings"]
   },
   "include": [
     "src"
