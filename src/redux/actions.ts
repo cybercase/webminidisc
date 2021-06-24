@@ -105,12 +105,12 @@ export function listContent() {
     };
 }
 
-export function renameTrack({ index, newName }: { index: number; newName: string }) {
+export function renameTrack({ index, newName, newFullWidthName }: { index: number; newName: string, newFullWidthName?: string }) {
     return async function(dispatch: AppDispatch) {
         const { netmdService } = serviceRegistry;
         dispatch(renameDialogActions.setVisible(false));
         try {
-            await netmdService!.renameTrack(index, newName);
+            await netmdService!.renameTrack(index, newName, newFullWidthName);
         } catch (err) {
             console.error(err);
             dispatch(batchActions([errorDialogAction.setVisible(true), errorDialogAction.setErrorMessage(`Rename failed.`)]));
@@ -119,10 +119,13 @@ export function renameTrack({ index, newName }: { index: number; newName: string
     };
 }
 
-export function renameDisc({ newName }: { newName: string }) {
+export function renameDisc({ newName, newFullWidthName }: { newName: string, newFullWidthName?: string }) {
     return async function(dispatch: AppDispatch) {
         const { netmdService } = serviceRegistry;
-        await netmdService!.renameDisc(newName);
+        await netmdService!.renameDisc(
+            newName.replace(/\/\//g, ' /'), //Make sure the title doesn't interfere with the groups
+            newFullWidthName?.replace(/／／/g, '／')
+        );
         dispatch(renameDialogActions.setVisible(false));
         listContent()(dispatch);
     };
@@ -387,8 +390,12 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
         };
 
         let disc = getState().main.disc;
-        let maxTitleLength = disc ? getAvailableCharsForTrackTitle(getTracks(disc).map(track => track.title || ``)) : -1;
+        let useFullWidth = getState().appState.fullWidthSupport;
+        let tracks = disc && getTracks(disc);
+        let maxTitleLength = tracks ? getAvailableCharsForTrackTitle(tracks.map(track => track.title || ``)) : -1;
+        let maxFullWidthTitleLength = tracks ? getAvailableCharsForTrackTitle(tracks.map(track => track.fullWidthTitle || ``)) : -1;
         maxTitleLength = Math.floor(maxTitleLength / files.length);
+        maxFullWidthTitleLength = Math.floor(maxFullWidthTitleLength / files.length);
 
         let error: any;
         let errorMessage = ``;
@@ -408,7 +415,7 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
             }
 
             if (maxTitleLength > -1) {
-                title = title.substring(0, maxTitleLength);
+                title = title.substring(0, useFullWidth ? Math.min(maxTitleLength, maxFullWidthTitleLength) : maxTitleLength);
             }
 
             trackUpdate.current = i++;
@@ -416,7 +423,7 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
             updateTrack();
             updateProgressCallback({ written: 0, encrypted: 0, total: 100 });
             try {
-                await netmdService?.upload(title, data, wireformat, updateProgressCallback);
+                await netmdService?.upload(title, data, wireformat, useFullWidth, updateProgressCallback);
             } catch (err) {
                 error = err;
                 errorMessage = `${file.name}: Error uploading to device. There might not be enough space left.`;

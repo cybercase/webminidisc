@@ -12,7 +12,7 @@ import {
 } from 'netmd-js';
 import { makeGetAsyncPacketIteratorOnWorkerThread } from 'netmd-js/dist/web-encrypt-worker';
 import { Logger } from 'netmd-js/dist/logger';
-import { asyncMutex, sanitizeHalfWidthTitle, sleep } from '../utils';
+import { asyncMutex, sanitizeHalfWidthTitle, sanitizeFullWidthTitle, sleep } from '../utils';
 import { Mutex } from 'async-mutex';
 
 const Worker = require('worker-loader!netmd-js/dist/web-encrypt-worker.js'); // eslint-disable-line import/no-webpack-loader-syntax
@@ -25,8 +25,8 @@ export interface NetMDService {
     listContent(): Promise<Disc>;
     getDeviceName(): Promise<string>;
     finalize(): Promise<void>;
-    renameTrack(index: number, newTitle: string): Promise<void>;
-    renameDisc(newName: string): Promise<void>;
+    renameTrack(index: number, newTitle: string, newFullWidthTitle?: string): Promise<void>;
+    renameDisc(newName: string, newFullWidthName?: string): Promise<void>;
     deleteTrack(index: number): Promise<void>;
     moveTrack(src: number, dst: number): Promise<void>;
     wipeDisc(): Promise<void>;
@@ -34,6 +34,7 @@ export interface NetMDService {
         title: string,
         data: ArrayBuffer,
         format: Wireformat,
+        useFullWidth: boolean,
         progressCallback: (progress: { written: number; encrypted: number; total: number }) => void
     ): Promise<void>;
 
@@ -109,22 +110,46 @@ export class NetMDUSBService implements NetMDService {
     }
 
     @asyncMutex
-    async renameTrack(index: number, title: string) {
+    async renameTrack(index: number, title: string, fullWidthTitle?: string) {
         title = sanitizeHalfWidthTitle(title);
         await this.netmdInterface!.cacheTOC();
         await this.netmdInterface!.setTrackTitle(index, title);
+        if (fullWidthTitle !== undefined) {
+            await this.netmdInterface!.setTrackTitle(index, sanitizeFullWidthTitle(fullWidthTitle), true);
+        }
         await this.netmdInterface!.syncTOC();
     }
 
     @asyncMutex
-    async renameDisc(newName: string) {
+    async renameDisc(newName: string, newFullWidthName?: string) {
         // TODO: This whole function should be moved in netmd-js
         const oldName = await this.netmdInterface!.getDiscTitle();
+        const oldFullWidthName = await this.netmdInterface!.getDiscTitle(true);
         const oldRawName = await this.netmdInterface!._getDiscTitle();
+        const oldRawFullWidthName = await this.netmdInterface!._getDiscTitle(true);
         const hasGroups = oldRawName.indexOf('//') >= 0;
+        const hasFullWidthGroups = oldRawName.indexOf('／／') >= 0;
         const hasGroupsAndTitle = oldRawName.startsWith('0;');
+        const hasFullWidthGroupsAndTitle = oldRawName.startsWith('０；');
 
         newName = sanitizeHalfWidthTitle(newName);
+        newFullWidthName = newFullWidthName && sanitizeFullWidthTitle(newFullWidthName);
+
+        if(newFullWidthName !== oldFullWidthName && newFullWidthName !== undefined){
+            let newFullWidthNameWithGroups;
+            if (hasFullWidthGroups) {
+                if (hasFullWidthGroupsAndTitle) {
+                    newFullWidthNameWithGroups = oldRawFullWidthName.replace(/^０；.*?／／/, newFullWidthName !== '' ? `０；${newFullWidthName}／／` : ``);
+                } else {
+                    newFullWidthNameWithGroups = `０；${newFullWidthName}／／${oldRawFullWidthName}`; // Add the new title
+                }
+            } else {
+                newFullWidthNameWithGroups = newFullWidthName;
+            }
+            await this.netmdInterface!.cacheTOC();
+            await this.netmdInterface!.setDiscTitle(newFullWidthNameWithGroups, true);
+            await this.netmdInterface!.syncTOC();
+        }
 
         if (newName === oldName) {
             return;
@@ -167,6 +192,7 @@ export class NetMDUSBService implements NetMDService {
         title: string,
         data: ArrayBuffer,
         format: Wireformat,
+        useFullWidth: boolean,
         progressCallback: (progress: { written: number; encrypted: number; total: number }) => void
     ) {
         let total = data.byteLength;
@@ -183,8 +209,9 @@ export class NetMDUSBService implements NetMDService {
             updateProgress();
         });
 
-        title = sanitizeHalfWidthTitle(title);
-        let mdTrack = new MDTrack(title, format, data, 0x80000, webWorkerAsyncPacketIterator);
+        let halfWidthTitle = sanitizeHalfWidthTitle(title);
+        let fullWidthTitle = sanitizeFullWidthTitle(title);
+        let mdTrack = new MDTrack(halfWidthTitle, format, data, 0x80000, useFullWidth ? fullWidthTitle : '', webWorkerAsyncPacketIterator);
 
         await download(this.netmdInterface!, mdTrack, ({ writtenBytes }) => {
             written = writtenBytes;

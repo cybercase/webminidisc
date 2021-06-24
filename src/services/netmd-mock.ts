@@ -1,6 +1,6 @@
 import { Track, Channels, Encoding, Wireformat, TrackFlag, DeviceStatus } from 'netmd-js';
 import { NetMDService } from './netmd';
-import { sleep, sanitizeHalfWidthTitle, asyncMutex } from '../utils';
+import { sleep, sanitizeFullWidthTitle, sanitizeHalfWidthTitle, asyncMutex } from '../utils';
 import { assert } from 'netmd-js/dist/utils';
 import { Mutex } from 'async-mutex';
 
@@ -9,6 +9,7 @@ class NetMDMockService implements NetMDService {
     public mutex = new Mutex();
     public _tracksTitlesMaxLength = 1700;
     public _discTitle: string = 'Mock Disc';
+    public _fullWidthDiscTitle: string = '';
     public _discCapacity: number = 80 * 60 * 512;
     public _tracks: Track[] = [
         {
@@ -18,6 +19,7 @@ class NetMDMockService implements NetMDService {
             channel: Channels.stereo,
             protected: TrackFlag.unprotected,
             title: 'Long name for - Mock Track 1 - by some artist -12398729837198723',
+            fullWidthTitle: '',
         },
         {
             duration: 5 * 60 * 512,
@@ -26,6 +28,7 @@ class NetMDMockService implements NetMDService {
             channel: Channels.stereo,
             protected: TrackFlag.unprotected,
             title: 'Mock Track 2',
+            fullWidthTitle: '',
         },
         {
             duration: 5 * 60 * 512,
@@ -34,6 +37,7 @@ class NetMDMockService implements NetMDService {
             channel: Channels.stereo,
             protected: TrackFlag.unprotected,
             title: 'Mock Track 3',
+            fullWidthTitle: '',
         },
         {
             duration: 5 * 60 * 512,
@@ -42,6 +46,7 @@ class NetMDMockService implements NetMDService {
             channel: Channels.stereo,
             protected: TrackFlag.unprotected,
             title: 'Mock Track 4',
+            fullWidthTitle: '',
         },
     ];
     public _status: DeviceStatus = {
@@ -108,18 +113,22 @@ class NetMDMockService implements NetMDService {
         return `Generic MD Unit`;
     }
 
-    async finalize() {}
+    async finalize() { }
 
-    async renameTrack(index: number, newTitle: string) {
+    async renameTrack(index: number, newTitle: string, fullWidthTitle?: string) {
         newTitle = sanitizeHalfWidthTitle(newTitle);
         if (this._getTracksTitlesLength() + newTitle.length > this._tracksTitlesMaxLength) {
             throw new Error(`Track's title too long`);
         }
+        if (fullWidthTitle !== undefined){
+            this._tracks[index].fullWidthTitle = sanitizeFullWidthTitle(fullWidthTitle);
+        } 
         this._tracks[index].title = newTitle;
     }
 
-    async renameDisc(newName: string) {
-        this._discTitle = newName;
+    async renameDisc(newName: string, fullWidthName?: string) {
+        this._discTitle = sanitizeHalfWidthTitle(newName);
+        if (fullWidthName !== undefined) this._fullWidthDiscTitle = sanitizeFullWidthTitle(fullWidthName);
     }
 
     async deleteTrack(index: number) {
@@ -142,11 +151,13 @@ class NetMDMockService implements NetMDService {
         title: string,
         data: ArrayBuffer,
         format: Wireformat,
+        useFullWidth: boolean,
         progressCallback: (progress: { written: number; encrypted: number; total: number }) => void
     ) {
         progressCallback({ written: 0, encrypted: 0, total: 100 });
 
-        title = sanitizeHalfWidthTitle(title);
+        let halfWidthTitle = sanitizeHalfWidthTitle(title);
+        let fullWidthTitle = sanitizeFullWidthTitle(title);
 
         if (this._getTracksTitlesLength() + title.length > this._tracksTitlesMaxLength) {
             throw new Error(`Track's title too long`); // Simulates reject from device
@@ -160,12 +171,13 @@ class NetMDMockService implements NetMDService {
         }
 
         this._tracks.push({
-            title,
+            title: halfWidthTitle,
             duration: 5 * 60 * 512,
             encoding: Encoding.sp,
             index: this._tracks.length,
             protected: TrackFlag.unprotected,
             channel: 0,
+            fullWidthTitle: useFullWidth ? fullWidthTitle : '',
         });
 
         await sleep(1000);

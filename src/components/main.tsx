@@ -86,13 +86,13 @@ const useStyles = makeStyles(theme => ({
     toolbarHighlight:
         theme.palette.type === 'light'
             ? {
-                  color: theme.palette.secondary.main,
-                  backgroundColor: lighten(theme.palette.secondary.light, 0.85),
-              }
+                color: theme.palette.secondary.main,
+                backgroundColor: lighten(theme.palette.secondary.light, 0.85),
+            }
             : {
-                  color: theme.palette.text.primary,
-                  backgroundColor: theme.palette.secondary.dark,
-              },
+                color: theme.palette.text.primary,
+                backgroundColor: theme.palette.secondary.dark,
+            },
     headBox: {
         display: 'flex',
         justifyContent: 'space-between',
@@ -255,12 +255,15 @@ export const Main = (props: {}) => {
 
     const handleRenameDoubleClick = (event: React.MouseEvent, item: number) => {
         let selectedIndex = item;
-        let currentName = getTracks(disc!).find(track => track.index === selectedIndex)?.title ?? '';
+        let track = getTracks(disc!).find(track => track.index === selectedIndex);
+        let currentName = track?.title ?? '';
+        let currentFullWidthName = track?.fullWidthTitle ?? '';
 
         dispatch(
             batchActions([
                 renameDialogActions.setVisible(true),
                 renameDialogActions.setCurrentName(currentName),
+                renameDialogActions.setCurrentFullWidthName(currentFullWidthName),
                 renameDialogActions.setIndex(selectedIndex),
             ])
         );
@@ -372,6 +375,7 @@ export const Main = (props: {}) => {
                     </Typography>
                 ) : (
                     <Typography component="h3" variant="h6" className={classes.toolbarLabel}>
+                        {disc?.fullWidthTitle && `${disc.fullWidthTitle} / `}
                         {disc?.title || `Untitled Disc`}
                     </Typography>
                 )}
@@ -491,6 +495,7 @@ export const Main = (props: {}) => {
                                     )}
                                 </TableCell>
                                 <TableCell className={classes.titleCell} title={track.title}>
+                                    {track.fullWidthTitle ? `${track.fullWidthTitle} / ` : ``}
                                     {track.title || `No Title`}
                                 </TableCell>
                                 <TableCell align="right" className={classes.durationCell}>

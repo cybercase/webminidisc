@@ -15,6 +15,7 @@ export interface AppState {
     aboutDialogVisible: boolean;
     notifyWhenFinished: boolean;
     hasNotificationSupport: boolean;
+    fullWidthSupport: boolean;
 }
 
 export const buildInitialState = (): AppState => {
@@ -29,6 +30,7 @@ export const buildInitialState = (): AppState => {
         aboutDialogVisible: false,
         notifyWhenFinished: loadPreference('notifyWhenFinished', false),
         hasNotificationSupport: true,
+        fullWidthSupport: loadPreference('fullWidthSupport', false),
     };
 };
 
@@ -71,6 +73,10 @@ export const slice = createSlice({
         },
         showAboutDialog: (state, action: PayloadAction<boolean>) => {
             state.aboutDialogVisible = action.payload;
+        },
+        setFullWidthSupport: (state, action: PayloadAction<boolean>) => {
+            state.fullWidthSupport = action.payload;
+            savePreference('fullWidthSupport', state.fullWidthSupport);
         },
     },
 });
