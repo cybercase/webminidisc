@@ -32,9 +32,9 @@ export interface NetMDService {
     wipeDisc(): Promise<void>;
     upload(
         title: string,
+        fullWidthTitle: string,
         data: ArrayBuffer,
         format: Wireformat,
-        useFullWidth: boolean,
         progressCallback: (progress: { written: number; encrypted: number; total: number }) => void
     ): Promise<void>;
 
@@ -190,9 +190,9 @@ export class NetMDUSBService implements NetMDService {
 
     async upload(
         title: string,
+        fullWidthTitle: string,
         data: ArrayBuffer,
         format: Wireformat,
-        useFullWidth: boolean,
         progressCallback: (progress: { written: number; encrypted: number; total: number }) => void
     ) {
         let total = data.byteLength;
@@ -210,8 +210,8 @@ export class NetMDUSBService implements NetMDService {
         });
 
         let halfWidthTitle = sanitizeHalfWidthTitle(title);
-        let fullWidthTitle = sanitizeFullWidthTitle(title);
-        let mdTrack = new MDTrack(halfWidthTitle, format, data, 0x80000, useFullWidth ? fullWidthTitle : '', webWorkerAsyncPacketIterator);
+        fullWidthTitle = sanitizeFullWidthTitle(fullWidthTitle);
+        let mdTrack = new MDTrack(halfWidthTitle, format, data, 0x80000, fullWidthTitle, webWorkerAsyncPacketIterator);
 
         await download(this.netmdInterface!, mdTrack, ({ writtenBytes }) => {
             written = writtenBytes;

@@ -9,7 +9,7 @@ import { actions as mainActions } from './main-feature';
 import serviceRegistry from '../services/registry';
 import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
-import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep, askNotificationPermission } from '../utils';
+import { getAvailableCharsForTitle, framesToSec, sleepWithProgressCallback, sleep, askNotificationPermission } from '../utils';
 import * as mm from 'music-metadata-browser';
 import { TitleFormatType, UploadFormat } from './convert-dialog-feature';
 import NotificationCompleteIconUrl from '../images/record-complete-notification-icon.png';
@@ -391,11 +391,7 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
 
         let disc = getState().main.disc;
         let useFullWidth = getState().appState.fullWidthSupport;
-        let tracks = disc && getTracks(disc);
-        let maxTitleLength = tracks ? getAvailableCharsForTrackTitle(tracks.map(track => track.title || ``)) : -1;
-        let maxFullWidthTitleLength = tracks ? getAvailableCharsForTrackTitle(tracks.map(track => track.fullWidthTitle || ``)) : -1;
-        maxTitleLength = Math.floor(maxTitleLength / files.length);
-        maxFullWidthTitleLength = Math.floor(maxFullWidthTitleLength / files.length);
+        let availableCharacters = getAvailableCharsForTitle(disc!);
 
         let error: any;
         let errorMessage = ``;
@@ -414,16 +410,22 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
                 console.error(err);
             }
 
-            if (maxTitleLength > -1) {
-                title = title.substring(0, useFullWidth ? Math.min(maxTitleLength, maxFullWidthTitleLength) : maxTitleLength);
+            const fixLength = (l: number) => Math.ceil(l/7) * 7;
+            let halfWidthTitle = title.substr(0, Math.min(title.length, availableCharacters));
+            availableCharacters -= fixLength(halfWidthTitle.length);
+
+            let fullWidthTitle = '';
+            if(useFullWidth){
+                fullWidthTitle = title.substr(0, Math.min(title.length * 2, availableCharacters, 210 /* limit is 105 */) / 2);
+                availableCharacters -= fixLength(fullWidthTitle.length * 2);
             }
 
             trackUpdate.current = i++;
-            trackUpdate.titleCurrent = title;
+            trackUpdate.titleCurrent = halfWidthTitle;
             updateTrack();
             updateProgressCallback({ written: 0, encrypted: 0, total: 100 });
             try {
-                await netmdService?.upload(title, data, wireformat, useFullWidth, updateProgressCallback);
+                await netmdService?.upload(halfWidthTitle, fullWidthTitle, data, wireformat, updateProgressCallback);
             } catch (err) {
                 error = err;
                 errorMessage = `${file.name}: Error uploading to device. There might not be enough space left.`;

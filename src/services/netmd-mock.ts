@@ -149,15 +149,15 @@ class NetMDMockService implements NetMDService {
 
     async upload(
         title: string,
+        fullWidthTitle: string,
         data: ArrayBuffer,
         format: Wireformat,
-        useFullWidth: boolean,
         progressCallback: (progress: { written: number; encrypted: number; total: number }) => void
     ) {
         progressCallback({ written: 0, encrypted: 0, total: 100 });
 
         let halfWidthTitle = sanitizeHalfWidthTitle(title);
-        let fullWidthTitle = sanitizeFullWidthTitle(title);
+        fullWidthTitle = sanitizeFullWidthTitle(fullWidthTitle);
 
         if (this._getTracksTitlesLength() + title.length > this._tracksTitlesMaxLength) {
             throw new Error(`Track's title too long`); // Simulates reject from device
@@ -177,7 +177,7 @@ class NetMDMockService implements NetMDService {
             index: this._tracks.length,
             protected: TrackFlag.unprotected,
             channel: 0,
-            fullWidthTitle: useFullWidth ? fullWidthTitle : '',
+            fullWidthTitle: fullWidthTitle,
         });
 
         await sleep(1000);
