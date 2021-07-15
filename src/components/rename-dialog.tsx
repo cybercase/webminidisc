@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useShallowEqualSelector } from '../utils';
 import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
-import { renameTrack, renameDisc } from '../redux/actions';
+import { renameTrack, renameDisc, renameGroup } from '../redux/actions';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -37,36 +37,50 @@ export const RenameDialog = (props: {}) => {
     let renameDialogTitle = useShallowEqualSelector(state => state.renameDialog.title);
     let renameDialogFullWidthTitle = useShallowEqualSelector(state => state.renameDialog.fullWidthTitle);
     let renameDialogIndex = useShallowEqualSelector(state => state.renameDialog.index);
+    let renameDialogGroupIndex = useShallowEqualSelector(state => state.renameDialog.groupIndex);
     let allowFullWidth = useShallowEqualSelector(state => state.appState.fullWidthSupport);
 
-    const what = renameDialogIndex < 0 ? `Disc` : `Track`;
+    const what = renameDialogGroupIndex !== null ? `Group` : renameDialogIndex < 0 ? `Disc` : `Track`;
 
     const handleCancelRename = () => {
         dispatch(renameDialogActions.setVisible(false));
     };
 
     const handleDoRename = () => {
-        if (renameDialogIndex < 0) {
-            dispatch(renameDisc({
-                newName: renameDialogTitle,
-                newFullWidthName: renameDialogFullWidthTitle,
-            }));
+        if (renameDialogGroupIndex !== null) {
+            // Just rename the group with this range
+            dispatch(
+                renameGroup({
+                    newName: renameDialogTitle,
+                    newFullWidthName: renameDialogFullWidthTitle,
+                    groupIndex: renameDialogGroupIndex,
+                })
+            );
+        } else if (renameDialogIndex < 0) {
+            dispatch(
+                renameDisc({
+                    newName: renameDialogTitle,
+                    newFullWidthName: renameDialogFullWidthTitle,
+                })
+            );
         } else {
-            dispatch(renameTrack({
-                index: renameDialogIndex,
-                newName: renameDialogTitle,
-                newFullWidthName: renameDialogFullWidthTitle,
-            }));
+            dispatch(
+                renameTrack({
+                    index: renameDialogIndex,
+                    newName: renameDialogTitle,
+                    newFullWidthName: renameDialogFullWidthTitle,
+                })
+            );
         }
-        handleCancelRename(); //Close the dialog
+        handleCancelRename(); // Close the dialog
     };
 
     const handleChange = useCallback(
         (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-            if (event.target.id === "name") {
+            if (event.target.id === 'name') {
                 dispatch(renameDialogActions.setCurrentName(event.target.value.substring(0, 120))); // MAX title length
             } else {
-                dispatch(renameDialogActions.setCurrentFullWidthName(event.target.value.substring(0, 64)));
+                dispatch(renameDialogActions.setCurrentFullWidthName(event.target.value.substring(0, 105)));
             }
         },
         [dispatch]
@@ -122,8 +136,7 @@ export const RenameDialog = (props: {}) => {
                         }}
                         onChange={handleChange}
                     />
-                )
-                }
+                )}
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleCancelRename}>Cancel</Button>

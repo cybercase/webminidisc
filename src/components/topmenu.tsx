@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export const TopMenu = function (props: { onClick?: () => void }) {
+export const TopMenu = function(props: { onClick?: () => void }) {
     const classes = useStyles();
     const dispatch = useDispatch();
 
@@ -91,6 +91,7 @@ export const TopMenu = function (props: { onClick?: () => void }) {
             batchActions([
                 renameDialogActions.setVisible(true),
                 renameDialogActions.setCurrentName(discTitle),
+                renameDialogActions.setGroupIndex(null),
                 renameDialogActions.setCurrentFullWidthName(fullWidthDiscTitle),
                 renameDialogActions.setIndex(-1),
             ])
@@ -164,7 +165,15 @@ export const TopMenu = function (props: { onClick?: () => void }) {
                     {fullWidthSupport ? <ToggleOnIcon fontSize="small" /> : <ToggleOffIcon fontSize="small" />}
                 </ListItemIcon>
                 <ListItemText>
-                    Allow <Tooltip title="Minidiscs have 2 slots for titles - the default half-width one used for standard alphabet and half-width katakana, and full-width for hiragana and kanji." arrow><span className={classes.toolTippedText}>Full-Width</span></Tooltip> Title Editing</ListItemText>
+                    {`Allow `}
+                    <Tooltip
+                        title="Minidiscs have 2 slots for titles - the default half-width one used for standard alphabet and half-width katakana, and full-width for hiragana and kanji."
+                        arrow
+                    >
+                        <span className={classes.toolTippedText}>Full-Width</span>
+                    </Tooltip>
+                    {`Title Editing`}
+                </ListItemText>
             </MenuItem>
         );
         menuItems.push(
