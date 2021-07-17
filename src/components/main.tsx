@@ -358,6 +358,7 @@ export const Main = (props: {}) => {
     };
 
     const handleRenameActionClick = (event: React.MouseEvent) => {
+        if(event.detail !== 1) return; //Event retriggering when hitting enter in the dialog
         handleRenameDoubleClick(event, selected[0]);
     };
 
