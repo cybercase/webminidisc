@@ -165,14 +165,14 @@ export const TopMenu = function(props: { onClick?: () => void }) {
                     {fullWidthSupport ? <ToggleOnIcon fontSize="small" /> : <ToggleOffIcon fontSize="small" />}
                 </ListItemIcon>
                 <ListItemText>
-                    {`Allow `}
+                    {fullWidthSupport ? `Disable ` : `Enable `}
                     <Tooltip
                         title="Minidiscs have 2 slots for titles - the default half-width one used for standard alphabet and half-width katakana, and full-width for hiragana and kanji."
                         arrow
                     >
                         <span className={classes.toolTippedText}>Full-Width</span>
                     </Tooltip>
-                    {`Title Editing`}
+                    {` Title Editing`}
                 </ListItemText>
             </MenuItem>
         );
