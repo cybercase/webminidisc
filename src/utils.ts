@@ -60,14 +60,15 @@ export function getAvailableCharsForTitle(disc: Disc, includeGroups?: boolean) {
 
     // Assume worst-case scenario
     let fwTitle = disc.fullWidthTitle + `0;//`;
-    let hwTitle = disc.title +  `0;//`;
-    if(includeGroups || includeGroups === undefined)
-    for(let group of groups) {
-        let range = `${group.tracks[0].index+1}${group.tracks.length - 1 !== 0 && (`-${group.tracks[group.tracks.length - 1].index+1}`)}//`
-        // The order of these characters doesn't matter. It's for length only
-        fwTitle += group.fullWidthTitle + range;
-        hwTitle += group.title + range;
-    }
+    let hwTitle = disc.title + `0;//`;
+    if (includeGroups || includeGroups === undefined)
+        for (let group of groups) {
+            let range = `${group.tracks[0].index + 1}${group.tracks.length - 1 !== 0 &&
+                `-${group.tracks[group.tracks.length - 1].index + 1}`}//`;
+            // The order of these characters doesn't matter. It's for length only
+            fwTitle += group.fullWidthTitle + range;
+            hwTitle += group.title + range;
+        }
 
     let usedCells = 0;
     usedCells += fixLength(fwTitle.length * 2);
@@ -87,10 +88,17 @@ export function sanitizeTitle(title: string) {
     return title.normalize('NFD').replace(/[^\x00-\x7F]/g, '');
 }
 
-export function getHalfWidthTitleLength(title: string) {// Some characters are written as 2 bytes
+export function getHalfWidthTitleLength(title: string) {
+    // Some characters are written as 2 bytes
     // prettier-ignore
     const multiByteChars: { [key: string]: number } = { "ガ": 1, "ギ": 1, "グ": 1, "ゲ": 1, "ゴ": 1, "ザ": 1, "ジ": 1, "ズ": 1, "ゼ": 1, "ゾ": 1, "ダ": 1, "ヂ": 1, "ヅ": 1, "デ": 1, "ド": 1, "バ": 1, "パ": 1, "ビ": 1, "ピ": 1, "ブ": 1, "プ": 1, "ベ": 1, "ペ": 1, "ボ": 1, "ポ": 1, "ヮ": 1, "ヰ": 1, "ヱ": 1, "ヵ": 1, "ヶ": 1, "ヴ": 1, "ヽ": 1, "ヾ": 1, "が": 1, "ぎ": 1, "ぐ": 1, "げ": 1, "ご": 1, "ざ": 1, "じ": 1, "ず": 1, "ぜ": 1, "ぞ": 1, "だ": 1, "ぢ": 1, "づ": 1, "で": 1, "ど": 1, "ば": 1, "ぱ": 1, "び": 1, "ぴ": 1, "ぶ": 1, "ぷ": 1, "べ": 1, "ぺ": 1, "ぼ": 1, "ぽ": 1, "ゎ": 1, "ゐ": 1, "ゑ": 1, "ゕ": 1, "ゖ": 1, "ゔ": 1, "ゝ": 1, "ゞ": 1 };
-    return title.length + title.split('').map(n => multiByteChars[n] ?? 0).reduce((a, b) => a + b, 0);
+    return (
+        title.length +
+        title
+            .split('')
+            .map(n => multiByteChars[n] ?? 0)
+            .reduce((a, b) => a + b, 0)
+    );
 }
 
 export function sanitizeHalfWidthTitle(title: string) {
@@ -139,7 +147,7 @@ export type DisplayTrack = {
     fullWidthTitle: string;
     group: string | null;
     duration: string;
-    encoding: string
+    encoding: string;
 };
 
 export function getSortedTracks(disc: Disc | null) {
@@ -247,17 +255,19 @@ export function recomputeGroupsAfterTrackMove(disc: Disc, trackIndex: number, ta
         }
     }
 
-    if(!anyChanges) return disc;
+    if (!anyChanges) return disc;
 
     let newDisc: Disc = { ...disc };
 
     // Convert back
-    newDisc.groups = groupBoundaries.map(n => ({
-        title: n.name,
-        fullWidthTitle: n.fullWidthName,
-        index: n.start,
-        tracks: allTracks.slice(n.start, n.end + 1),
-    })).filter(n => n.tracks.length > 0);
+    newDisc.groups = groupBoundaries
+        .map(n => ({
+            title: n.name,
+            fullWidthTitle: n.fullWidthName,
+            index: n.start,
+            tracks: allTracks.slice(n.start, n.end + 1),
+        }))
+        .filter(n => n.tracks.length > 0);
 
     // Convert ungrouped tracks
     let allGrouped = newDisc.groups.map(n => n.tracks).reduce((a, b) => a.concat(b), []);
@@ -276,16 +286,22 @@ export function recomputeGroupsAfterTrackMove(disc: Disc, trackIndex: number, ta
 }
 
 export function compileDiscTitles(disc: Disc) {
-    let availableCharactersForTitle = getAvailableCharsForTitle({
-        ...disc,
-        title: '',
-        fullWidthTitle: '',
-    }, false);
+    let availableCharactersForTitle = getAvailableCharsForTitle(
+        {
+            ...disc,
+            title: '',
+            fullWidthTitle: '',
+        },
+        false
+    );
     // If the disc or any of the groups, or any track has a full-width title, provide support for them
     const useFullWidth =
         disc.fullWidthTitle ||
         disc.groups.filter(n => !!n.fullWidthTitle).length > 0 ||
-        disc.groups.map(n => n.tracks).reduce((a, b) => a.concat(b), []).filter(n => !!n.fullWidthTitle).length > 0;
+        disc.groups
+            .map(n => n.tracks)
+            .reduce((a, b) => a.concat(b), [])
+            .filter(n => !!n.fullWidthTitle).length > 0;
 
     const fixLength = (l: number) => Math.ceil(l / 7) * 7;
 
@@ -304,20 +320,19 @@ export function compileDiscTitles(disc: Disc) {
         let newRawTitleAfterGroup = newRawTitle + `${range};${n.title}//`,
             newRawFullWidthTitleAfterGroup = newRawFullWidthTitle + halfWidthToFullWidthRange(range) + `；${n.fullWidthTitle ?? ''}／／`;
 
-
         let titlesLengthInTOC = fixLength(getHalfWidthTitleLength(newRawTitleAfterGroup));
 
-        if(useFullWidth) titlesLengthInTOC += fixLength(newRawFullWidthTitleAfterGroup.length * 2)
+        if (useFullWidth) titlesLengthInTOC += fixLength(newRawFullWidthTitleAfterGroup.length * 2);
 
-        if(availableCharactersForTitle - titlesLengthInTOC < 0) break;
+        if (availableCharactersForTitle - titlesLengthInTOC < 0) break;
 
         newRawTitle = newRawTitleAfterGroup;
         newRawFullWidthTitle = newRawFullWidthTitleAfterGroup;
     }
 
     let titlesLengthInTOC = fixLength(getHalfWidthTitleLength(newRawTitle));
-    if(useFullWidth) titlesLengthInTOC += fixLength(newRawFullWidthTitle.length * 2); // If this check fails the titles without the groups already take too much space, don't change anything
-    if(availableCharactersForTitle - titlesLengthInTOC < 0) {
+    if (useFullWidth) titlesLengthInTOC += fixLength(newRawFullWidthTitle.length * 2); // If this check fails the titles without the groups already take too much space, don't change anything
+    if (availableCharactersForTitle - titlesLengthInTOC < 0) {
         return null;
     }
 
