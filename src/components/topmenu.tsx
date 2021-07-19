@@ -167,12 +167,11 @@ export const TopMenu = function(props: { onClick?: () => void }) {
                 <ListItemText>
                     {fullWidthSupport ? `Disable ` : `Enable `}
                     <Tooltip
-                        title="Minidiscs have 2 slots for titles - the default half-width one used for standard alphabet and half-width katakana, and full-width for hiragana and kanji."
+                        title="This advanced feature enables the use of Hiragana and Kanji alphabets. More about this in Support and FAQ."
                         arrow
                     >
-                        <span className={classes.toolTippedText}>Full-Width</span>
+                        <span className={classes.toolTippedText}>Full-Width Title Editing</span>
                     </Tooltip>
-                    {` Title Editing`}
                 </ListItemText>
             </MenuItem>
         );
