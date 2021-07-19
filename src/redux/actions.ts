@@ -220,7 +220,7 @@ export function listContent() {
         try {
             disc = await serviceRegistry.netmdService!.listContent();
         } catch (err) {
-            if (window.confirm("Warning: This disc's title data seems to be corrupted.\nDo you wish to erase it?")) {
+            if (window.confirm("This disc's title seems to be corrupted, do you wish to erase it?\nNone of the tracks will be deleted.")) {
                 await serviceRegistry.netmdService!.wipeDiscTitleInfo();
                 disc = await serviceRegistry.netmdService!.listContent();
             } else throw err;
