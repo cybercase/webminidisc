@@ -139,9 +139,9 @@ export function dragDropTrack(sourceList: number, sourceIndex: number, targetLis
             if (targetIndex === 0) {
                 let prevList = groupedTracks[targetList - 1];
                 let i = 2;
-                while(prevList && prevList.tracks.length === 0){
+                while (prevList && prevList.tracks.length === 0) {
                     // Skip past all the empty lists
-                    prevList = groupedTracks[targetList - (i++)];
+                    prevList = groupedTracks[targetList - i++];
                 }
                 if (prevList) {
                     // If there's a previous list, make this tracks's index previous list's last item's index + 1
@@ -164,7 +164,7 @@ export function dragDropTrack(sourceList: number, sourceIndex: number, targetLis
         // Recompile the groups and update them on the player
         let normalGroups = [];
         for (let group of groupedTracks) {
-            if(group.tracks.length === 0) continue;
+            if (group.tracks.length === 0) continue;
             if (group.index === -1) ungrouped.push(...group.tracks);
             else normalGroups.push(group);
         }
@@ -217,10 +217,10 @@ export function listContent() {
         // Issue loading
         dispatch(appStateActions.setLoading(true));
         let disc;
-        try{
+        try {
             disc = await serviceRegistry.netmdService!.listContent();
-        }catch(err){
-            if(window.confirm("Warning: This disc's title data seems to be corrupted.\nDo you wish to erase it?")) {
+        } catch (err) {
+            if (window.confirm("Warning: This disc's title data seems to be corrupted.\nDo you wish to erase it?")) {
                 await serviceRegistry.netmdService!.wipeDiscTitleInfo();
                 disc = await serviceRegistry.netmdService!.listContent();
             } else throw err;
