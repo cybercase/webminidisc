@@ -24,7 +24,7 @@
     "jconv": "^0.1.5",
     "lint-staged": "^10.5.3",
     "music-metadata-browser": "^2.2.0",
-    "netmd-js": "^1.4.0",
+    "netmd-js": "^2.0.1",
     "prettier": "^1.19.1",
     "react": "^16.14.0",
     "react-beautiful-dnd": "^13.1.0",
