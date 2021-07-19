@@ -77,11 +77,14 @@ export const RenameDialog = (props: {}) => {
 
     const handleChange = useCallback(
         (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-            if (event.target.id === 'name') {
-                dispatch(renameDialogActions.setCurrentName(event.target.value.substring(0, 120))); // MAX title length
-            } else {
-                dispatch(renameDialogActions.setCurrentFullWidthName(event.target.value.substring(0, 105)));
-            }
+            dispatch(renameDialogActions.setCurrentName(event.target.value.substring(0, 120))); // MAX title length
+        },
+        [dispatch]
+    );
+
+    const handleFullWidthChange = useCallback(
+        (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+            dispatch(renameDialogActions.setCurrentFullWidthName(event.target.value.substring(0, 105)));
         },
         [dispatch]
     );
@@ -134,7 +137,7 @@ export const RenameDialog = (props: {}) => {
                         onKeyDown={event => {
                             event.key === `Enter` && handleDoRename();
                         }}
-                        onChange={handleChange}
+                        onChange={handleFullWidthChange}
                     />
                 )}
             </DialogContent>
