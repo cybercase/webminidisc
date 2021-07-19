@@ -12,14 +12,7 @@ import {
     DroppableProvided,
     DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
-import {
-    listContent,
-    deleteTracks,
-    moveTrack,
-    groupTracks,
-    deleteGroup,
-    dragDropTrack,
-} from '../redux/actions';
+import { listContent, deleteTracks, moveTrack, groupTracks, deleteGroup, dragDropTrack } from '../redux/actions';
 import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
 import { actions as convertDialogActions } from '../redux/convert-dialog-feature';
 import { actions as dumpDialogActions } from '../redux/dump-dialog-feature';
@@ -307,18 +300,18 @@ export const Main = (props: {}) => {
 
     // Action Handlers
     const handleSelectClick = (event: React.MouseEvent, item: number) => {
-        if(event.shiftKey && selected.length && lastClicked !== -1){
-            let rangeBegin = Math.min(lastClicked+1, item),
-                rangeEnd = Math.max(lastClicked-1, item);
+        if (event.shiftKey && selected.length && lastClicked !== -1) {
+            let rangeBegin = Math.min(lastClicked + 1, item),
+                rangeEnd = Math.max(lastClicked - 1, item);
             let copy = [...selected];
-            for(let i = rangeBegin; i<=rangeEnd; i++){
+            for (let i = rangeBegin; i <= rangeEnd; i++) {
                 let index = copy.indexOf(i);
-                if(index === -1) copy.push(i);
+                if (index === -1) copy.push(i);
                 else copy.splice(index, 1);
             }
-            if(!copy.includes(item)) copy.push(item);
+            if (!copy.includes(item)) copy.push(item);
             setSelected(copy);
-        }else if (selected.includes(item)) {
+        } else if (selected.includes(item)) {
             setSelected(selected.filter(i => i !== item));
         } else {
             setSelected([...selected, item]);
@@ -585,9 +578,7 @@ export const Main = (props: {}) => {
                             <TableCell align="right">Duration</TableCell>
                         </TableRow>
                     </TableHead>
-                    <DragDropContext
-                        onDragEnd={handleDrop}
-                    >
+                    <DragDropContext onDragEnd={handleDrop}>
                         <TableBody>
                             {groupedTracks.map((group, index) => (
                                 <TableRow key={`${index}`}>
@@ -598,7 +589,7 @@ export const Main = (props: {}) => {
                                                     <TableBody
                                                         {...provided.droppableProps}
                                                         ref={provided.innerRef}
-                                                        className={clsx({[classes.hoveringOverGroup]: snapshot.isDraggingOver})}
+                                                        className={clsx({ [classes.hoveringOverGroup]: snapshot.isDraggingOver })}
                                                     >
                                                         {group.title !== null && (
                                                             <TableRow
@@ -635,7 +626,9 @@ export const Main = (props: {}) => {
                                                                 </TableCell>
                                                             </TableRow>
                                                         )}
-                                                        {group.title === null && group.tracks.length === 0 && <TableRow style={{height: '1px'}}/>}
+                                                        {group.title === null && group.tracks.length === 0 && (
+                                                            <TableRow style={{ height: '1px' }} />
+                                                        )}
                                                         {group.tracks.map(n => (
                                                             <Draggable
                                                                 draggableId={`${group.index}-${n.index}`}
