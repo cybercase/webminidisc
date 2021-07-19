@@ -198,17 +198,6 @@ export function getGroupedTracks(disc: Disc | null) {
     return groupedList;
 }
 
-export function reverseTimeFormat(time: string) {
-    if (time.includes('+')) time = time.substring(0, time.indexOf('+')); // Remove frame numbers
-    const segments = time.split(':');
-    let seconds = 0;
-    for (let seg of segments) {
-        seconds *= 60;
-        seconds += parseInt(seg);
-    }
-    return seconds;
-}
-
 export function recomputeGroupsAfterTrackMove(disc: Disc, trackIndex: number, targetIndex: number) {
     // Used for moving tracks in netmd-mock and deleting
     let offset = trackIndex > targetIndex ? 1 : -1;
