@@ -92,10 +92,10 @@ export class NetMDUSBService implements NetMDService {
         await this.netmdInterface!.setDiscTitle(sanitizeHalfWidthTitle(titleObject.newRawTitle));
         await this.netmdInterface!.setDiscTitle(sanitizeFullWidthTitle(titleObject.newRawFullWidthTitle), true);
         await this.netmdInterface!.syncTOC();
-        this._dropCache();
+        this.dropCachedContentList();
     }
 
-    async _listContent() {
+    async listContentUsingCache() {
         // listContent takes a long time to execute (>3000ms), so I think caching it should speed up the app
         if (!this.cachedContentList) {
             console.log("There's no cached version of the TOC, caching");
@@ -106,13 +106,13 @@ export class NetMDUSBService implements NetMDService {
         return JSON.parse(JSON.stringify(this.cachedContentList)) as Disc;
     }
 
-    _dropCache() {
+    dropCachedContentList() {
         console.log('Cached TOC Dropped');
         this.cachedContentList = undefined;
     }
 
     async pair() {
-        this._dropCache();
+        this.dropCachedContentList();
         let iface = await openNewDevice(navigator.usb, this.logger);
         if (iface === null) {
             return false;
@@ -122,7 +122,7 @@ export class NetMDUSBService implements NetMDService {
     }
 
     async connect() {
-        this._dropCache();
+        this.dropCachedContentList();
         let iface = await openPairedDevice(navigator.usb, this.logger);
         if (iface === null) {
             return false;
@@ -133,8 +133,8 @@ export class NetMDUSBService implements NetMDService {
 
     @asyncMutex
     async listContent() {
-        this._dropCache();
-        return await this._listContent();
+        this.dropCachedContentList();
+        return await this.listContentUsingCache();
     }
 
     @asyncMutex
@@ -150,12 +150,12 @@ export class NetMDUSBService implements NetMDService {
     @asyncMutex
     async finalize() {
         await this.netmdInterface!.netMd.finalize();
-        this._dropCache();
+        this.dropCachedContentList();
     }
 
     @asyncMutex
     async rewriteGroups(groups: Group[]) {
-        const disc = await this._listContent();
+        const disc = await this.listContentUsingCache();
         disc.groups = groups;
         await this._rewriteRawTitles(compileDiscTitles(disc));
     }
@@ -169,12 +169,12 @@ export class NetMDUSBService implements NetMDService {
             await this.netmdInterface!.setTrackTitle(index, sanitizeFullWidthTitle(fullWidthTitle), true);
         }
         await this.netmdInterface!.syncTOC();
-        this._dropCache();
+        this.dropCachedContentList();
     }
 
     @asyncMutex
     async renameGroup(groupBegin: number, newName: string, newFullWidthName?: string) {
-        const disc = await this._listContent();
+        const disc = await this.listContentUsingCache();
         let thisGroup = disc.groups.find(n => n.tracks[0].index === groupBegin);
         if (!thisGroup) return;
 
@@ -185,7 +185,7 @@ export class NetMDUSBService implements NetMDService {
 
     @asyncMutex
     async addGroup(groupBegin: number, groupLength: number, title: string) {
-        const disc = await this._listContent();
+        const disc = await this.listContentUsingCache();
         let ungrouped = disc.groups.find(n => n.title === null);
         if (!ungrouped) return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
         let ungroupedLengthBeforeGroup = ungrouped.tracks.length;
@@ -211,7 +211,7 @@ export class NetMDUSBService implements NetMDService {
 
     @asyncMutex
     async deleteGroup(groupBegin: number) {
-        const disc = await this._listContent();
+        const disc = await this.listContentUsingCache();
 
         let thisGroup = disc.groups.find(n => n.tracks[0].index === groupBegin);
         if (thisGroup) disc.groups.splice(disc.groups.indexOf(thisGroup), 1);
@@ -251,7 +251,7 @@ export class NetMDUSBService implements NetMDService {
             await this.netmdInterface!.cacheTOC();
             await this.netmdInterface!.setDiscTitle(newFullWidthNameWithGroups, true);
             await this.netmdInterface!.syncTOC();
-            this._dropCache();
+            this.dropCachedContentList();
         }
 
         if (newName === oldName) {
@@ -273,27 +273,27 @@ export class NetMDUSBService implements NetMDService {
         await this.netmdInterface!.cacheTOC();
         await this.netmdInterface!.setDiscTitle(newNameWithGroups);
         await this.netmdInterface!.syncTOC();
-        this._dropCache();
+        this.dropCachedContentList();
     }
 
     @asyncMutex
     async deleteTracks(indexes: number[]) {
         indexes = indexes.sort();
         indexes.reverse();
-        let content = await this._listContent();
+        let content = await this.listContentUsingCache();
         for (let index of indexes) {
             content = recomputeGroupsAfterTrackMove(content, index, -1);
             await this.netmdInterface!.eraseTrack(index);
             await sleep(100);
         }
         await this._rewriteRawTitles(compileDiscTitles(content));
-        this._dropCache();
+        this.dropCachedContentList();
     }
 
     @asyncMutex
     async wipeDisc() {
         await this.netmdInterface!.eraseDisc();
-        this._dropCache();
+        this.dropCachedContentList();
     }
 
     @asyncMutex
@@ -309,9 +309,9 @@ export class NetMDUSBService implements NetMDService {
         await this.netmdInterface!.moveTrack(src, dst);
 
         if (updateGroups === undefined || updateGroups) {
-            await this._rewriteRawTitles(compileDiscTitles(recomputeGroupsAfterTrackMove(await this._listContent(), src, dst)));
+            await this._rewriteRawTitles(compileDiscTitles(recomputeGroupsAfterTrackMove(await this.listContentUsingCache(), src, dst)));
         }
-        this._dropCache();
+        this.dropCachedContentList();
     }
 
     async upload(
@@ -345,7 +345,7 @@ export class NetMDUSBService implements NetMDService {
         });
 
         w.terminate();
-        this._dropCache();
+        this.dropCachedContentList();
     }
 
     @asyncMutex
