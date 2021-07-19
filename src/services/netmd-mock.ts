@@ -135,13 +135,13 @@ class NetMDMockService implements NetMDService {
 
     async addGroup(groupBegin: number, groupLength: number, newName: string) {
         let ungrouped = this._groups.find(n => n.title === null);
-        if(!ungrouped) return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
+        if (!ungrouped) return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
         let ungroupedLengthBeforeGroup = ungrouped.tracks.length;
 
         let thisGroupTracks = ungrouped.tracks.filter(n => n.index >= groupBegin && n.index < groupBegin + groupLength);
         ungrouped.tracks = ungrouped.tracks.filter(n => !thisGroupTracks.includes(n));
 
-        if(ungroupedLengthBeforeGroup - ungrouped.tracks.length !== groupLength){
+        if (ungroupedLengthBeforeGroup - ungrouped.tracks.length !== groupLength) {
             throw new Error('A track cannot be in 2 groups!');
         }
 
@@ -160,12 +160,12 @@ class NetMDMockService implements NetMDService {
         const thisGroup = this._groups.slice(1).find(n => n.tracks[0].index === groupBegin);
         if (!thisGroup) return;
         let ungroupedGroup = this._groups.find(n => n.title === null);
-        if(!ungroupedGroup){
+        if (!ungroupedGroup) {
             ungroupedGroup = {
                 title: null,
                 fullWidthTitle: null,
                 tracks: [],
-                index: 0
+                index: 0,
             };
             this._groups.unshift(ungroupedGroup);
         }
@@ -207,10 +207,10 @@ class NetMDMockService implements NetMDService {
         debugger;
         indexes = indexes.sort();
         indexes.reverse();
-        for(let index of indexes){
+        for (let index of indexes) {
             this._groups = recomputeGroupsAfterTrackMove(this._getDisc(), index, -1).groups;
             this._tracks.splice(index, 1);
-            this._groups.forEach(n => n.tracks = n.tracks.filter(n => this._tracks.includes(n)));
+            this._groups.forEach(n => (n.tracks = n.tracks.filter(n => this._tracks.includes(n))));
         }
         this._updateTrackIndexes();
     }
@@ -228,14 +228,16 @@ class NetMDMockService implements NetMDService {
     }
 
     async wipeDiscTitleInfo() {
-        this._groups = [{
-            index: 0,
-            title: null,
-            fullWidthTitle: null,
-            tracks: this._tracks
-        }];
-        this._discTitle = "";
-        this._fullWidthDiscTitle = "";
+        this._groups = [
+            {
+                index: 0,
+                title: null,
+                fullWidthTitle: null,
+                tracks: this._tracks,
+            },
+        ];
+        this._discTitle = '';
+        this._fullWidthDiscTitle = '';
     }
 
     async upload(
