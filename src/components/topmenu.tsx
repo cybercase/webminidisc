@@ -5,6 +5,7 @@ import { batchActions } from 'redux-batched-actions';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import Divider from '@material-ui/core/Divider';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import { wipeDisc, listContent } from '../redux/actions';
@@ -160,6 +161,17 @@ export const TopMenu = function(props: { onClick?: () => void }) {
             </MenuItem>
         );
         menuItems.push(
+            <MenuItem key="exit" onClick={handleExit}>
+                <ListItemIcon className={classes.listItemIcon}>
+                    <ExitToAppIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Exit</ListItemText>
+            </MenuItem>
+        );
+    }
+    if (mainView === 'MAIN') {
+        menuItems.push(<Divider />);
+        menuItems.push(
             <MenuItem key="allowFullWidth" onClick={handleAllowFullWidth}>
                 <ListItemIcon className={classes.listItemIcon}>
                     {fullWidthSupport ? <ToggleOnIcon fontSize="small" /> : <ToggleOffIcon fontSize="small" />}
@@ -173,14 +185,6 @@ export const TopMenu = function(props: { onClick?: () => void }) {
                         <span className={classes.toolTippedText}>Full-Width Title Editing</span>
                     </Tooltip>
                 </ListItemText>
-            </MenuItem>
-        );
-        menuItems.push(
-            <MenuItem key="exit" onClick={handleExit}>
-                <ListItemIcon className={classes.listItemIcon}>
-                    <ExitToAppIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Exit</ListItemText>
             </MenuItem>
         );
     }
@@ -202,6 +206,9 @@ export const TopMenu = function(props: { onClick?: () => void }) {
                 <ListItemText>Retro Mode (beta)</ListItemText>
             </MenuItem>
         );
+    }
+    if (mainView === 'MAIN') {
+        menuItems.push(<Divider />);
     }
     menuItems.push(
         <MenuItem key="about" onClick={handleShowAbout}>
