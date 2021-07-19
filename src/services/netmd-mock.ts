@@ -204,7 +204,6 @@ class NetMDMockService implements NetMDService {
     }
 
     async deleteTracks(indexes: number[]) {
-        debugger;
         indexes = indexes.sort();
         indexes.reverse();
         for (let index of indexes) {
