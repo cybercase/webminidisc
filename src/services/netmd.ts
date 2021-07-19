@@ -87,7 +87,7 @@ export class NetMDUSBService implements NetMDService {
     }
 
     async _rewriteRawTitles(titleObject: { newRawTitle: string; newRawFullWidthTitle: string } | null) {
-        if(titleObject === null) return;
+        if (titleObject === null) return;
         await this.netmdInterface!.cacheTOC();
         await this.netmdInterface!.setDiscTitle(sanitizeHalfWidthTitle(titleObject.newRawTitle));
         await this.netmdInterface!.setDiscTitle(sanitizeFullWidthTitle(titleObject.newRawFullWidthTitle), true);
@@ -97,17 +97,17 @@ export class NetMDUSBService implements NetMDService {
 
     async _listContent() {
         // listContent takes a long time to execute (>3000ms), so I think caching it should speed up the app
-        if(!this.cachedContentList) {
+        if (!this.cachedContentList) {
             console.log("There's no cached version of the TOC, caching");
             this.cachedContentList = await listContent(this.netmdInterface!);
-        }else{
+        } else {
             console.log("There's a cached TOC available.");
         }
         return JSON.parse(JSON.stringify(this.cachedContentList)) as Disc;
     }
 
     _dropCache() {
-        console.log("Cached TOC Dropped");
+        console.log('Cached TOC Dropped');
         this.cachedContentList = undefined;
     }
 
@@ -187,13 +187,13 @@ export class NetMDUSBService implements NetMDService {
     async addGroup(groupBegin: number, groupLength: number, title: string) {
         const disc = await this._listContent();
         let ungrouped = disc.groups.find(n => n.title === null);
-        if(!ungrouped) return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
+        if (!ungrouped) return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
         let ungroupedLengthBeforeGroup = ungrouped.tracks.length;
 
         let thisGroupTracks = ungrouped.tracks.filter(n => n.index >= groupBegin && n.index < groupBegin + groupLength);
         ungrouped.tracks = ungrouped.tracks.filter(n => !thisGroupTracks.includes(n));
 
-        if(ungroupedLengthBeforeGroup - ungrouped.tracks.length !== groupLength){
+        if (ungroupedLengthBeforeGroup - ungrouped.tracks.length !== groupLength) {
             throw new Error('A track cannot be in 2 groups!');
         }
 
@@ -281,7 +281,7 @@ export class NetMDUSBService implements NetMDService {
         indexes = indexes.sort();
         indexes.reverse();
         let content = await this._listContent();
-        for(let index of indexes){
+        for (let index of indexes) {
             content = recomputeGroupsAfterTrackMove(content, index, -1);
             await this.netmdInterface!.eraseTrack(index);
             await sleep(100);
@@ -309,9 +309,7 @@ export class NetMDUSBService implements NetMDService {
         await this.netmdInterface!.moveTrack(src, dst);
 
         if (updateGroups === undefined || updateGroups) {
-            await this._rewriteRawTitles(
-                compileDiscTitles(recomputeGroupsAfterTrackMove(await this._listContent(), src, dst))
-            );
+            await this._rewriteRawTitles(compileDiscTitles(recomputeGroupsAfterTrackMove(await this._listContent(), src, dst)));
         }
         this._dropCache();
     }
