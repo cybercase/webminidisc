@@ -86,7 +86,7 @@ export class NetMDUSBService implements NetMDService {
         }
     }
 
-    async _rewriteRawTitles(titleObject: { newRawTitle: string; newRawFullWidthTitle: string } | null) {
+    private async writeRawTitles(titleObject: { newRawTitle: string; newRawFullWidthTitle: string } | null) {
         if (titleObject === null) return;
         await this.netmdInterface!.cacheTOC();
         await this.netmdInterface!.setDiscTitle(sanitizeHalfWidthTitle(titleObject.newRawTitle));
@@ -95,7 +95,7 @@ export class NetMDUSBService implements NetMDService {
         this.dropCachedContentList();
     }
 
-    async listContentUsingCache() {
+    private async listContentUsingCache() {
         // listContent takes a long time to execute (>3000ms), so I think caching it should speed up the app
         if (!this.cachedContentList) {
             console.log("There's no cached version of the TOC, caching");
@@ -106,7 +106,7 @@ export class NetMDUSBService implements NetMDService {
         return JSON.parse(JSON.stringify(this.cachedContentList)) as Disc;
     }
 
-    dropCachedContentList() {
+    private dropCachedContentList() {
         console.log('Cached TOC Dropped');
         this.cachedContentList = undefined;
     }
@@ -157,7 +157,7 @@ export class NetMDUSBService implements NetMDService {
     async rewriteGroups(groups: Group[]) {
         const disc = await this.listContentUsingCache();
         disc.groups = groups;
-        await this._rewriteRawTitles(compileDiscTitles(disc));
+        await this.writeRawTitles(compileDiscTitles(disc));
     }
 
     @asyncMutex
@@ -180,7 +180,7 @@ export class NetMDUSBService implements NetMDService {
 
         thisGroup.title = newName;
         if (newFullWidthName !== undefined) thisGroup.fullWidthTitle = newFullWidthName;
-        await this._rewriteRawTitles(compileDiscTitles(disc));
+        await this.writeRawTitles(compileDiscTitles(disc));
     }
 
     @asyncMutex
@@ -206,7 +206,7 @@ export class NetMDUSBService implements NetMDService {
             index: groupBegin,
             tracks: thisGroupTracks,
         });
-        await this._rewriteRawTitles(compileDiscTitles(disc));
+        await this.writeRawTitles(compileDiscTitles(disc));
     }
 
     @asyncMutex
@@ -216,7 +216,7 @@ export class NetMDUSBService implements NetMDService {
         let thisGroup = disc.groups.find(n => n.tracks[0].index === groupBegin);
         if (thisGroup) disc.groups.splice(disc.groups.indexOf(thisGroup), 1);
 
-        await this._rewriteRawTitles(compileDiscTitles(disc));
+        await this.writeRawTitles(compileDiscTitles(disc));
     }
 
     @asyncMutex
@@ -286,7 +286,7 @@ export class NetMDUSBService implements NetMDService {
             await this.netmdInterface!.eraseTrack(index);
             await sleep(100);
         }
-        await this._rewriteRawTitles(compileDiscTitles(content));
+        await this.writeRawTitles(compileDiscTitles(content));
         this.dropCachedContentList();
     }
 
@@ -298,7 +298,7 @@ export class NetMDUSBService implements NetMDService {
 
     @asyncMutex
     async wipeDiscTitleInfo() {
-        await this._rewriteRawTitles({
+        await this.writeRawTitles({
             newRawTitle: '',
             newRawFullWidthTitle: '',
         });
@@ -309,7 +309,7 @@ export class NetMDUSBService implements NetMDService {
         await this.netmdInterface!.moveTrack(src, dst);
 
         if (updateGroups === undefined || updateGroups) {
-            await this._rewriteRawTitles(compileDiscTitles(recomputeGroupsAfterTrackMove(await this.listContentUsingCache(), src, dst)));
+            await this.writeRawTitles(compileDiscTitles(recomputeGroupsAfterTrackMove(await this.listContentUsingCache(), src, dst)));
         }
         this.dropCachedContentList();
     }
