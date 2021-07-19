@@ -42,6 +42,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import FolderIcon from '@material-ui/icons/Folder';
+import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -555,7 +556,7 @@ export const Main = (props: {}) => {
                             }
                             onClick={handleGroupTracks}
                         >
-                            <FolderIcon />
+                            <CreateNewFolderIcon />
                         </IconButton>
                     </Tooltip>
                 ) : null}
