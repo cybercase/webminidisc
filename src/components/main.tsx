@@ -68,6 +68,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import * as BadgeImpl from '@material-ui/core/Badge/Badge';
 import Button from '@material-ui/core/Button';
 import { W95Main } from './win95/main';
+import { useMemo } from 'react';
 
 const useStyles = makeStyles(theme => ({
     add: {
@@ -296,8 +297,8 @@ export const Main = (props: {}) => {
     });
 
     const classes = useStyles();
-    const tracks = getSortedTracks(disc);
-    const groupedTracks = getGroupedTracks(disc);
+    const tracks = useMemo(() => getSortedTracks(disc), [disc]);
+    const groupedTracks = useMemo(() => getGroupedTracks(disc), [disc]);
 
     // Action Handlers
     const handleSelectClick = (event: React.MouseEvent, item: number) => {
@@ -382,6 +383,13 @@ export const Main = (props: {}) => {
             dispatch(control('pause'));
         } else dispatch(control('play'));
     };
+
+    const canGroup = useMemo(() => {
+        return (
+            tracks.filter(n => n.group === null && selected.includes(n.index)).length === selected.length &&
+            isSequential(selected.sort((a, b) => a - b))
+        );
+    }, [tracks, selected]);
 
     if (vintageMode) {
         const p = {
@@ -547,15 +555,8 @@ export const Main = (props: {}) => {
                 ) : null}
 
                 {selectedCount > 0 ? (
-                    <Tooltip title="Group">
-                        <IconButton
-                            aria-label="group"
-                            disabled={
-                                !isSequential(selected.sort((a, b) => a - b)) ||
-                                tracks.filter(n => n.group === null && selected.includes(n.index)).length !== selected.length
-                            }
-                            onClick={handleGroupTracks}
-                        >
+                    <Tooltip title={canGroup ? 'Group' : ''}>
+                        <IconButton aria-label="group" disabled={!canGroup} onClick={handleGroupTracks}>
                             <CreateNewFolderIcon />
                         </IconButton>
                     </Tooltip>
