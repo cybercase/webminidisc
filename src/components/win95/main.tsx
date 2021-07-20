@@ -86,7 +86,8 @@ export const W95Main = (props: {
     tracks: {
         index: number;
         title: string;
-        group: string;
+        fullWidthTitle: string;
+        group: string | null;
         duration: string;
         encoding: string;
     }[];
@@ -122,6 +123,7 @@ export const W95Main = (props: {
                         <img alt="device" src={DeviceIconUrl} style={{ marginTop: -10, marginLeft: 10 }} />
                         <div className={classes.toolbarItem}>
                             {`${props.deviceName}: (` || `Loading...`}
+                            {props.disc?.fullWidthTitle && `${props.disc?.fullWidthTitle} / `}
                             {props.disc?.title || `Untitled Disc`}
                             {`)`}
                         </div>
@@ -202,7 +204,7 @@ export const W95Main = (props: {
                                 >
                                     <TableDataCell style={{ textAlign: 'center', width: '2ch' }}>{track.index + 1}</TableDataCell>
                                     <TableDataCell style={{ width: '80%' }}>
-                                        <div>{track.title || `No Title`}</div>
+                                        <div>{track.fullWidthTitle && `${track.fullWidthTitle} / `}{track.title || `No Title`}</div>
                                     </TableDataCell>
                                     <TableDataCell style={{ textAlign: 'right', width: '20%' }}>
                                         <span>{track.encoding}</span>

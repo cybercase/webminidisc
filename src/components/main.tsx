@@ -1,18 +1,37 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import clsx from 'clsx';
 import { useDropzone } from 'react-dropzone';
-import { listContent, deleteTracks, moveTrack } from '../redux/actions';
+import {
+    DragDropContext,
+    Draggable,
+    DraggableProvided,
+    DropResult,
+    ResponderProvided,
+    Droppable,
+    DroppableProvided,
+    DroppableStateSnapshot,
+} from 'react-beautiful-dnd';
+import { listContent, deleteTracks, moveTrack, groupTracks, deleteGroup, dragDropTrack } from '../redux/actions';
 import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
 import { actions as convertDialogActions } from '../redux/convert-dialog-feature';
 import { actions as dumpDialogActions } from '../redux/dump-dialog-feature';
 
-import { formatTimeFromFrames, getTracks } from 'netmd-js';
+import { formatTimeFromFrames, Track } from 'netmd-js';
 import { control } from '../redux/actions';
 
-import { belowDesktop, forAnyDesktop, getSortedTracks, useShallowEqualSelector } from '../utils';
+import {
+    belowDesktop,
+    forAnyDesktop,
+    getGroupedTracks,
+    getSortedTracks,
+    isSequential,
+    useShallowEqualSelector,
+    EncodingName,
+} from '../utils';
 
 import { lighten, makeStyles } from '@material-ui/core/styles';
+import { fade } from '@material-ui/core/styles/colorManipulator';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Fab from '@material-ui/core/Fab';
@@ -22,6 +41,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import Backdrop from '@material-ui/core/Backdrop';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
+import FolderIcon from '@material-ui/icons/Folder';
+import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -46,9 +67,8 @@ import { TopMenu } from './topmenu';
 import Checkbox from '@material-ui/core/Checkbox';
 import * as BadgeImpl from '@material-ui/core/Badge/Badge';
 import Button from '@material-ui/core/Button';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
 import { W95Main } from './win95/main';
+import { useMemo } from 'react';
 
 const useStyles = makeStyles(theme => ({
     add: {
@@ -126,7 +146,7 @@ const useStyles = makeStyles(theme => ({
     indexCell: {
         whiteSpace: 'nowrap',
         paddingRight: 0,
-        width: `2ch`,
+        width: `16px`,
     },
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
@@ -138,7 +158,9 @@ const useStyles = makeStyles(theme => ({
     },
     controlButtonInTrackCommon: {
         width: `16px`,
+        height: `16px`,
         verticalAlign: 'middle',
+        cursor: 'pointer',
         marginLeft: theme.spacing(-0.5),
     },
     playButtonInTrackListPlaying: {
@@ -153,15 +175,17 @@ const useStyles = makeStyles(theme => ({
         display: 'inline-block',
     },
     playButtonInTrackListNotPlaying: {
-        visibility: 'hidden',
+        width: `0px`,
     },
     trackRow: {
+        userSelect: 'none',
         '&:hover': {
             /* For the tracks that aren't currently playing */
             '& $playButtonInTrackListNotPlaying': {
-                visibility: 'visible',
+                width: `16px`,
             },
             '& $trackIndex': {
+                width: `0px`,
                 display: 'none',
             },
 
@@ -174,8 +198,34 @@ const useStyles = makeStyles(theme => ({
             },
         },
     },
+    inGroupTrackRow: {
+        '& > $indexCell': {
+            transform: `translateX(${theme.spacing(3)}px)`,
+        },
+        '& > $titleCell': {
+            transform: `translateX(${theme.spacing(3)}px)`,
+        },
+    },
+    deleteGroupButton: {
+        display: 'none',
+    },
+    groupHeadRow: {
+        '&:hover': {
+            '& svg:not($deleteGroupButton)': {
+                display: 'none',
+            },
+            '& $deleteGroupButton': {
+                display: 'inline-block',
+            },
+        },
+    },
+    hoveringOverGroup: {
+        backgroundColor: `${fade(theme.palette.secondary.dark, 0.4)}`,
+    },
     trackIndex: {
         display: 'inline-block',
+        height: '16px',
+        width: '16px',
     },
 }));
 
@@ -187,6 +237,7 @@ export const Main = (props: {}) => {
     const { vintageMode } = useShallowEqualSelector(state => state.appState);
 
     const [selected, setSelected] = React.useState<number[]>([]);
+    const [lastClicked, setLastClicked] = useState(-1);
     const selectedCount = selected.length;
 
     const [moveMenuAnchorEl, setMoveMenuAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -205,6 +256,18 @@ export const Main = (props: {}) => {
             handleCloseMoveMenu();
         },
         [dispatch, selected, handleCloseMoveMenu]
+    );
+
+    const handleDrop = useCallback(
+        (result: DropResult, provided: ResponderProvided) => {
+            if (!result.destination) return;
+            let sourceList = parseInt(result.source.droppableId),
+                sourceIndex = result.source.index,
+                targetList = parseInt(result.destination.droppableId),
+                targetIndex = result.destination.index;
+            dispatch(dragDropTrack(sourceList, sourceIndex, targetList, targetIndex));
+        },
+        [dispatch]
     );
 
     const handleShowDumpDialog = useCallback(() => {
@@ -234,15 +297,28 @@ export const Main = (props: {}) => {
     });
 
     const classes = useStyles();
-    const tracks = getSortedTracks(disc);
+    const tracks = useMemo(() => getSortedTracks(disc), [disc]);
+    const groupedTracks = useMemo(() => getGroupedTracks(disc), [disc]);
 
     // Action Handlers
     const handleSelectClick = (event: React.MouseEvent, item: number) => {
-        if (selected.includes(item)) {
+        if (event.shiftKey && selected.length && lastClicked !== -1) {
+            let rangeBegin = Math.min(lastClicked + 1, item),
+                rangeEnd = Math.max(lastClicked - 1, item);
+            let copy = [...selected];
+            for (let i = rangeBegin; i <= rangeEnd; i++) {
+                let index = copy.indexOf(i);
+                if (index === -1) copy.push(i);
+                else copy.splice(index, 1);
+            }
+            if (!copy.includes(item)) copy.push(item);
+            setSelected(copy);
+        } else if (selected.includes(item)) {
             setSelected(selected.filter(i => i !== item));
         } else {
             setSelected([...selected, item]);
         }
+        setLastClicked(item);
     };
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -253,25 +329,44 @@ export const Main = (props: {}) => {
         }
     };
 
-    const handleRenameDoubleClick = (event: React.MouseEvent, item: number) => {
-        let selectedIndex = item;
-        let currentName = getTracks(disc!).find(track => track.index === selectedIndex)?.title ?? '';
+    const handleRenameDoubleClick = (event: React.MouseEvent, index: number, renameGroup?: boolean) => {
+        let group, track;
+        if (renameGroup) {
+            group = groupedTracks.find(n => n.tracks[0]?.index === index);
+            if (!group) return;
+        } else {
+            track = tracks.find(n => n.index === index);
+            if (!track) return;
+        }
 
+        let currentName = (track ? track.title : group?.title) ?? '';
+        let currentFullWidthName = (track ? track.fullWidthTitle : group?.fullWidthTitle) ?? '';
         dispatch(
             batchActions([
                 renameDialogActions.setVisible(true),
+                renameDialogActions.setGroupIndex(group ? index : null),
                 renameDialogActions.setCurrentName(currentName),
-                renameDialogActions.setIndex(selectedIndex),
+                renameDialogActions.setCurrentFullWidthName(currentFullWidthName),
+                renameDialogActions.setIndex(track?.index ?? -1),
             ])
         );
     };
 
     const handleRenameActionClick = (event: React.MouseEvent) => {
+        if(event.detail !== 1) return; //Event retriggering when hitting enter in the dialog
         handleRenameDoubleClick(event, selected[0]);
     };
 
     const handleDeleteSelected = (event: React.MouseEvent) => {
         dispatch(deleteTracks(selected));
+    };
+
+    const handleGroupTracks = (event: React.MouseEvent) => {
+        dispatch(groupTracks(selected));
+    };
+
+    const handleGroupRemoval = (event: React.MouseEvent, groupBegin: number) => {
+        dispatch(deleteGroup(groupBegin));
     };
 
     const handlePlayTrack = async (event: React.MouseEvent, track: number) => {
@@ -288,6 +383,13 @@ export const Main = (props: {}) => {
             dispatch(control('pause'));
         } else dispatch(control('play'));
     };
+
+    const canGroup = useMemo(() => {
+        return (
+            tracks.filter(n => n.group === null && selected.includes(n.index)).length === selected.length &&
+            isSequential(selected.sort((a, b) => a - b))
+        );
+    }, [tracks, selected]);
 
     if (vintageMode) {
         const p = {
@@ -323,6 +425,64 @@ export const Main = (props: {}) => {
         };
         return <W95Main {...p} />;
     }
+
+    const getTrackRow = (track: Track, inGroup: boolean, additional: {}) => {
+        const child = (
+            <TableRow
+                {...additional}
+                hover
+                selected={selected.includes(track.index)}
+                onDoubleClick={event => handleRenameDoubleClick(event, track.index)}
+                onClick={event => handleSelectClick(event, track.index)}
+                className={clsx(classes.trackRow, { [classes.inGroupTrackRow]: inGroup })}
+            >
+                <TableCell className={classes.indexCell}>
+                    {track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state) ? (
+                        <span>
+                            <PlayArrowIcon
+                                className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackListPlaying, {
+                                    [classes.currentControlButton]: deviceStatus?.state === 'playing',
+                                })}
+                                onClick={event => {
+                                    handleCurrentClick(event);
+                                    event.stopPropagation();
+                                }}
+                            />
+                            <PauseIcon
+                                className={clsx(classes.controlButtonInTrackCommon, classes.pauseButtonInTrackListPlaying, {
+                                    [classes.currentControlButton]: deviceStatus?.state === 'paused',
+                                })}
+                                onClick={event => {
+                                    handleCurrentClick(event);
+                                    event.stopPropagation();
+                                }}
+                            />
+                        </span>
+                    ) : (
+                        <span>
+                            <span className={classes.trackIndex}>{track.index + 1}</span>
+                            <PlayArrowIcon
+                                className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackListNotPlaying)}
+                                onClick={event => {
+                                    handlePlayTrack(event, track.index);
+                                    event.stopPropagation();
+                                }}
+                            />
+                        </span>
+                    )}
+                </TableCell>
+                <TableCell className={classes.titleCell} title={track.title ?? ''}>
+                    {track.fullWidthTitle ? `${track.fullWidthTitle} / ` : ``}
+                    {track.title || `No Title`}
+                </TableCell>
+                <TableCell align="right" className={classes.durationCell}>
+                    <span className={classes.formatBadge}>{EncodingName[track.encoding]}</span>
+                    <span className={classes.durationCellTime}>{formatTimeFromFrames(track.duration, false)}</span>
+                </TableCell>
+            </TableRow>
+        );
+        return child;
+    };
 
     return (
         <React.Fragment>
@@ -372,40 +532,10 @@ export const Main = (props: {}) => {
                     </Typography>
                 ) : (
                     <Typography component="h3" variant="h6" className={classes.toolbarLabel}>
+                        {disc?.fullWidthTitle && `${disc.fullWidthTitle} / `}
                         {disc?.title || `Untitled Disc`}
                     </Typography>
                 )}
-                {selectedCount === 1 ? (
-                    <React.Fragment>
-                        <Tooltip title="Move to Position">
-                            <Button aria-controls="move-menu" aria-label="Move" onClick={handleShowMoveMenu}>
-                                Move
-                            </Button>
-                        </Tooltip>
-                        <Menu
-                            id="move-menu"
-                            anchorEl={moveMenuAnchorEl}
-                            open={!!moveMenuAnchorEl}
-                            onClose={handleCloseMoveMenu}
-                            PaperProps={{
-                                style: {
-                                    maxHeight: 300,
-                                },
-                            }}
-                        >
-                            {Array(tracks.length)
-                                .fill(null)
-                                .map((_, i) => {
-                                    return (
-                                        <MenuItem key={`pos-${i}`} onClick={() => handleMoveSelectedTrack(i)}>
-                                            {i + 1}
-                                        </MenuItem>
-                                    );
-                                })}
-                        </Menu>
-                    </React.Fragment>
-                ) : null}
-
                 {selectedCount > 0 ? (
                     <React.Fragment>
                         <Tooltip title="Record from MD">
@@ -425,6 +555,14 @@ export const Main = (props: {}) => {
                 ) : null}
 
                 {selectedCount > 0 ? (
+                    <Tooltip title={canGroup ? 'Group' : ''}>
+                        <IconButton aria-label="group" disabled={!canGroup} onClick={handleGroupTracks}>
+                            <CreateNewFolderIcon />
+                        </IconButton>
+                    </Tooltip>
+                ) : null}
+
+                {selectedCount > 0 ? (
                     <Tooltip title="Rename">
                         <IconButton aria-label="rename" disabled={selectedCount !== 1} onClick={handleRenameActionClick}>
                             <EditIcon />
@@ -432,7 +570,7 @@ export const Main = (props: {}) => {
                     </Tooltip>
                 ) : null}
             </Toolbar>
-            <Box className={classes.main} {...getRootProps()}>
+            <Box className={classes.main} {...getRootProps()} id="main">
                 <input {...getInputProps()} />
                 <Table size="small">
                     <TableHead>
@@ -442,64 +580,82 @@ export const Main = (props: {}) => {
                             <TableCell align="right">Duration</TableCell>
                         </TableRow>
                     </TableHead>
-                    <TableBody>
-                        {tracks.map(track => (
-                            <TableRow
-                                hover
-                                selected={selected.includes(track.index)}
-                                key={track.index}
-                                onDoubleClick={event => handleRenameDoubleClick(event, track.index)}
-                                onClick={event => handleSelectClick(event, track.index)}
-                                className={classes.trackRow}
-                            >
-                                <TableCell className={classes.indexCell}>
-                                    {track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state) ? (
-                                        <span>
-                                            <PlayArrowIcon
-                                                className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackListPlaying, {
-                                                    [classes.currentControlButton]: deviceStatus?.state === 'playing',
-                                                })}
-                                                onClick={event => {
-                                                    handleCurrentClick(event);
-                                                    event.stopPropagation();
-                                                }}
-                                            />
-                                            <PauseIcon
-                                                className={clsx(classes.controlButtonInTrackCommon, classes.pauseButtonInTrackListPlaying, {
-                                                    [classes.currentControlButton]: deviceStatus?.state === 'paused',
-                                                })}
-                                                onClick={event => {
-                                                    handleCurrentClick(event);
-                                                    event.stopPropagation();
-                                                }}
-                                            />
-                                        </span>
-                                    ) : (
-                                        <span>
-                                            <span className={classes.trackIndex}>{track.index + 1}</span>
-                                            <PlayArrowIcon
-                                                className={clsx(
-                                                    classes.controlButtonInTrackCommon,
-                                                    classes.playButtonInTrackListNotPlaying
+                    <DragDropContext onDragEnd={handleDrop}>
+                        <TableBody>
+                            {groupedTracks.map((group, index) => (
+                                <TableRow key={`${index}`}>
+                                    <TableCell colSpan={3} style={{ padding: '0' }}>
+                                        <Table size="small">
+                                            <Droppable droppableId={`${index}`} key={`${index}`}>
+                                                {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
+                                                    <TableBody
+                                                        {...provided.droppableProps}
+                                                        ref={provided.innerRef}
+                                                        className={clsx({ [classes.hoveringOverGroup]: snapshot.isDraggingOver })}
+                                                    >
+                                                        {group.title !== null && (
+                                                            <TableRow
+                                                                hover
+                                                                className={classes.groupHeadRow}
+                                                                key={`${index}-head`}
+                                                                onDoubleClick={event =>
+                                                                    handleRenameDoubleClick(event, group.tracks[0].index, true)
+                                                                }
+                                                            >
+                                                                <TableCell className={classes.indexCell}>
+                                                                    <FolderIcon className={classes.controlButtonInTrackCommon} />
+                                                                    <DeleteIcon
+                                                                        className={clsx(
+                                                                            classes.controlButtonInTrackCommon,
+                                                                            classes.deleteGroupButton
+                                                                        )}
+                                                                        onClick={event => {
+                                                                            handleGroupRemoval(event, group.tracks[0].index);
+                                                                        }}
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell className={classes.titleCell} title={group.title!}>
+                                                                    {group.fullWidthTitle ? `${group.fullWidthTitle} / ` : ``}
+                                                                    {group.title || `No Name`}
+                                                                </TableCell>
+                                                                <TableCell align="right" className={classes.durationCell}>
+                                                                    <span className={classes.durationCellTime}>
+                                                                        {formatTimeFromFrames(
+                                                                            group.tracks.map(n => n.duration).reduce((a, b) => a + b),
+                                                                            false
+                                                                        )}
+                                                                    </span>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                        {group.title === null && group.tracks.length === 0 && (
+                                                            <TableRow style={{ height: '1px' }} />
+                                                        )}
+                                                        {group.tracks.map(n => (
+                                                            <Draggable
+                                                                draggableId={`${group.index}-${n.index}`}
+                                                                key={`${n.index - group.tracks[0].index}`}
+                                                                index={n.index - group.tracks[0].index}
+                                                            >
+                                                                {(providedInGroup: DraggableProvided) =>
+                                                                    getTrackRow(n, group.title !== null, {
+                                                                        ref: providedInGroup.innerRef,
+                                                                        ...providedInGroup.draggableProps,
+                                                                        ...providedInGroup.dragHandleProps,
+                                                                    })
+                                                                }
+                                                            </Draggable>
+                                                        ))}
+                                                        {provided.placeholder}
+                                                    </TableBody>
                                                 )}
-                                                onClick={event => {
-                                                    handlePlayTrack(event, track.index);
-                                                    event.stopPropagation();
-                                                }}
-                                            />
-                                        </span>
-                                    )}
-                                </TableCell>
-                                <TableCell className={classes.titleCell} title={track.title}>
-                                    {track.title || `No Title`}
-                                </TableCell>
-                                <TableCell align="right" className={classes.durationCell}>
-                                    <span className={classes.formatBadge}>{track.encoding}</span>
-                                    <span className={classes.durationCellTime}>{track.duration}</span>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
+                                            </Droppable>
+                                        </Table>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </DragDropContext>
                 </Table>
                 <Backdrop className={classes.backdrop} open={isDragActive}>
                     Drop your Music to Upload

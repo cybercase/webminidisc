@@ -5,6 +5,7 @@ import { batchActions } from 'redux-batched-actions';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import Divider from '@material-ui/core/Divider';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import { wipeDisc, listContent } from '../redux/actions';
@@ -14,6 +15,7 @@ import { useShallowEqualSelector } from '../utils';
 import Link from '@material-ui/core/Link';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Tooltip from '@material-ui/core/Tooltip';
 import { makeStyles } from '@material-ui/core/styles';
 
 import RefreshIcon from '@material-ui/icons/Refresh';
@@ -33,14 +35,19 @@ const useStyles = makeStyles(theme => ({
     listItemIcon: {
         minWidth: theme.spacing(5),
     },
+    toolTippedText: {
+        textDecoration: 'underline',
+        textDecorationStyle: 'dotted',
+    },
 }));
 
 export const TopMenu = function(props: { onClick?: () => void }) {
     const classes = useStyles();
     const dispatch = useDispatch();
 
-    let { mainView, darkMode, vintageMode } = useShallowEqualSelector(state => state.appState);
+    let { mainView, darkMode, vintageMode, fullWidthSupport } = useShallowEqualSelector(state => state.appState);
     let discTitle = useShallowEqualSelector(state => state.main.disc?.title ?? ``);
+    let fullWidthDiscTitle = useShallowEqualSelector(state => state.main.disc?.fullWidthTitle ?? ``);
 
     const githubLinkRef = React.useRef<null | HTMLAnchorElement>(null);
     const helpLinkRef = React.useRef<null | HTMLAnchorElement>(null);
@@ -71,6 +78,10 @@ export const TopMenu = function(props: { onClick?: () => void }) {
         handleMenuClose();
     }, [dispatch, handleMenuClose]);
 
+    const handleAllowFullWidth = useCallback(() => {
+        dispatch(appActions.setFullWidthSupport(!fullWidthSupport));
+    }, [dispatch, fullWidthSupport]);
+
     const handleRefresh = useCallback(() => {
         dispatch(listContent());
         handleMenuClose();
@@ -81,11 +92,13 @@ export const TopMenu = function(props: { onClick?: () => void }) {
             batchActions([
                 renameDialogActions.setVisible(true),
                 renameDialogActions.setCurrentName(discTitle),
+                renameDialogActions.setGroupIndex(null),
+                renameDialogActions.setCurrentFullWidthName(fullWidthDiscTitle),
                 renameDialogActions.setIndex(-1),
             ])
         );
         handleMenuClose();
-    }, [dispatch, handleMenuClose, discTitle]);
+    }, [dispatch, handleMenuClose, discTitle, fullWidthDiscTitle]);
 
     const handleExit = useCallback(() => {
         dispatch(appActions.setMainView('WELCOME'));
@@ -156,6 +169,25 @@ export const TopMenu = function(props: { onClick?: () => void }) {
             </MenuItem>
         );
     }
+    if (mainView === 'MAIN') {
+        menuItems.push(<Divider />);
+        menuItems.push(
+            <MenuItem key="allowFullWidth" onClick={handleAllowFullWidth}>
+                <ListItemIcon className={classes.listItemIcon}>
+                    {fullWidthSupport ? <ToggleOnIcon fontSize="small" /> : <ToggleOffIcon fontSize="small" />}
+                </ListItemIcon>
+                <ListItemText>
+                    {fullWidthSupport ? `Disable ` : `Enable `}
+                    <Tooltip
+                        title="This advanced feature enables the use of Hiragana and Kanji alphabets. More about this in Support and FAQ."
+                        arrow
+                    >
+                        <span className={classes.toolTippedText}>Full-Width Title Editing</span>
+                    </Tooltip>
+                </ListItemText>
+            </MenuItem>
+        );
+    }
     menuItems.push(
         <MenuItem key="darkMode" onClick={handleDarkMode}>
             <ListItemIcon className={classes.listItemIcon}>
@@ -174,6 +206,9 @@ export const TopMenu = function(props: { onClick?: () => void }) {
                 <ListItemText>Retro Mode (beta)</ListItemText>
             </MenuItem>
         );
+    }
+    if (mainView === 'MAIN') {
+        menuItems.push(<Divider />);
     }
     menuItems.push(
         <MenuItem key="about" onClick={handleShowAbout}>

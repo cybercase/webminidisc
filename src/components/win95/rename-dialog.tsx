@@ -22,7 +22,7 @@ export const W95RenameDialog = (props: {
                     <span>Rename {props.what}</span>
                 </WindowHeader>
                 <WindowContent>
-                    <p style={{ marginBottom: 4 }}>Track Name:</p>
+                    <p style={{ marginBottom: 4 }}>{props.what} Name:</p>
                     <TextField
                         style={{ marginBottom: 16 }}
                         value={props.renameDialogTitle}

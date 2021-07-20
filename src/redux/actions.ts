@@ -9,7 +9,15 @@ import { actions as mainActions } from './main-feature';
 import serviceRegistry from '../services/registry';
 import { Wireformat, getTracks } from 'netmd-js';
 import { AnyAction } from '@reduxjs/toolkit';
-import { getAvailableCharsForTrackTitle, framesToSec, sleepWithProgressCallback, sleep, askNotificationPermission } from '../utils';
+import {
+    getAvailableCharsForTitle,
+    framesToSec,
+    sleepWithProgressCallback,
+    sleep,
+    askNotificationPermission,
+    getGroupedTracks,
+    getHalfWidthTitleLength,
+} from '../utils';
 import * as mm from 'music-metadata-browser';
 import { TitleFormatType, UploadFormat } from './convert-dialog-feature';
 import NotificationCompleteIconUrl from '../images/record-complete-notification-icon.png';
@@ -50,6 +58,128 @@ export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto' | 'pa
     };
 }
 
+export function renameGroup({ groupIndex, newName, newFullWidthName }: { groupIndex: number; newName: string; newFullWidthName?: string }) {
+    return async function(dispatch: AppDispatch, getState: () => RootState) {
+        await serviceRegistry!.netmdService?.renameGroup(groupIndex, newName, newFullWidthName);
+        listContent()(dispatch);
+    };
+}
+
+export function groupTracks(indexes: number[]) {
+    return async function(dispatch: AppDispatch) {
+        let begin = indexes[0];
+        let length = indexes[indexes.length - 1] - begin + 1;
+        const { netmdService } = serviceRegistry;
+
+        netmdService!.addGroup(begin, length, '');
+        listContent()(dispatch);
+    };
+}
+
+export function deleteGroup(groupBegin: number) {
+    return async function(dispatch: AppDispatch) {
+        const { netmdService } = serviceRegistry;
+        netmdService!.deleteGroup(groupBegin);
+        listContent()(dispatch);
+    };
+}
+
+export function dragDropTrack(sourceList: number, sourceIndex: number, targetList: number, targetIndex: number) {
+    // This code is here, because it would need to be duplicated in both netmd and netmd-mock.
+    return async function(dispatch: AppDispatch, getState: () => RootState) {
+        if (sourceList === targetList && sourceIndex === targetIndex) return;
+        dispatch(appStateActions.setLoading(true));
+        const groupedTracks = getGroupedTracks(await serviceRegistry.netmdService!.listContent());
+        // Remove the moved item from its current list
+        let movedItem = groupedTracks[sourceList].tracks.splice(sourceIndex, 1)[0];
+        let newIndex: number;
+
+        // Calculate bounds
+        let boundsStartList, boundsEndList, boundsStartIndex, boundsEndIndex, offset;
+
+        if (sourceList < targetList) {
+            boundsStartList = sourceList;
+            boundsStartIndex = sourceIndex;
+            boundsEndList = targetList;
+            boundsEndIndex = targetIndex;
+            offset = -1;
+        } else if (sourceList > targetList) {
+            boundsStartList = targetList;
+            boundsStartIndex = targetIndex;
+            boundsEndList = sourceList;
+            boundsEndIndex = sourceIndex;
+            offset = 1;
+        } else {
+            if (sourceIndex < targetIndex) {
+                boundsStartList = boundsEndList = sourceList;
+                boundsStartIndex = sourceIndex;
+                boundsEndIndex = targetIndex;
+                offset = -1;
+            } else {
+                boundsStartList = boundsEndList = targetList;
+                boundsStartIndex = targetIndex;
+                boundsEndIndex = sourceIndex;
+                offset = 1;
+            }
+        }
+
+        // Shift indices
+        for (let i = boundsStartList; i <= boundsEndList; i++) {
+            let startingIndex = i === boundsStartList ? boundsStartIndex : 0;
+            let endingIndex = i === boundsEndList ? boundsEndIndex : groupedTracks[i].tracks.length;
+            for (let j = startingIndex; j < endingIndex; j++) {
+                groupedTracks[i].tracks[j].index += offset;
+            }
+        }
+
+        // Calculate the moved track's destination index
+        if (targetList === 0) {
+            newIndex = targetIndex;
+        } else {
+            if (targetIndex === 0) {
+                let prevList = groupedTracks[targetList - 1];
+                let i = 2;
+                while (prevList && prevList.tracks.length === 0) {
+                    // Skip past all the empty lists
+                    prevList = groupedTracks[targetList - i++];
+                }
+                if (prevList) {
+                    // If there's a previous list, make this tracks's index previous list's last item's index + 1
+                    let lastIndexOfPrevList = prevList.tracks[prevList.tracks.length - 1].index;
+                    newIndex = lastIndexOfPrevList + 1;
+                } else newIndex = 0; // Else default to index 0
+            } else {
+                newIndex = groupedTracks[targetList].tracks[0].index + targetIndex;
+            }
+        }
+
+        if (movedItem.index !== newIndex) {
+            await serviceRegistry!.netmdService!.moveTrack(movedItem.index, newIndex, false);
+        }
+
+        movedItem.index = newIndex;
+        groupedTracks[targetList].tracks.splice(targetIndex, 0, movedItem);
+        let ungrouped = [];
+
+        // Recompile the groups and update them on the player
+        let normalGroups = [];
+        for (let group of groupedTracks) {
+            if (group.tracks.length === 0) continue;
+            if (group.index === -1) ungrouped.push(...group.tracks);
+            else normalGroups.push(group);
+        }
+        if (ungrouped.length)
+            normalGroups.unshift({
+                index: 0,
+                title: null,
+                fullWidthTitle: null,
+                tracks: ungrouped,
+            });
+        await serviceRegistry.netmdService!.rewriteGroups(normalGroups);
+        listContent()(dispatch);
+    };
+}
+
 export function pair() {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         dispatch(appStateActions.setPairingFailed(false));
@@ -86,7 +216,15 @@ export function listContent() {
     return async function(dispatch: AppDispatch) {
         // Issue loading
         dispatch(appStateActions.setLoading(true));
-        let disc = await serviceRegistry.netmdService!.listContent();
+        let disc;
+        try {
+            disc = await serviceRegistry.netmdService!.listContent();
+        } catch (err) {
+            if (window.confirm("This disc's title seems to be corrupted, do you wish to erase it?\nNone of the tracks will be deleted.")) {
+                await serviceRegistry.netmdService!.wipeDiscTitleInfo();
+                disc = await serviceRegistry.netmdService!.listContent();
+            } else throw err;
+        }
         let deviceName = await serviceRegistry.netmdService!.getDeviceName();
         let deviceStatus = null;
         try {
@@ -105,12 +243,12 @@ export function listContent() {
     };
 }
 
-export function renameTrack({ index, newName }: { index: number; newName: string }) {
+export function renameTrack({ index, newName, newFullWidthName }: { index: number; newName: string; newFullWidthName?: string }) {
     return async function(dispatch: AppDispatch) {
         const { netmdService } = serviceRegistry;
         dispatch(renameDialogActions.setVisible(false));
         try {
-            await netmdService!.renameTrack(index, newName);
+            await netmdService!.renameTrack(index, newName, newFullWidthName);
         } catch (err) {
             console.error(err);
             dispatch(batchActions([errorDialogAction.setVisible(true), errorDialogAction.setErrorMessage(`Rename failed.`)]));
@@ -119,10 +257,13 @@ export function renameTrack({ index, newName }: { index: number; newName: string
     };
 }
 
-export function renameDisc({ newName }: { newName: string }) {
+export function renameDisc({ newName, newFullWidthName }: { newName: string; newFullWidthName?: string }) {
     return async function(dispatch: AppDispatch) {
         const { netmdService } = serviceRegistry;
-        await netmdService!.renameDisc(newName);
+        await netmdService!.renameDisc(
+            newName.replace(/\/\//g, ' /'), // Make sure the title doesn't interfere with the groups
+            newFullWidthName?.replace(/／／/g, '／')
+        );
         dispatch(renameDialogActions.setVisible(false));
         listContent()(dispatch);
     };
@@ -138,11 +279,7 @@ export function deleteTracks(indexes: number[]) {
         }
         const { netmdService } = serviceRegistry;
         dispatch(appStateActions.setLoading(true));
-        indexes = indexes.sort();
-        indexes.reverse();
-        for (let index of indexes) {
-            await netmdService!.deleteTrack(index);
-        }
+        await netmdService!.deleteTracks(indexes);
         listContent()(dispatch);
     };
 }
@@ -387,8 +524,8 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
         };
 
         let disc = getState().main.disc;
-        let maxTitleLength = disc ? getAvailableCharsForTrackTitle(getTracks(disc).map(track => track.title || ``)) : -1;
-        maxTitleLength = Math.floor(maxTitleLength / files.length);
+        let useFullWidth = getState().appState.fullWidthSupport;
+        let availableCharacters = getAvailableCharsForTitle(disc!);
 
         let error: any;
         let errorMessage = ``;
@@ -407,16 +544,22 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
                 console.error(err);
             }
 
-            if (maxTitleLength > -1) {
-                title = title.substring(0, maxTitleLength);
+            const fixLength = (l: number) => Math.ceil(l / 7) * 7;
+            let halfWidthTitle = title.substr(0, Math.min(getHalfWidthTitleLength(title), availableCharacters));
+            availableCharacters -= fixLength(getHalfWidthTitleLength(halfWidthTitle));
+
+            let fullWidthTitle = '';
+            if (useFullWidth) {
+                fullWidthTitle = title.substr(0, Math.min(title.length * 2, availableCharacters, 210 /* limit is 105 */) / 2);
+                availableCharacters -= fixLength(fullWidthTitle.length * 2);
             }
 
             trackUpdate.current = i++;
-            trackUpdate.titleCurrent = title;
+            trackUpdate.titleCurrent = halfWidthTitle;
             updateTrack();
             updateProgressCallback({ written: 0, encrypted: 0, total: 100 });
             try {
-                await netmdService?.upload(title, data, wireformat, updateProgressCallback);
+                await netmdService?.upload(halfWidthTitle, fullWidthTitle, data, wireformat, updateProgressCallback);
             } catch (err) {
                 error = err;
                 errorMessage = `${file.name}: Error uploading to device. There might not be enough space left.`;
