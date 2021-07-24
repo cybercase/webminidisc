@@ -43,6 +43,7 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import FolderIcon from '@material-ui/icons/Folder';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
+import DragIndicator from '@material-ui/icons/DragIndicator';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -226,6 +227,14 @@ const useStyles = makeStyles(theme => ({
         height: '16px',
         width: '16px',
     },
+    dragHandle: {
+        width: 20,
+        padding: `${theme.spacing(0.5)}px 0 0 0`,
+    },
+    dragHandleEmpty: {
+        width: 20,
+        padding: `${theme.spacing(0.5)}px 0 0 0`,
+    },
 }));
 
 export const Main = (props: {}) => {
@@ -352,7 +361,7 @@ export const Main = (props: {}) => {
     };
 
     const handleRenameActionClick = (event: React.MouseEvent) => {
-        if(event.detail !== 1) return; //Event retriggering when hitting enter in the dialog
+        if (event.detail !== 1) return; //Event retriggering when hitting enter in the dialog
         handleRenameDoubleClick(event, selected[0]);
     };
 
@@ -425,16 +434,20 @@ export const Main = (props: {}) => {
         return <W95Main {...p} />;
     }
 
-    const getTrackRow = (track: Track, inGroup: boolean, additional: {}) => {
+    const getTrackRow = (track: Track, inGroup: boolean, draggableProvided: DraggableProvided) => {
         const child = (
             <TableRow
-                {...additional}
+                {...draggableProvided.draggableProps}
+                ref={draggableProvided.innerRef}
                 hover
                 selected={selected.includes(track.index)}
                 onDoubleClick={event => handleRenameDoubleClick(event, track.index)}
                 onClick={event => handleSelectClick(event, track.index)}
                 className={clsx(classes.trackRow, { [classes.inGroupTrackRow]: inGroup })}
             >
+                <TableCell className={classes.dragHandle} {...draggableProvided.dragHandleProps} onClick={event => event.stopPropagation()}>
+                    <DragIndicator fontSize="small" color="disabled" />
+                </TableCell>
                 <TableCell className={classes.indexCell}>
                     {track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state) ? (
                         <span>
@@ -574,6 +587,7 @@ export const Main = (props: {}) => {
                 <Table size="small">
                     <TableHead>
                         <TableRow>
+                            <TableCell className={classes.dragHandleEmpty}></TableCell>
                             <TableCell className={classes.indexCell}>#</TableCell>
                             <TableCell>Title</TableCell>
                             <TableCell align="right">Duration</TableCell>
@@ -583,7 +597,7 @@ export const Main = (props: {}) => {
                         <TableBody>
                             {groupedTracks.map((group, index) => (
                                 <TableRow key={`${index}`}>
-                                    <TableCell colSpan={3} style={{ padding: '0' }}>
+                                    <TableCell colSpan={4} style={{ padding: '0' }}>
                                         <Table size="small">
                                             <Droppable droppableId={`${index}`} key={`${index}`}>
                                                 {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
@@ -601,6 +615,7 @@ export const Main = (props: {}) => {
                                                                     handleRenameDoubleClick(event, group.tracks[0].index, true)
                                                                 }
                                                             >
+                                                                <TableCell className={classes.dragHandleEmpty}></TableCell>
                                                                 <TableCell className={classes.indexCell}>
                                                                     <FolderIcon className={classes.controlButtonInTrackCommon} />
                                                                     <DeleteIcon
@@ -636,12 +651,8 @@ export const Main = (props: {}) => {
                                                                 key={`${n.index - group.tracks[0].index}`}
                                                                 index={n.index - group.tracks[0].index}
                                                             >
-                                                                {(providedInGroup: DraggableProvided) =>
-                                                                    getTrackRow(n, group.title !== null, {
-                                                                        ref: providedInGroup.innerRef,
-                                                                        ...providedInGroup.draggableProps,
-                                                                        ...providedInGroup.dragHandleProps,
-                                                                    })
+                                                                {(provided: DraggableProvided) =>
+                                                                    getTrackRow(n, group.title !== null, provided)
                                                                 }
                                                             </Draggable>
                                                         ))}
