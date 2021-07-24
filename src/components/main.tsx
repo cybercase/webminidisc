@@ -147,7 +147,7 @@ const useStyles = makeStyles(theme => ({
     indexCell: {
         whiteSpace: 'nowrap',
         paddingRight: 0,
-        width: `16px`,
+        width: theme.spacing(4),
     },
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
