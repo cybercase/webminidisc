@@ -632,9 +632,11 @@ export const Main = (props: {}) => {
                         </TableBody>
                     </DragDropContext>
                 </Table>
-                <Backdrop className={classes.backdrop} open={isDragActive}>
-                    Drop your Music to Upload
-                </Backdrop>
+                {isDragActive ? (
+                    <Backdrop className={classes.backdrop} open={isDragActive}>
+                        Drop your Music to Upload
+                    </Backdrop>
+                ) : null}
             </Box>
             <Fab color="primary" aria-label="add" className={classes.add} onClick={open}>
                 <AddIcon />
