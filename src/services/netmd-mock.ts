@@ -55,7 +55,7 @@ class NetMDMockService implements NetMDService {
             channel: Channels.stereo,
             protected: TrackFlag.unprotected,
             title: 'Mock Track 5',
-            fullWidthTitle: '',
+            fullWidthTitle: 'スコット と リバース',
         },
     ];
     public _groupsDef: {
