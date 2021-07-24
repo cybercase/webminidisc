@@ -158,44 +158,28 @@ const useStyles = makeStyles(theme => ({
         textDecorationStyle: 'dotted',
     },
     controlButtonInTrackCommon: {
-        width: `16px`,
-        height: `16px`,
+        width: theme.spacing(2),
+        height: theme.spacing(2),
         verticalAlign: 'middle',
-        cursor: 'pointer',
         marginLeft: theme.spacing(-0.5),
     },
-    playButtonInTrackListPlaying: {
-        color: theme.palette.primary.main,
+    playButtonInTrackList: {
         display: 'none',
-    },
-    pauseButtonInTrackListPlaying: {
-        color: theme.palette.primary.main,
-        display: 'none',
-    },
-    currentControlButton: {
-        display: 'inline-block',
-    },
-    playButtonInTrackListNotPlaying: {
-        width: `0px`,
     },
     trackRow: {
         '&:hover': {
-            /* For the tracks that aren't currently playing */
-            '& $playButtonInTrackListNotPlaying': {
-                width: `16px`,
+            '& $playButtonInTrackList': {
+                display: 'inline-flex',
             },
             '& $trackIndex': {
-                width: `0px`,
                 display: 'none',
             },
-
-            /* For the current track */
-            '& svg:not($currentControlButton)': {
-                display: 'inline-block',
-            },
-            '& $currentControlButton': {
-                display: 'none',
-            },
+        },
+    },
+    currentTrackRow: {
+        color: theme.palette.primary.main,
+        '& > td': {
+            color: 'inherit',
         },
     },
     inGroupTrackRow: {
@@ -435,6 +419,7 @@ export const Main = (props: {}) => {
     }
 
     const getTrackRow = (track: Track, inGroup: boolean, draggableProvided: DraggableProvided) => {
+        const isCurrentTrack = track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state);
         const child = (
             <TableRow
                 {...draggableProvided.draggableProps}
@@ -443,45 +428,25 @@ export const Main = (props: {}) => {
                 selected={selected.includes(track.index)}
                 onDoubleClick={event => handleRenameDoubleClick(event, track.index)}
                 onClick={event => handleSelectClick(event, track.index)}
-                className={clsx(classes.trackRow, { [classes.inGroupTrackRow]: inGroup })}
+                color="inherit"
+                className={clsx(classes.trackRow, { [classes.inGroupTrackRow]: inGroup, [classes.currentTrackRow]: isCurrentTrack })}
             >
                 <TableCell className={classes.dragHandle} {...draggableProvided.dragHandleProps} onClick={event => event.stopPropagation()}>
                     <DragIndicator fontSize="small" color="disabled" />
                 </TableCell>
                 <TableCell className={classes.indexCell}>
-                    {track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state) ? (
-                        <span>
-                            <PlayArrowIcon
-                                className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackListPlaying, {
-                                    [classes.currentControlButton]: deviceStatus?.state === 'playing',
-                                })}
-                                onClick={event => {
-                                    handleCurrentClick(event);
-                                    event.stopPropagation();
-                                }}
-                            />
-                            <PauseIcon
-                                className={clsx(classes.controlButtonInTrackCommon, classes.pauseButtonInTrackListPlaying, {
-                                    [classes.currentControlButton]: deviceStatus?.state === 'paused',
-                                })}
-                                onClick={event => {
-                                    handleCurrentClick(event);
-                                    event.stopPropagation();
-                                }}
-                            />
-                        </span>
-                    ) : (
-                        <span>
-                            <span className={classes.trackIndex}>{track.index + 1}</span>
-                            <PlayArrowIcon
-                                className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackListNotPlaying)}
-                                onClick={event => {
-                                    handlePlayTrack(event, track.index);
-                                    event.stopPropagation();
-                                }}
-                            />
-                        </span>
-                    )}
+                    <span className={classes.trackIndex}>{track.index + 1}</span>
+                    <IconButton
+                        aria-label="delete"
+                        className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackList)}
+                        size="small"
+                        onClick={event => {
+                            handlePlayTrack(event, track.index);
+                            event.stopPropagation();
+                        }}
+                    >
+                        <PlayArrowIcon fontSize="inherit" />
+                    </IconButton>
                 </TableCell>
                 <TableCell className={classes.titleCell} title={track.title ?? ''}>
                     {track.fullWidthTitle ? `${track.fullWidthTitle} / ` : ``}
