@@ -178,7 +178,6 @@ const useStyles = makeStyles(theme => ({
         width: `0px`,
     },
     trackRow: {
-        userSelect: 'none',
         '&:hover': {
             /* For the tracks that aren't currently playing */
             '& $playButtonInTrackListNotPlaying': {
