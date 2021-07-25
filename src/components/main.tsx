@@ -17,18 +17,10 @@ import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
 import { actions as convertDialogActions } from '../redux/convert-dialog-feature';
 import { actions as dumpDialogActions } from '../redux/dump-dialog-feature';
 
-import { formatTimeFromFrames, Track } from 'netmd-js';
+import { DeviceStatus, formatTimeFromFrames, Track } from 'netmd-js';
 import { control } from '../redux/actions';
 
-import {
-    belowDesktop,
-    forAnyDesktop,
-    getGroupedTracks,
-    getSortedTracks,
-    isSequential,
-    useShallowEqualSelector,
-    EncodingName,
-} from '../utils';
+import { belowDesktop, forAnyDesktop, getGroupedTracks, getSortedTracks, isSequential, useShallowEqualSelector } from '../utils';
 
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import { fade } from '@material-ui/core/styles/colorManipulator';
@@ -39,11 +31,7 @@ import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import Backdrop from '@material-ui/core/Backdrop';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import PauseIcon from '@material-ui/icons/Pause';
-import FolderIcon from '@material-ui/icons/Folder';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
-import DragIndicator from '@material-ui/icons/DragIndicator';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -56,6 +44,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
 import { batchActions } from 'redux-batched-actions';
 
+import { GroupRow, TrackRow } from './main-rows';
 import { RenameDialog } from './rename-dialog';
 import { UploadDialog } from './upload-dialog';
 import { RecordDialog } from './record-dialog';
@@ -66,7 +55,6 @@ import { AboutDialog } from './about-dialog';
 import { DumpDialog } from './dump-dialog';
 import { TopMenu } from './topmenu';
 import Checkbox from '@material-ui/core/Checkbox';
-import * as BadgeImpl from '@material-ui/core/Badge/Badge';
 import Button from '@material-ui/core/Button';
 import { W95Main } from './win95/main';
 import { useMemo } from 'react';
@@ -121,29 +109,6 @@ const useStyles = makeStyles(theme => ({
     spacing: {
         marginTop: theme.spacing(1),
     },
-    formatBadge: {
-        ...(BadgeImpl as any).styles(theme).badge,
-        ...(BadgeImpl as any).styles(theme).colorPrimary,
-        position: 'static',
-        display: 'inline-flex',
-        border: `2px solid ${theme.palette.background.paper}`,
-        padding: '0 4px',
-        verticalAlign: 'middle',
-        width: theme.spacing(4.5),
-        marginRight: theme.spacing(0.5),
-    },
-    titleCell: {
-        overflow: 'hidden',
-        maxWidth: '40ch',
-        textOverflow: 'ellipsis',
-        // whiteSpace: 'nowrap',
-    },
-    durationCell: {
-        whiteSpace: 'nowrap',
-    },
-    durationCellTime: {
-        verticalAlign: 'middle',
-    },
     indexCell: {
         whiteSpace: 'nowrap',
         paddingRight: 0,
@@ -157,69 +122,18 @@ const useStyles = makeStyles(theme => ({
         textDecoration: 'underline',
         textDecorationStyle: 'dotted',
     },
-    controlButtonInTrackCommon: {
-        width: theme.spacing(2),
-        height: theme.spacing(2),
-        verticalAlign: 'middle',
-        marginLeft: theme.spacing(-0.5),
-    },
-    playButtonInTrackList: {
-        display: 'none',
-    },
-    trackRow: {
-        '&:hover': {
-            '& $playButtonInTrackList': {
-                display: 'inline-flex',
-            },
-            '& $trackIndex': {
-                display: 'none',
-            },
-        },
-    },
-    currentTrackRow: {
-        color: theme.palette.primary.main,
-        '& > td': {
-            color: 'inherit',
-        },
-    },
-    inGroupTrackRow: {
-        '& > $indexCell': {
-            transform: `translateX(${theme.spacing(3)}px)`,
-        },
-        '& > $titleCell': {
-            transform: `translateX(${theme.spacing(3)}px)`,
-        },
-    },
-    deleteGroupButton: {
-        display: 'none',
-    },
-    groupHeadRow: {
-        '&:hover': {
-            '& svg:not($deleteGroupButton)': {
-                display: 'none',
-            },
-            '& $deleteGroupButton': {
-                display: 'inline-block',
-            },
-        },
-    },
     hoveringOverGroup: {
         backgroundColor: `${fade(theme.palette.secondary.dark, 0.4)}`,
-    },
-    trackIndex: {
-        display: 'inline-block',
-        height: '16px',
-        width: '16px',
-    },
-    dragHandle: {
-        width: 20,
-        padding: `${theme.spacing(0.5)}px 0 0 0`,
     },
     dragHandleEmpty: {
         width: 20,
         padding: `${theme.spacing(0.5)}px 0 0 0`,
     },
 }));
+
+function isCurrentTrack(track: Track, deviceStatus: DeviceStatus | null) {
+    return track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state);
+}
 
 export const Main = (props: {}) => {
     let dispatch = useDispatch();
@@ -370,12 +284,6 @@ export const Main = (props: {}) => {
         }
     };
 
-    const handleCurrentClick = async (event: React.MouseEvent) => {
-        if (deviceStatus?.state === 'playing') {
-            dispatch(control('pause'));
-        } else dispatch(control('play'));
-    };
-
     const canGroup = useMemo(() => {
         return (
             tracks.filter(n => n.group === null && selected.includes(n.index)).length === selected.length &&
@@ -417,49 +325,6 @@ export const Main = (props: {}) => {
         };
         return <W95Main {...p} />;
     }
-
-    const getTrackRow = (track: Track, inGroup: boolean, draggableProvided: DraggableProvided) => {
-        const isCurrentTrack = track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state);
-        const child = (
-            <TableRow
-                {...draggableProvided.draggableProps}
-                ref={draggableProvided.innerRef}
-                hover
-                selected={selected.includes(track.index)}
-                onDoubleClick={event => handleRenameDoubleClick(event, track.index)}
-                onClick={event => handleSelectClick(event, track.index)}
-                color="inherit"
-                className={clsx(classes.trackRow, { [classes.inGroupTrackRow]: inGroup, [classes.currentTrackRow]: isCurrentTrack })}
-            >
-                <TableCell className={classes.dragHandle} {...draggableProvided.dragHandleProps} onClick={event => event.stopPropagation()}>
-                    <DragIndicator fontSize="small" color="disabled" />
-                </TableCell>
-                <TableCell className={classes.indexCell}>
-                    <span className={classes.trackIndex}>{track.index + 1}</span>
-                    <IconButton
-                        aria-label="delete"
-                        className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackList)}
-                        size="small"
-                        onClick={event => {
-                            handlePlayTrack(event, track.index);
-                            event.stopPropagation();
-                        }}
-                    >
-                        <PlayArrowIcon fontSize="inherit" />
-                    </IconButton>
-                </TableCell>
-                <TableCell className={classes.titleCell} title={track.title ?? ''}>
-                    {track.fullWidthTitle ? `${track.fullWidthTitle} / ` : ``}
-                    {track.title || `No Title`}
-                </TableCell>
-                <TableCell align="right" className={classes.durationCell}>
-                    <span className={classes.formatBadge}>{EncodingName[track.encoding]}</span>
-                    <span className={classes.durationCellTime}>{formatTimeFromFrames(track.duration, false)}</span>
-                </TableCell>
-            </TableRow>
-        );
-        return child;
-    };
 
     return (
         <React.Fragment>
@@ -572,40 +437,15 @@ export const Main = (props: {}) => {
                                                         className={clsx({ [classes.hoveringOverGroup]: snapshot.isDraggingOver })}
                                                     >
                                                         {group.title !== null && (
-                                                            <TableRow
-                                                                hover
-                                                                className={classes.groupHeadRow}
-                                                                key={`${index}-head`}
+                                                            <GroupRow
+                                                                group={group}
                                                                 onDoubleClick={event =>
                                                                     handleRenameDoubleClick(event, group.tracks[0].index, true)
                                                                 }
-                                                            >
-                                                                <TableCell className={classes.dragHandleEmpty}></TableCell>
-                                                                <TableCell className={classes.indexCell}>
-                                                                    <FolderIcon className={classes.controlButtonInTrackCommon} />
-                                                                    <DeleteIcon
-                                                                        className={clsx(
-                                                                            classes.controlButtonInTrackCommon,
-                                                                            classes.deleteGroupButton
-                                                                        )}
-                                                                        onClick={event => {
-                                                                            handleGroupRemoval(event, group.tracks[0].index);
-                                                                        }}
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell className={classes.titleCell} title={group.title!}>
-                                                                    {group.fullWidthTitle ? `${group.fullWidthTitle} / ` : ``}
-                                                                    {group.title || `No Name`}
-                                                                </TableCell>
-                                                                <TableCell align="right" className={classes.durationCell}>
-                                                                    <span className={classes.durationCellTime}>
-                                                                        {formatTimeFromFrames(
-                                                                            group.tracks.map(n => n.duration).reduce((a, b) => a + b),
-                                                                            false
-                                                                        )}
-                                                                    </span>
-                                                                </TableCell>
-                                                            </TableRow>
+                                                                onDelete={event => {
+                                                                    handleGroupRemoval(event, group.tracks[0].index);
+                                                                }}
+                                                            />
                                                         )}
                                                         {group.title === null && group.tracks.length === 0 && (
                                                             <TableRow style={{ height: '1px' }} />
@@ -616,9 +456,18 @@ export const Main = (props: {}) => {
                                                                 key={`t-${t.index}`}
                                                                 index={tidx}
                                                             >
-                                                                {(provided: DraggableProvided) =>
-                                                                    getTrackRow(t, group.title !== null, provided)
-                                                                }
+                                                                {(provided: DraggableProvided) => (
+                                                                    <TrackRow
+                                                                        track={t}
+                                                                        draggableProvided={provided}
+                                                                        inGroup={group.title !== null}
+                                                                        isSelected={selected.includes(t.index)}
+                                                                        isCurrentTrack={isCurrentTrack(t, deviceStatus)}
+                                                                        onSelect={handleSelectClick}
+                                                                        onRename={handleRenameDoubleClick}
+                                                                        onPlay={handlePlayTrack}
+                                                                    />
+                                                                )}
                                                             </Draggable>
                                                         ))}
                                                         {provided.placeholder}
