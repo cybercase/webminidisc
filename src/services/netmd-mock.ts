@@ -152,28 +152,29 @@ class NetMDMockService implements NetMDService {
     }
 
     async addGroup(groupBegin: number, groupLength: number, newName: string) {
-        let ungrouped = this._getGroups().find(n => n.title === null);
-        if (!ungrouped) {
+        let ungroupedDefs = this._groupsDef.find(g => g.title === null);
+        if (!ungroupedDefs) {
             return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
         }
-        let ungroupedLengthBeforeGroup = ungrouped.tracks.length;
+        let ungroupedLengthBeforeGroup = ungroupedDefs.tracksIdx.length;
 
-        let thisGroupTracks = ungrouped.tracks.filter(n => n.index >= groupBegin && n.index < groupBegin + groupLength);
-        ungrouped.tracks = ungrouped.tracks.filter(n => !thisGroupTracks.includes(n));
-
-        if (ungroupedLengthBeforeGroup - ungrouped.tracks.length !== groupLength) {
-            throw new Error('A track cannot be in 2 groups!');
-        }
-
-        if (!isSequential(thisGroupTracks.map(n => n.index))) {
+        const newGroupTracks = ungroupedDefs.tracksIdx.filter(idx => idx >= groupBegin && idx < groupBegin + groupLength);
+        if (!isSequential(newGroupTracks)) {
             throw new Error('Invalid sequence of tracks!');
         }
-        this._groupsDef.push({
+
+        const newGroupDef = {
             title: newName,
             fullWidthTitle: '',
             index: groupBegin,
-            tracksIdx: thisGroupTracks.map(t => t.index),
-        });
+            tracksIdx: newGroupTracks,
+        };
+        this._groupsDef.push(newGroupDef);
+
+        ungroupedDefs.tracksIdx = ungroupedDefs.tracksIdx.filter(idx => !newGroupTracks.includes(idx));
+        if (ungroupedLengthBeforeGroup - ungroupedDefs.tracksIdx.length !== groupLength) {
+            throw new Error('A track cannot be in 2 groups!');
+        }
     }
 
     async deleteGroup(groupBegin: number) {
