@@ -610,14 +610,14 @@ export const Main = (props: {}) => {
                                                         {group.title === null && group.tracks.length === 0 && (
                                                             <TableRow style={{ height: '1px' }} />
                                                         )}
-                                                        {group.tracks.map(n => (
+                                                        {group.tracks.map((t, tidx) => (
                                                             <Draggable
-                                                                draggableId={`${group.index}-${n.index}`}
-                                                                key={`${n.index - group.tracks[0].index}`}
-                                                                index={n.index - group.tracks[0].index}
+                                                                draggableId={`${group.index}-${t.index}`}
+                                                                key={`t-${t.index}`}
+                                                                index={tidx}
                                                             >
                                                                 {(provided: DraggableProvided) =>
-                                                                    getTrackRow(n, group.title !== null, provided)
+                                                                    getTrackRow(t, group.title !== null, provided)
                                                                 }
                                                             </Draggable>
                                                         ))}
