@@ -106,7 +106,7 @@ export const W95Main = (props: {
     handleShowDumpDialog: () => void;
     handleDeleteSelected: (event: React.MouseEvent) => void;
     handleRenameActionClick: (event: React.MouseEvent) => void;
-    handleRenameDoubleClick: (event: React.MouseEvent, item: number) => void;
+    handleRenameTrack: (event: React.MouseEvent, item: number) => void;
     handleSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleSelectClick: (event: React.MouseEvent, item: number) => void;
 }) => {
@@ -199,12 +199,15 @@ export const W95Main = (props: {
                                 <CustomTableRow
                                     style={props.selected.includes(track.index) ? themeContext.selectedTableRow : {}}
                                     key={track.index}
-                                    onDoubleClick={(event: React.MouseEvent) => props.handleRenameDoubleClick(event, track.index)}
+                                    onDoubleClick={(event: React.MouseEvent) => props.handleRenameTrack(event, track.index)}
                                     onClick={(event: React.MouseEvent) => props.handleSelectClick(event, track.index)}
                                 >
                                     <TableDataCell style={{ textAlign: 'center', width: '2ch' }}>{track.index + 1}</TableDataCell>
                                     <TableDataCell style={{ width: '80%' }}>
-                                        <div>{track.fullWidthTitle && `${track.fullWidthTitle} / `}{track.title || `No Title`}</div>
+                                        <div>
+                                            {track.fullWidthTitle && `${track.fullWidthTitle} / `}
+                                            {track.title || `No Title`}
+                                        </div>
                                     </TableDataCell>
                                     <TableDataCell style={{ textAlign: 'right', width: '20%' }}>
                                         <span>{track.encoding}</span>

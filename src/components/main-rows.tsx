@@ -171,18 +171,21 @@ export function TrackRow({ track, inGroup, isSelected, draggableProvided, isCurr
 
 interface GroupRowProps {
     group: Group;
-    onDoubleClick: (event: React.MouseEvent) => void;
-    onDelete: (event: React.MouseEvent) => void;
+    onRename: (event: React.MouseEvent, groupIdx: number) => void;
+    onDelete: (event: React.MouseEvent, groupIdx: number) => void;
 }
 
-export function GroupRow({ group, onDoubleClick, onDelete }: GroupRowProps) {
+export function GroupRow({ group, onRename, onDelete }: GroupRowProps) {
     const classes = useStyles();
+
+    const handleDelete = useCallback((event: React.MouseEvent) => onDelete(event, group.tracks[0].index), [onDelete, group]);
+    const handleRename = useCallback((event: React.MouseEvent) => onRename(event, group.index), [onRename, group]);
     return (
-        <TableRow hover className={classes.groupHeadRow} onDoubleClick={onDoubleClick}>
+        <TableRow hover className={classes.groupHeadRow} onDoubleClick={handleRename}>
             <TableCell className={classes.dragHandleEmpty}></TableCell>
             <TableCell className={classes.indexCell}>
                 <FolderIcon className={classes.controlButtonInTrackCommon} />
-                <DeleteIcon className={clsx(classes.controlButtonInTrackCommon, classes.deleteGroupButton)} onClick={onDelete} />
+                <DeleteIcon className={clsx(classes.controlButtonInTrackCommon, classes.deleteGroupButton)} onClick={handleDelete} />
             </TableCell>
             <TableCell className={classes.titleCell} title={group.title!}>
                 {group.fullWidthTitle ? `${group.fullWidthTitle} / ` : ``}

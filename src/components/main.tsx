@@ -143,10 +143,10 @@ export const Main = (props: {}) => {
     const { vintageMode } = useShallowEqualSelector(state => state.appState);
 
     const [selected, setSelected] = React.useState<number[]>([]);
+    const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
     const [lastClicked, setLastClicked] = useState(-1);
-    const selectedCount = selected.length;
-
     const [moveMenuAnchorEl, setMoveMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+
     const handleShowMoveMenu = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             setMoveMenuAnchorEl(event.currentTarget);
@@ -156,6 +156,7 @@ export const Main = (props: {}) => {
     const handleCloseMoveMenu = useCallback(() => {
         setMoveMenuAnchorEl(null);
     }, [setMoveMenuAnchorEl]);
+
     const handleMoveSelectedTrack = useCallback(
         (destIndex: number) => {
             dispatch(moveTrack(selected[0], destIndex));
@@ -188,7 +189,6 @@ export const Main = (props: {}) => {
         setSelected([]); // Reset selection if disc changes
     }, [disc]);
 
-    let [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
     const onDrop = useCallback(
         (acceptedFiles: File[], rejectedFiles: File[]) => {
             setUploadedFiles(acceptedFiles);
@@ -196,6 +196,7 @@ export const Main = (props: {}) => {
         },
         [dispatch]
     );
+
     const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
         onDrop,
         accept: [`audio/*`, `video/mp4`],
@@ -207,82 +208,120 @@ export const Main = (props: {}) => {
     const groupedTracks = useMemo(() => getGroupedTracks(disc), [disc]);
 
     // Action Handlers
-    const handleSelectClick = (event: React.MouseEvent, item: number) => {
-        if (event.shiftKey && selected.length && lastClicked !== -1) {
-            let rangeBegin = Math.min(lastClicked + 1, item),
-                rangeEnd = Math.max(lastClicked - 1, item);
-            let copy = [...selected];
-            for (let i = rangeBegin; i <= rangeEnd; i++) {
-                let index = copy.indexOf(i);
-                if (index === -1) copy.push(i);
-                else copy.splice(index, 1);
+    const handleSelectClick = useCallback(
+        (event: React.MouseEvent, item: number) => {
+            if (event.shiftKey && selected.length && lastClicked !== -1) {
+                let rangeBegin = Math.min(lastClicked + 1, item),
+                    rangeEnd = Math.max(lastClicked - 1, item);
+                let copy = [...selected];
+                for (let i = rangeBegin; i <= rangeEnd; i++) {
+                    let index = copy.indexOf(i);
+                    if (index === -1) copy.push(i);
+                    else copy.splice(index, 1);
+                }
+                if (!copy.includes(item)) copy.push(item);
+                setSelected(copy);
+            } else if (selected.includes(item)) {
+                setSelected(selected.filter(i => i !== item));
+            } else {
+                setSelected([...selected, item]);
             }
-            if (!copy.includes(item)) copy.push(item);
-            setSelected(copy);
-        } else if (selected.includes(item)) {
-            setSelected(selected.filter(i => i !== item));
-        } else {
-            setSelected([...selected, item]);
-        }
-        setLastClicked(item);
-    };
+            setLastClicked(item);
+        },
+        [selected, setSelected, lastClicked, setLastClicked]
+    );
 
-    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (selected.length < tracks.length) {
-            setSelected(tracks.map(t => t.index));
-        } else {
-            setSelected([]);
-        }
-    };
+    const handleSelectAllClick = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            if (selected.length < tracks.length) {
+                setSelected(tracks.map(t => t.index));
+            } else {
+                setSelected([]);
+            }
+        },
+        [selected, tracks]
+    );
 
-    const handleRenameDoubleClick = (event: React.MouseEvent, index: number, renameGroup?: boolean) => {
-        let group, track;
-        if (renameGroup) {
-            group = groupedTracks.find(n => n.tracks[0]?.index === index);
-            if (!group) return;
-        } else {
-            track = tracks.find(n => n.index === index);
-            if (!track) return;
-        }
+    const handleRenameTrack = useCallback(
+        (event: React.MouseEvent, index: number) => {
+            let track = tracks.find(t => t.index === index);
+            if (!track) {
+                return;
+            }
 
-        let currentName = (track ? track.title : group?.title) ?? '';
-        let currentFullWidthName = (track ? track.fullWidthTitle : group?.fullWidthTitle) ?? '';
-        dispatch(
-            batchActions([
-                renameDialogActions.setVisible(true),
-                renameDialogActions.setGroupIndex(group ? index : null),
-                renameDialogActions.setCurrentName(currentName),
-                renameDialogActions.setCurrentFullWidthName(currentFullWidthName),
-                renameDialogActions.setIndex(track?.index ?? -1),
-            ])
-        );
-    };
+            dispatch(
+                batchActions([
+                    renameDialogActions.setVisible(true),
+                    renameDialogActions.setGroupIndex(null),
+                    renameDialogActions.setCurrentName(track.title),
+                    renameDialogActions.setCurrentFullWidthName(track.fullWidthTitle),
+                    renameDialogActions.setIndex(track.index),
+                ])
+            );
+        },
+        [dispatch, tracks]
+    );
 
-    const handleRenameActionClick = (event: React.MouseEvent) => {
-        if (event.detail !== 1) return; //Event retriggering when hitting enter in the dialog
-        handleRenameDoubleClick(event, selected[0]);
-    };
+    const handleRenameGroup = useCallback(
+        (event: React.MouseEvent, index: number) => {
+            let group = groupedTracks.find(g => g.index === index);
+            if (!group) {
+                return;
+            }
 
-    const handleDeleteSelected = (event: React.MouseEvent) => {
-        dispatch(deleteTracks(selected));
-    };
+            dispatch(
+                batchActions([
+                    renameDialogActions.setVisible(true),
+                    renameDialogActions.setGroupIndex(index),
+                    renameDialogActions.setCurrentName(group.title ?? ''),
+                    renameDialogActions.setCurrentFullWidthName(group.fullWidthTitle ?? ''),
+                    renameDialogActions.setIndex(-1),
+                ])
+            );
+        },
+        [dispatch, groupedTracks]
+    );
 
-    const handleGroupTracks = (event: React.MouseEvent) => {
-        dispatch(groupTracks(selected));
-    };
+    const handleRenameActionClick = useCallback(
+        (event: React.MouseEvent) => {
+            if (event.detail !== 1) return; //Event retriggering when hitting enter in the dialog
+            handleRenameTrack(event, selected[0]);
+        },
+        [handleRenameTrack, selected]
+    );
 
-    const handleGroupRemoval = (event: React.MouseEvent, groupBegin: number) => {
-        dispatch(deleteGroup(groupBegin));
-    };
+    const handleDeleteSelected = useCallback(
+        (event: React.MouseEvent) => {
+            dispatch(deleteTracks(selected));
+        },
+        [dispatch, selected]
+    );
 
-    const handlePlayTrack = async (event: React.MouseEvent, track: number) => {
-        if (deviceStatus?.track !== track) {
-            dispatch(control('goto', track));
-        }
-        if (deviceStatus?.state !== 'playing') {
-            dispatch(control('play'));
-        }
-    };
+    const handleGroupTracks = useCallback(
+        (event: React.MouseEvent) => {
+            dispatch(groupTracks(selected));
+        },
+        [dispatch, selected]
+    );
+
+    const handleGroupRemoval = useCallback(
+        (event: React.MouseEvent, groupBegin: number) => {
+            dispatch(deleteGroup(groupBegin));
+        },
+        [dispatch]
+    );
+
+    const handlePlayTrack = useCallback(
+        (event: React.MouseEvent, track: number) => {
+            if (deviceStatus?.track !== track) {
+                dispatch(control('goto', track));
+            }
+            if (deviceStatus?.state !== 'playing') {
+                dispatch(control('play'));
+            }
+        },
+        [dispatch, deviceStatus]
+    );
 
     const canGroup = useMemo(() => {
         return (
@@ -290,6 +329,7 @@ export const Main = (props: {}) => {
             isSequential(selected.sort((a, b) => a - b))
         );
     }, [tracks, selected]);
+    const selectedCount = selected.length;
 
     if (vintageMode) {
         const p = {
@@ -319,7 +359,7 @@ export const Main = (props: {}) => {
             handleShowDumpDialog,
             handleDeleteSelected,
             handleRenameActionClick,
-            handleRenameDoubleClick,
+            handleRenameTrack,
             handleSelectAllClick,
             handleSelectClick,
         };
@@ -439,12 +479,8 @@ export const Main = (props: {}) => {
                                                         {group.title !== null && (
                                                             <GroupRow
                                                                 group={group}
-                                                                onDoubleClick={event =>
-                                                                    handleRenameDoubleClick(event, group.tracks[0].index, true)
-                                                                }
-                                                                onDelete={event => {
-                                                                    handleGroupRemoval(event, group.tracks[0].index);
-                                                                }}
+                                                                onRename={handleRenameGroup}
+                                                                onDelete={handleGroupRemoval}
                                                             />
                                                         )}
                                                         {group.title === null && group.tracks.length === 0 && (
@@ -464,7 +500,7 @@ export const Main = (props: {}) => {
                                                                         isSelected={selected.includes(t.index)}
                                                                         isCurrentTrack={isCurrentTrack(t, deviceStatus)}
                                                                         onSelect={handleSelectClick}
-                                                                        onRename={handleRenameDoubleClick}
+                                                                        onRename={handleRenameTrack}
                                                                         onPlay={handlePlayTrack}
                                                                     />
                                                                 )}
