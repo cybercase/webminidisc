@@ -137,8 +137,8 @@ function isCurrentTrack(track: Track, deviceStatus: DeviceStatus | null) {
 
 export const Main = (props: {}) => {
     let dispatch = useDispatch();
-    let disc = useShallowEqualSelector(state => state.main.disc);
-    let deviceName = useShallowEqualSelector(state => state.main.deviceName);
+    const disc = useShallowEqualSelector(state => state.main.disc);
+    const deviceName = useShallowEqualSelector(state => state.main.deviceName);
     const deviceStatus = useShallowEqualSelector(state => state.main.deviceStatus);
     const { vintageMode } = useShallowEqualSelector(state => state.appState);
 

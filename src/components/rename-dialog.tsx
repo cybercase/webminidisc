@@ -42,11 +42,12 @@ export const RenameDialog = (props: {}) => {
 
     const what = renameDialogGroupIndex !== null ? `Group` : renameDialogIndex < 0 ? `Disc` : `Track`;
 
-    const handleCancelRename = () => {
+    const handleCancelRename = useCallback(() => {
         dispatch(renameDialogActions.setVisible(false));
-    };
+    }, [dispatch]);
 
-    const handleDoRename = () => {
+    const handleDoRename = useCallback(() => {
+        console.log(renameDialogGroupIndex, renameDialogIndex);
         if (renameDialogGroupIndex !== null) {
             // Just rename the group with this range
             dispatch(
@@ -73,7 +74,7 @@ export const RenameDialog = (props: {}) => {
             );
         }
         handleCancelRename(); // Close the dialog
-    };
+    }, [dispatch, handleCancelRename, renameDialogFullWidthTitle, renameDialogGroupIndex, renameDialogIndex, renameDialogTitle]);
 
     const handleChange = useCallback(
         (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -87,6 +88,17 @@ export const RenameDialog = (props: {}) => {
             dispatch(renameDialogActions.setCurrentFullWidthName(event.target.value.substring(0, 105)));
         },
         [dispatch]
+    );
+
+    const handleEnterKeyEvent = useCallback(
+        (event: React.KeyboardEvent) => {
+            if (event.key === `Enter`) {
+                event.stopPropagation();
+                event.preventDefault();
+                handleDoRename();
+            }
+        },
+        [handleDoRename]
     );
 
     const { vintageMode } = useShallowEqualSelector(state => state.appState);
@@ -121,9 +133,7 @@ export const RenameDialog = (props: {}) => {
                     type="text"
                     fullWidth
                     value={renameDialogTitle}
-                    onKeyDown={event => {
-                        event.key === `Enter` && handleDoRename();
-                    }}
+                    onKeyDown={handleEnterKeyEvent}
                     onChange={handleChange}
                 />
                 {allowFullWidth && (
@@ -134,9 +144,7 @@ export const RenameDialog = (props: {}) => {
                         fullWidth
                         className={classes.marginUpDown}
                         value={renameDialogFullWidthTitle}
-                        onKeyDown={event => {
-                            event.key === `Enter` && handleDoRename();
-                        }}
+                        onKeyDown={handleEnterKeyEvent}
                         onChange={handleFullWidthChange}
                     />
                 )}

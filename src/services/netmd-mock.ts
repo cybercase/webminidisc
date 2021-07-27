@@ -140,8 +140,8 @@ class NetMDMockService implements NetMDService {
         return JSON.parse(JSON.stringify(this._getDisc()));
     }
 
-    async renameGroup(groupBegin: number, newName: string, newFullWidth?: string) {
-        let group = this._groupsDef.slice(1).find(n => n.index === groupBegin);
+    async renameGroup(gropuIndex: number, newName: string, newFullWidth?: string) {
+        let group = this._groupsDef.slice(1).find(n => n.index === gropuIndex);
         if (!group) {
             return;
         }
@@ -328,7 +328,7 @@ class NetMDMockService implements NetMDService {
 
     @asyncMutex
     async pause() {
-        console.log('pause');
+        this._status.state = 'paused';
     }
 
     @asyncMutex

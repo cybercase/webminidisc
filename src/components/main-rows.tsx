@@ -18,7 +18,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 import { DraggableProvided } from 'react-beautiful-dnd';
 
-const useStyles = makeStyles((theme: any) => ({
+const useStyles = makeStyles(theme => ({
     currentTrackRow: {
         color: theme.palette.primary.main,
         '& > td': {
@@ -65,6 +65,10 @@ const useStyles = makeStyles((theme: any) => ({
     },
     durationCell: {
         whiteSpace: 'nowrap',
+    },
+    durationCellSecondary: {
+        whiteSpace: 'nowrap',
+        color: theme.palette.text.secondary,
     },
     durationCellTime: {
         verticalAlign: 'middle',
@@ -191,7 +195,7 @@ export function GroupRow({ group, onRename, onDelete }: GroupRowProps) {
                 {group.fullWidthTitle ? `${group.fullWidthTitle} / ` : ``}
                 {group.title || `No Name`}
             </TableCell>
-            <TableCell align="right" className={classes.durationCell}>
+            <TableCell align="right" className={classes.durationCellSecondary}>
                 <span className={classes.durationCellTime}>
                     {formatTimeFromFrames(
                         group.tracks.map(n => n.duration).reduce((a, b) => a + b),
