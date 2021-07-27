@@ -73,7 +73,7 @@ class NetMDMockService implements NetMDService {
         {
             title: 'Test',
             fullWidthTitle: '',
-            index: 0,
+            index: 1,
             tracksIdx: [0, 1],
         },
     ];
@@ -141,7 +141,7 @@ class NetMDMockService implements NetMDService {
     }
 
     async renameGroup(gropuIndex: number, newName: string, newFullWidth?: string) {
-        let group = this._groupsDef.slice(1).find(n => n.index === gropuIndex);
+        let group = this._groupsDef.find(n => n.index === gropuIndex);
         if (!group) {
             return;
         }
@@ -171,16 +171,18 @@ class NetMDMockService implements NetMDService {
         };
         this._groupsDef.push(newGroupDef);
 
+        this._groupsDef = this._groupsDef.filter(g => g.tracksIdx.length !== 0).sort((a, b) => a.tracksIdx[0] - b.tracksIdx[0]);
+
         ungroupedDefs.tracksIdx = ungroupedDefs.tracksIdx.filter(idx => !newGroupTracks.includes(idx));
         if (ungroupedLengthBeforeGroup - ungroupedDefs.tracksIdx.length !== groupLength) {
             throw new Error('A track cannot be in 2 groups!');
         }
     }
 
-    async deleteGroup(groupBegin: number) {
+    async deleteGroup(index: number) {
         const groups = this._getGroups();
-        const thisGroup = groups.slice(1).find(n => n.tracks[0].index === groupBegin);
-        if (!thisGroup) {
+        const group = groups.find(g => g.index === index);
+        if (!group) {
             return;
         }
         let ungroupedGroup = this._groupsDef.find(n => n.title === null);
@@ -193,8 +195,8 @@ class NetMDMockService implements NetMDService {
             };
             this._groupsDef.unshift(ungroupedGroup);
         }
-        ungroupedGroup.tracksIdx = ungroupedGroup.tracksIdx.concat(thisGroup.tracks.map(t => t.index)).sort();
-        this._groupsDef.splice(groups.indexOf(thisGroup), 1);
+        ungroupedGroup.tracksIdx = ungroupedGroup.tracksIdx.concat(group.tracks.map(t => t.index)).sort();
+        this._groupsDef.splice(groups.indexOf(group), 1);
     }
 
     async rewriteGroups(groups: Group[]) {

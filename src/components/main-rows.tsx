@@ -182,7 +182,7 @@ interface GroupRowProps {
 export function GroupRow({ group, onRename, onDelete }: GroupRowProps) {
     const classes = useStyles();
 
-    const handleDelete = useCallback((event: React.MouseEvent) => onDelete(event, group.tracks[0].index), [onDelete, group]);
+    const handleDelete = useCallback((event: React.MouseEvent) => onDelete(event, group.index), [onDelete, group]);
     const handleRename = useCallback((event: React.MouseEvent) => onRename(event, group.index), [onRename, group]);
     return (
         <TableRow hover className={classes.groupHeadRow} onDoubleClick={handleRename}>

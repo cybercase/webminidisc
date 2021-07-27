@@ -76,10 +76,10 @@ export function groupTracks(indexes: number[]) {
     };
 }
 
-export function deleteGroup(groupBegin: number) {
+export function deleteGroup(index: number) {
     return async function(dispatch: AppDispatch) {
         const { netmdService } = serviceRegistry;
-        netmdService!.deleteGroup(groupBegin);
+        netmdService!.deleteGroup(index);
         listContent()(dispatch);
     };
 }

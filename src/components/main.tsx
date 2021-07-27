@@ -304,9 +304,9 @@ export const Main = (props: {}) => {
         [dispatch, selected]
     );
 
-    const handleGroupRemoval = useCallback(
-        (event: React.MouseEvent, groupBegin: number) => {
-            dispatch(deleteGroup(groupBegin));
+    const handleDeleteGroup = useCallback(
+        (event: React.MouseEvent, index: number) => {
+            dispatch(deleteGroup(index));
         },
         [dispatch]
     );
@@ -480,7 +480,7 @@ export const Main = (props: {}) => {
                                                             <GroupRow
                                                                 group={group}
                                                                 onRename={handleRenameGroup}
-                                                                onDelete={handleGroupRemoval}
+                                                                onDelete={handleDeleteGroup}
                                                             />
                                                         )}
                                                         {group.title === null && group.tracks.length === 0 && (

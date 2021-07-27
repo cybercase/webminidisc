@@ -36,7 +36,7 @@ export interface NetMDService {
     finalize(): Promise<void>;
     renameTrack(index: number, newTitle: string, newFullWidthTitle?: string): Promise<void>;
     renameDisc(newName: string, newFullWidthName?: string): Promise<void>;
-    renameGroup(groupBegin: number, newTitle: string, newFullWidthTitle?: string): Promise<void>;
+    renameGroup(groupIndex: number, newTitle: string, newFullWidthTitle?: string): Promise<void>;
     addGroup(groupBegin: number, groupLength: number, name: string): Promise<void>;
     deleteGroup(groupIndex: number): Promise<void>;
     rewriteGroups(groups: Group[]): Promise<void>;
@@ -218,11 +218,13 @@ export class NetMDUSBService implements NetMDService {
     }
 
     @asyncMutex
-    async deleteGroup(groupBegin: number) {
+    async deleteGroup(index: number) {
         const disc = await this.listContentUsingCache();
 
-        let thisGroup = disc.groups.find(n => n.tracks[0].index === groupBegin);
-        if (thisGroup) disc.groups.splice(disc.groups.indexOf(thisGroup), 1);
+        let groupIndex = disc.groups.findIndex(g => g.index === index);
+        if (groupIndex >= 0) {
+            disc.groups.splice(groupIndex, 1);
+        }
 
         await this.writeRawTitles(compileDiscTitles(disc));
     }
