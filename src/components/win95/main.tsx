@@ -108,7 +108,7 @@ export const W95Main = (props: {
     handleRenameActionClick: (event: React.MouseEvent) => void;
     handleRenameTrack: (event: React.MouseEvent, item: number) => void;
     handleSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleSelectClick: (event: React.MouseEvent, item: number) => void;
+    handleSelectTrackClick: (event: React.MouseEvent, item: number) => void;
 }) => {
     const classes = useStyles();
     const themeContext = useContext(ThemeContext);
@@ -200,7 +200,7 @@ export const W95Main = (props: {
                                     style={props.selected.includes(track.index) ? themeContext.selectedTableRow : {}}
                                     key={track.index}
                                     onDoubleClick={(event: React.MouseEvent) => props.handleRenameTrack(event, track.index)}
-                                    onClick={(event: React.MouseEvent) => props.handleSelectClick(event, track.index)}
+                                    onClick={(event: React.MouseEvent) => props.handleSelectTrackClick(event, track.index)}
                                 >
                                     <TableDataCell style={{ textAlign: 'center', width: '2ch' }}>{track.index + 1}</TableDataCell>
                                     <TableDataCell style={{ width: '80%' }}>

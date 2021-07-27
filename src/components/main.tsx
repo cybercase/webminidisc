@@ -208,7 +208,7 @@ export const Main = (props: {}) => {
     const groupedTracks = useMemo(() => getGroupedTracks(disc), [disc]);
 
     // Action Handlers
-    const handleSelectClick = useCallback(
+    const handleSelectTrackClick = useCallback(
         (event: React.MouseEvent, item: number) => {
             if (event.shiftKey && selected.length && lastClicked !== -1) {
                 let rangeBegin = Math.min(lastClicked + 1, item),
@@ -361,7 +361,7 @@ export const Main = (props: {}) => {
             handleRenameActionClick,
             handleRenameTrack,
             handleSelectAllClick,
-            handleSelectClick,
+            handleSelectTrackClick,
         };
         return <W95Main {...p} />;
     }
@@ -499,7 +499,7 @@ export const Main = (props: {}) => {
                                                                         inGroup={group.title !== null}
                                                                         isSelected={selected.includes(t.index)}
                                                                         isCurrentTrack={isCurrentTrack(t, deviceStatus)}
-                                                                        onSelect={handleSelectClick}
+                                                                        onSelect={handleSelectTrackClick}
                                                                         onRename={handleRenameTrack}
                                                                         onPlay={handlePlayTrack}
                                                                     />
