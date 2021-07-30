@@ -129,13 +129,14 @@ export function TrackRow({ track, inGroup, isSelected, draggableProvided, isCurr
 
     const handleRename = useCallback(event => onRename(event, track.index), [track.index, onRename]);
     const handleSelect = useCallback(event => onSelect(event, track.index), [track.index, onSelect]);
-    const handlePlay = useCallback(
+    const handlePlay: React.MouseEventHandler = useCallback(
         event => {
+            event.stopPropagation();
             onPlay(event, track.index);
-            event?.stopPropagation();
         },
         [track.index, onPlay]
     );
+    const handleDoubleClickOnPlayButton: React.MouseEventHandler = useCallback(event => event.stopPropagation(), []);
 
     return (
         <TableRow
@@ -158,6 +159,7 @@ export function TrackRow({ track, inGroup, isSelected, draggableProvided, isCurr
                     className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackList)}
                     size="small"
                     onClick={handlePlay}
+                    onDoubleClick={handleDoubleClickOnPlayButton}
                 >
                     <PlayArrowIcon fontSize="inherit" />
                 </IconButton>
