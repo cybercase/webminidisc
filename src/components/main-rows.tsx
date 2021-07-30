@@ -12,6 +12,7 @@ import * as BadgeImpl from '@material-ui/core/Badge/Badge';
 
 import DragIndicator from '@material-ui/icons/DragIndicator';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import PauseIcon from '@material-ui/icons/Pause';
 import IconButton from '@material-ui/core/IconButton';
 import FolderIcon from '@material-ui/icons/Folder';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -117,26 +118,36 @@ interface TrackRowProps {
     track: Track;
     inGroup: boolean;
     isSelected: boolean;
-    isCurrentTrack: boolean;
+    trackStatus: 'playing' | 'paused' | 'none';
     draggableProvided: DraggableProvided;
     onSelect: (event: React.MouseEvent, trackIdx: number) => void;
     onRename: (event: React.MouseEvent, trackIdx: number) => void;
-    onPlay: (event: React.MouseEvent, trackIdx: number) => void;
+    onTogglePlayPause: (event: React.MouseEvent, trackIdx: number) => void;
 }
 
-export function TrackRow({ track, inGroup, isSelected, draggableProvided, isCurrentTrack, onSelect, onRename, onPlay }: TrackRowProps) {
+export function TrackRow({
+    track,
+    inGroup,
+    isSelected,
+    draggableProvided,
+    trackStatus,
+    onSelect,
+    onRename,
+    onTogglePlayPause,
+}: TrackRowProps) {
     const classes = useStyles();
 
     const handleRename = useCallback(event => onRename(event, track.index), [track.index, onRename]);
     const handleSelect = useCallback(event => onSelect(event, track.index), [track.index, onSelect]);
-    const handlePlay: React.MouseEventHandler = useCallback(
+    const handlePlayPause: React.MouseEventHandler = useCallback(
         event => {
             event.stopPropagation();
-            onPlay(event, track.index);
+            onTogglePlayPause(event, track.index);
         },
-        [track.index, onPlay]
+        [track.index, onTogglePlayPause]
     );
     const handleDoubleClickOnPlayButton: React.MouseEventHandler = useCallback(event => event.stopPropagation(), []);
+    const isPlayingOrPaused = trackStatus === 'playing' || trackStatus === 'paused';
 
     return (
         <TableRow
@@ -147,7 +158,7 @@ export function TrackRow({ track, inGroup, isSelected, draggableProvided, isCurr
             onDoubleClick={handleRename}
             onClick={handleSelect}
             color="inherit"
-            className={clsx(classes.trackRow, { [classes.inGroupTrackRow]: inGroup, [classes.currentTrackRow]: isCurrentTrack })}
+            className={clsx(classes.trackRow, { [classes.inGroupTrackRow]: inGroup, [classes.currentTrackRow]: isPlayingOrPaused })}
         >
             <TableCell className={classes.dragHandle} {...draggableProvided.dragHandleProps} onClick={event => event.stopPropagation()}>
                 <DragIndicator fontSize="small" color="disabled" />
@@ -158,10 +169,14 @@ export function TrackRow({ track, inGroup, isSelected, draggableProvided, isCurr
                     aria-label="delete"
                     className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackList)}
                     size="small"
-                    onClick={handlePlay}
+                    onClick={handlePlayPause}
                     onDoubleClick={handleDoubleClickOnPlayButton}
                 >
-                    <PlayArrowIcon fontSize="inherit" />
+                    {trackStatus === 'paused' || trackStatus === 'none' ? (
+                        <PlayArrowIcon fontSize="inherit" />
+                    ) : (
+                        <PauseIcon fontSize="inherit" />
+                    )}
                 </IconButton>
             </TableCell>
             <TableCell className={classes.titleCell} title={track.title ?? ''}>

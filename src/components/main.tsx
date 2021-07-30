@@ -131,8 +131,18 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-function isCurrentTrack(track: Track, deviceStatus: DeviceStatus | null) {
-    return track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state);
+function getTrackStatus(track: Track, deviceStatus: DeviceStatus | null): 'playing' | 'paused' | 'none' {
+    if (!deviceStatus || track.index !== deviceStatus.track) {
+        return 'none';
+    }
+
+    if (deviceStatus.state === 'playing') {
+        return 'playing';
+    } else if (deviceStatus.state === 'paused') {
+        return 'paused';
+    } else {
+        return 'none';
+    }
 }
 
 export const Main = (props: {}) => {
@@ -311,13 +321,18 @@ export const Main = (props: {}) => {
         [dispatch]
     );
 
-    const handlePlayTrack = useCallback(
+    const handleTogglePlayPauseTrack = useCallback(
         (event: React.MouseEvent, track: number) => {
-            if (deviceStatus?.track !== track) {
-                dispatch(control('goto', track));
+            if (!deviceStatus) {
+                return;
             }
-            if (deviceStatus?.state !== 'playing') {
-                dispatch(control('play'));
+            if (deviceStatus.track !== track) {
+                dispatch(control('goto', track));
+                if (deviceStatus.state !== 'playing') {
+                    dispatch(control('play'));
+                }
+            } else if (deviceStatus.state === 'playing') {
+                dispatch(control('pause'));
             }
         },
         [dispatch, deviceStatus]
@@ -498,10 +513,10 @@ export const Main = (props: {}) => {
                                                                         draggableProvided={provided}
                                                                         inGroup={group.title !== null}
                                                                         isSelected={selected.includes(t.index)}
-                                                                        isCurrentTrack={isCurrentTrack(t, deviceStatus)}
+                                                                        trackStatus={getTrackStatus(t, deviceStatus)}
                                                                         onSelect={handleSelectTrackClick}
                                                                         onRename={handleRenameTrack}
-                                                                        onPlay={handlePlayTrack}
+                                                                        onTogglePlayPause={handleTogglePlayPauseTrack}
                                                                     />
                                                                 )}
                                                             </Draggable>
