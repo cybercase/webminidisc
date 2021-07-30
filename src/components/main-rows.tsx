@@ -100,13 +100,14 @@ const useStyles = makeStyles(theme => ({
         width: 20,
         padding: `${theme.spacing(0.5)}px 0 0 0`,
     },
+    groupFolderIcon: {},
     groupHeadRow: {
         '&:hover': {
-            '& svg:not($deleteGroupButton)': {
-                display: 'none',
-            },
             '& $deleteGroupButton': {
-                display: 'inline-block',
+                display: 'inline-flex',
+            },
+            '& $groupFolderIcon': {
+                display: 'none',
             },
         },
     },
@@ -188,8 +189,15 @@ export function GroupRow({ group, onRename, onDelete }: GroupRowProps) {
         <TableRow hover className={classes.groupHeadRow} onDoubleClick={handleRename}>
             <TableCell className={classes.dragHandleEmpty}></TableCell>
             <TableCell className={classes.indexCell}>
-                <FolderIcon className={classes.controlButtonInTrackCommon} />
-                <DeleteIcon className={clsx(classes.controlButtonInTrackCommon, classes.deleteGroupButton)} onClick={handleDelete} />
+                <FolderIcon className={clsx(classes.controlButtonInTrackCommon, classes.groupFolderIcon)} />
+                <IconButton
+                    aria-label="delete"
+                    className={clsx(classes.controlButtonInTrackCommon, classes.deleteGroupButton)}
+                    size="small"
+                    onClick={handleDelete}
+                >
+                    <DeleteIcon fontSize="inherit" />
+                </IconButton>
             </TableCell>
             <TableCell className={classes.titleCell} title={group.title!}>
                 {group.fullWidthTitle ? `${group.fullWidthTitle} / ` : ``}
