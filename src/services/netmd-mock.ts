@@ -55,21 +55,26 @@ class NetMDMockService implements NetMDService {
             channel: Channels.stereo,
             protected: TrackFlag.unprotected,
             title: 'Mock Track 5',
-            fullWidthTitle: '',
+            fullWidthTitle: 'スコット と リバース',
         },
     ];
-    public _groups: Group[] = [
+    public _groupsDef: {
+        index: number;
+        title: string | null;
+        fullWidthTitle: string | null;
+        tracksIdx: number[];
+    }[] = [
         {
             title: null,
-            index: 0,
-            tracks: this._tracks.slice(2),
             fullWidthTitle: '',
+            index: 0,
+            tracksIdx: [2, 3, 4],
         },
         {
             title: 'Test',
             fullWidthTitle: '',
-            index: 0,
-            tracks: [this._tracks[0], this._tracks[1]],
+            index: 1,
+            tracksIdx: [0, 1],
         },
     ];
 
@@ -79,6 +84,15 @@ class NetMDMockService implements NetMDService {
         time: { minute: 0, second: 0, frame: 4 },
         state: 'ready',
     };
+
+    public _getGroups(): Group[] {
+        return this._groupsDef.map(g => ({
+            title: g.title,
+            index: g.index,
+            tracks: this._tracks.filter(t => g.tracksIdx.includes(t.index)),
+            fullWidthTitle: g.fullWidthTitle,
+        }));
+    }
 
     _updateTrackIndexes() {
         for (let i = 0; i < this._tracks.length; i++) {
@@ -108,7 +122,7 @@ class NetMDMockService implements NetMDService {
             used: this._getUsed(),
             total: this._discCapacity,
             trackCount: this._tracks.length,
-            groups: this._groups,
+            groups: this._getGroups(),
         };
     }
 
@@ -126,55 +140,72 @@ class NetMDMockService implements NetMDService {
         return JSON.parse(JSON.stringify(this._getDisc()));
     }
 
-    async renameGroup(groupBegin: number, newName: string, newFullWidth?: string) {
-        let group = this._groups.slice(1).find(n => n.index === groupBegin);
-        if (!group) return;
+    async renameGroup(gropuIndex: number, newName: string, newFullWidth?: string) {
+        let group = this._groupsDef.find(n => n.index === gropuIndex);
+        if (!group) {
+            return;
+        }
         group.title = newName;
-        if (newFullWidth !== undefined) group.fullWidthTitle = newFullWidth;
+        if (newFullWidth !== undefined) {
+            group.fullWidthTitle = newFullWidth;
+        }
     }
 
     async addGroup(groupBegin: number, groupLength: number, newName: string) {
-        let ungrouped = this._groups.find(n => n.title === null);
-        if (!ungrouped) return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
-        let ungroupedLengthBeforeGroup = ungrouped.tracks.length;
-
-        let thisGroupTracks = ungrouped.tracks.filter(n => n.index >= groupBegin && n.index < groupBegin + groupLength);
-        ungrouped.tracks = ungrouped.tracks.filter(n => !thisGroupTracks.includes(n));
-
-        if (ungroupedLengthBeforeGroup - ungrouped.tracks.length !== groupLength) {
-            throw new Error('A track cannot be in 2 groups!');
+        let ungroupedDefs = this._groupsDef.find(g => g.title === null);
+        if (!ungroupedDefs) {
+            return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
         }
+        let ungroupedLengthBeforeGroup = ungroupedDefs.tracksIdx.length;
 
-        if (!isSequential(thisGroupTracks.map(n => n.index))) {
+        const newGroupTracks = ungroupedDefs.tracksIdx.filter(idx => idx >= groupBegin && idx < groupBegin + groupLength);
+        if (!isSequential(newGroupTracks)) {
             throw new Error('Invalid sequence of tracks!');
         }
-        this._groups.push({
+
+        const newGroupDef = {
             title: newName,
             fullWidthTitle: '',
             index: groupBegin,
-            tracks: thisGroupTracks,
-        });
+            tracksIdx: newGroupTracks,
+        };
+        this._groupsDef.push(newGroupDef);
+
+        this._groupsDef = this._groupsDef.filter(g => g.tracksIdx.length !== 0).sort((a, b) => a.tracksIdx[0] - b.tracksIdx[0]);
+
+        ungroupedDefs.tracksIdx = ungroupedDefs.tracksIdx.filter(idx => !newGroupTracks.includes(idx));
+        if (ungroupedLengthBeforeGroup - ungroupedDefs.tracksIdx.length !== groupLength) {
+            throw new Error('A track cannot be in 2 groups!');
+        }
     }
 
-    async deleteGroup(groupBegin: number) {
-        const thisGroup = this._groups.slice(1).find(n => n.tracks[0].index === groupBegin);
-        if (!thisGroup) return;
-        let ungroupedGroup = this._groups.find(n => n.title === null);
+    async deleteGroup(index: number) {
+        const groups = this._getGroups();
+        const group = groups.find(g => g.index === index);
+        if (!group) {
+            return;
+        }
+        let ungroupedGroup = this._groupsDef.find(n => n.title === null);
         if (!ungroupedGroup) {
             ungroupedGroup = {
                 title: null,
                 fullWidthTitle: null,
-                tracks: [],
+                tracksIdx: [],
                 index: 0,
             };
-            this._groups.unshift(ungroupedGroup);
+            this._groupsDef.unshift(ungroupedGroup);
         }
-        ungroupedGroup.tracks = ungroupedGroup.tracks.concat(thisGroup.tracks).sort((a, b) => a.index - b.index);
-        this._groups.splice(this._groups.indexOf(thisGroup), 1);
+        ungroupedGroup.tracksIdx = ungroupedGroup.tracksIdx.concat(group.tracks.map(t => t.index)).sort();
+        this._groupsDef.splice(groups.indexOf(group), 1);
     }
 
     async rewriteGroups(groups: Group[]) {
-        this._groups = [...groups];
+        this._groupsDef = groups.map(g => ({
+            title: g.title,
+            fullWidthTitle: g.fullWidthTitle,
+            index: g.index,
+            tracksIdx: g.tracks.map(t => t.index),
+        }));
     }
 
     async getDeviceStatus() {
@@ -207,9 +238,16 @@ class NetMDMockService implements NetMDService {
         indexes = indexes.sort();
         indexes.reverse();
         for (let index of indexes) {
-            this._groups = recomputeGroupsAfterTrackMove(this._getDisc(), index, -1).groups;
+            this._groupsDef = recomputeGroupsAfterTrackMove(this._getDisc(), index, -1).groups.map(g => ({
+                title: g.title,
+                fullWidthTitle: g.fullWidthTitle,
+                index: g.index,
+                tracksIdx: g.tracks.map(t => t.index),
+            }));
             this._tracks.splice(index, 1);
-            this._groups.forEach(n => (n.tracks = n.tracks.filter(n => this._tracks.includes(n))));
+            this._groupsDef.forEach(
+                g => (g.tracksIdx = g.tracksIdx.filter(tidx => this._tracks.find(t => t.index === tidx) !== undefined))
+            );
         }
         this._updateTrackIndexes();
     }
@@ -219,7 +257,14 @@ class NetMDMockService implements NetMDService {
         assert(t.length === 1);
         this._tracks.splice(dst, 0, t[0]);
         this._updateTrackIndexes();
-        if (updateGroups || updateGroups === undefined) this._groups = recomputeGroupsAfterTrackMove(this._getDisc(), src, dst).groups;
+        if (updateGroups || updateGroups === undefined) {
+            this._groupsDef = recomputeGroupsAfterTrackMove(this._getDisc(), src, dst).groups.map(g => ({
+                title: g.title,
+                fullWidthTitle: g.fullWidthTitle,
+                index: g.index,
+                tracksIdx: g.tracks.map(t => t.index),
+            }));
+        }
     }
 
     async wipeDisc() {
@@ -227,12 +272,12 @@ class NetMDMockService implements NetMDService {
     }
 
     async wipeDiscTitleInfo() {
-        this._groups = [
+        this._groupsDef = [
             {
                 index: 0,
                 title: null,
                 fullWidthTitle: null,
-                tracks: this._tracks,
+                tracksIdx: this._tracks.map(t => t.index),
             },
         ];
         this._discTitle = '';
@@ -262,7 +307,7 @@ class NetMDMockService implements NetMDService {
             await sleep(1000);
         }
 
-        this._tracks.push({
+        const newTrack = {
             title: halfWidthTitle,
             duration: 5 * 60 * 512,
             encoding: Encoding.sp,
@@ -270,7 +315,9 @@ class NetMDMockService implements NetMDService {
             protected: TrackFlag.unprotected,
             channel: 0,
             fullWidthTitle: fullWidthTitle,
-        });
+        };
+        this._tracks.push(newTrack);
+        this._groupsDef[0].tracksIdx.push(newTrack.index);
 
         await sleep(1000);
         progressCallback({ written: 100, encrypted: 100, total: 100 });
@@ -283,7 +330,7 @@ class NetMDMockService implements NetMDService {
 
     @asyncMutex
     async pause() {
-        console.log('pause');
+        this._status.state = 'paused';
     }
 
     @asyncMutex

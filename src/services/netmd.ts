@@ -36,7 +36,7 @@ export interface NetMDService {
     finalize(): Promise<void>;
     renameTrack(index: number, newTitle: string, newFullWidthTitle?: string): Promise<void>;
     renameDisc(newName: string, newFullWidthName?: string): Promise<void>;
-    renameGroup(groupBegin: number, newTitle: string, newFullWidthTitle?: string): Promise<void>;
+    renameGroup(groupIndex: number, newTitle: string, newFullWidthTitle?: string): Promise<void>;
     addGroup(groupBegin: number, groupLength: number, name: string): Promise<void>;
     deleteGroup(groupIndex: number): Promise<void>;
     rewriteGroups(groups: Group[]): Promise<void>;
@@ -96,7 +96,6 @@ export class NetMDUSBService implements NetMDService {
     }
 
     private async listContentUsingCache() {
-        // listContent takes a long time to execute (>3000ms), so I think caching it should speed up the app
         if (!this.cachedContentList) {
             console.log("There's no cached version of the TOC, caching");
             this.cachedContentList = await listContent(this.netmdInterface!);
@@ -173,13 +172,17 @@ export class NetMDUSBService implements NetMDService {
     }
 
     @asyncMutex
-    async renameGroup(groupBegin: number, newName: string, newFullWidthName?: string) {
+    async renameGroup(groupIndex: number, newName: string, newFullWidthName?: string) {
         const disc = await this.listContentUsingCache();
-        let thisGroup = disc.groups.find(n => n.tracks[0].index === groupBegin);
-        if (!thisGroup) return;
+        let thisGroup = disc.groups.find(g => g.index === groupIndex);
+        if (!thisGroup) {
+            return;
+        }
 
         thisGroup.title = newName;
-        if (newFullWidthName !== undefined) thisGroup.fullWidthTitle = newFullWidthName;
+        if (newFullWidthName !== undefined) {
+            thisGroup.fullWidthTitle = newFullWidthName;
+        }
         await this.writeRawTitles(compileDiscTitles(disc));
     }
 
@@ -187,7 +190,10 @@ export class NetMDUSBService implements NetMDService {
     async addGroup(groupBegin: number, groupLength: number, title: string) {
         const disc = await this.listContentUsingCache();
         let ungrouped = disc.groups.find(n => n.title === null);
-        if (!ungrouped) return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
+        if (!ungrouped) {
+            return; // You can only group tracks that aren't already in a different group, if there's no such tracks, there's no point to continue
+        }
+
         let ungroupedLengthBeforeGroup = ungrouped.tracks.length;
 
         let thisGroupTracks = ungrouped.tracks.filter(n => n.index >= groupBegin && n.index < groupBegin + groupLength);
@@ -200,21 +206,25 @@ export class NetMDUSBService implements NetMDService {
         if (!isSequential(thisGroupTracks.map(n => n.index))) {
             throw new Error('Invalid sequence of tracks!');
         }
+
         disc.groups.push({
             title,
             fullWidthTitle: '',
-            index: groupBegin,
+            index: disc.groups.length,
             tracks: thisGroupTracks,
         });
+        disc.groups = disc.groups.filter(g => g.tracks.length !== 0).sort((a, b) => a.tracks[0].index - b.tracks[0].index);
         await this.writeRawTitles(compileDiscTitles(disc));
     }
 
     @asyncMutex
-    async deleteGroup(groupBegin: number) {
+    async deleteGroup(index: number) {
         const disc = await this.listContentUsingCache();
 
-        let thisGroup = disc.groups.find(n => n.tracks[0].index === groupBegin);
-        if (thisGroup) disc.groups.splice(disc.groups.indexOf(thisGroup), 1);
+        let groupIndex = disc.groups.findIndex(g => g.index === index);
+        if (groupIndex >= 0) {
+            disc.groups.splice(groupIndex, 1);
+        }
 
         await this.writeRawTitles(compileDiscTitles(disc));
     }

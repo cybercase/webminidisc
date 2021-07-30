@@ -121,9 +121,11 @@ const App = () => {
                     </Typography>
                 </main>
 
-                <Backdrop className={classes.backdrop} open={loading}>
-                    <CircularProgress color="inherit" />
-                </Backdrop>
+                {loading ? (
+                    <Backdrop className={classes.backdrop} open={loading}>
+                        <CircularProgress color="inherit" />
+                    </Backdrop>
+                ) : null}
             </ThemeProvider>
         </React.Fragment>
     );

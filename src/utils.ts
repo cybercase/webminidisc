@@ -171,14 +171,18 @@ export function getSortedTracks(disc: Disc | null) {
 }
 
 export function getGroupedTracks(disc: Disc | null) {
-    if (!disc) return [];
+    if (!disc) {
+        return [];
+    }
     let groupedList: Group[] = [];
     let ungroupedTracks = [...(disc.groups.find(n => n.title === null)?.tracks ?? [])];
 
     let lastIndex = 0;
 
     for (let group of disc.groups) {
-        if (group.title === null) continue; // Ungrouped tracks
+        if (group.title === null) {
+            continue; // Ungrouped tracks
+        }
         let toCopy = group.tracks[0].index - lastIndex;
         groupedList.push({
             index: -1,

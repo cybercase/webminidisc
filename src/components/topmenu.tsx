@@ -170,7 +170,7 @@ export const TopMenu = function(props: { onClick?: () => void }) {
         );
     }
     if (mainView === 'MAIN') {
-        menuItems.push(<Divider />);
+        menuItems.push(<Divider key="action-divider" />);
         menuItems.push(
             <MenuItem key="allowFullWidth" onClick={handleAllowFullWidth}>
                 <ListItemIcon className={classes.listItemIcon}>
@@ -208,7 +208,7 @@ export const TopMenu = function(props: { onClick?: () => void }) {
         );
     }
     if (mainView === 'MAIN') {
-        menuItems.push(<Divider />);
+        menuItems.push(<Divider key="feature-divider" />);
     }
     menuItems.push(
         <MenuItem key="about" onClick={handleShowAbout}>

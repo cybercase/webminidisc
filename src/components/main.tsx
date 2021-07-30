@@ -17,18 +17,10 @@ import { actions as renameDialogActions } from '../redux/rename-dialog-feature';
 import { actions as convertDialogActions } from '../redux/convert-dialog-feature';
 import { actions as dumpDialogActions } from '../redux/dump-dialog-feature';
 
-import { formatTimeFromFrames, Track } from 'netmd-js';
+import { DeviceStatus, formatTimeFromFrames, Track } from 'netmd-js';
 import { control } from '../redux/actions';
 
-import {
-    belowDesktop,
-    forAnyDesktop,
-    getGroupedTracks,
-    getSortedTracks,
-    isSequential,
-    useShallowEqualSelector,
-    EncodingName,
-} from '../utils';
+import { belowDesktop, forAnyDesktop, getGroupedTracks, getSortedTracks, isSequential, useShallowEqualSelector } from '../utils';
 
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import { fade } from '@material-ui/core/styles/colorManipulator';
@@ -39,9 +31,6 @@ import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import Backdrop from '@material-ui/core/Backdrop';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import PauseIcon from '@material-ui/icons/Pause';
-import FolderIcon from '@material-ui/icons/Folder';
 import CreateNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 
 import Table from '@material-ui/core/Table';
@@ -55,6 +44,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
 import { batchActions } from 'redux-batched-actions';
 
+import { GroupRow, TrackRow } from './main-rows';
 import { RenameDialog } from './rename-dialog';
 import { UploadDialog } from './upload-dialog';
 import { RecordDialog } from './record-dialog';
@@ -65,7 +55,6 @@ import { AboutDialog } from './about-dialog';
 import { DumpDialog } from './dump-dialog';
 import { TopMenu } from './topmenu';
 import Checkbox from '@material-ui/core/Checkbox';
-import * as BadgeImpl from '@material-ui/core/Badge/Badge';
 import Button from '@material-ui/core/Button';
 import { W95Main } from './win95/main';
 import { useMemo } from 'react';
@@ -120,33 +109,10 @@ const useStyles = makeStyles(theme => ({
     spacing: {
         marginTop: theme.spacing(1),
     },
-    formatBadge: {
-        ...(BadgeImpl as any).styles(theme).badge,
-        ...(BadgeImpl as any).styles(theme).colorPrimary,
-        position: 'static',
-        display: 'inline-flex',
-        border: `2px solid ${theme.palette.background.paper}`,
-        padding: '0 4px',
-        verticalAlign: 'middle',
-        width: theme.spacing(4.5),
-        marginRight: theme.spacing(0.5),
-    },
-    titleCell: {
-        overflow: 'hidden',
-        maxWidth: '40ch',
-        textOverflow: 'ellipsis',
-        // whiteSpace: 'nowrap',
-    },
-    durationCell: {
-        whiteSpace: 'nowrap',
-    },
-    durationCellTime: {
-        verticalAlign: 'middle',
-    },
     indexCell: {
         whiteSpace: 'nowrap',
         paddingRight: 0,
-        width: `16px`,
+        width: theme.spacing(4),
     },
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
@@ -156,91 +122,41 @@ const useStyles = makeStyles(theme => ({
         textDecoration: 'underline',
         textDecorationStyle: 'dotted',
     },
-    controlButtonInTrackCommon: {
-        width: `16px`,
-        height: `16px`,
-        verticalAlign: 'middle',
-        cursor: 'pointer',
-        marginLeft: theme.spacing(-0.5),
-    },
-    playButtonInTrackListPlaying: {
-        color: theme.palette.primary.main,
-        display: 'none',
-    },
-    pauseButtonInTrackListPlaying: {
-        color: theme.palette.primary.main,
-        display: 'none',
-    },
-    currentControlButton: {
-        display: 'inline-block',
-    },
-    playButtonInTrackListNotPlaying: {
-        width: `0px`,
-    },
-    trackRow: {
-        userSelect: 'none',
-        '&:hover': {
-            /* For the tracks that aren't currently playing */
-            '& $playButtonInTrackListNotPlaying': {
-                width: `16px`,
-            },
-            '& $trackIndex': {
-                width: `0px`,
-                display: 'none',
-            },
-
-            /* For the current track */
-            '& svg:not($currentControlButton)': {
-                display: 'inline-block',
-            },
-            '& $currentControlButton': {
-                display: 'none',
-            },
-        },
-    },
-    inGroupTrackRow: {
-        '& > $indexCell': {
-            transform: `translateX(${theme.spacing(3)}px)`,
-        },
-        '& > $titleCell': {
-            transform: `translateX(${theme.spacing(3)}px)`,
-        },
-    },
-    deleteGroupButton: {
-        display: 'none',
-    },
-    groupHeadRow: {
-        '&:hover': {
-            '& svg:not($deleteGroupButton)': {
-                display: 'none',
-            },
-            '& $deleteGroupButton': {
-                display: 'inline-block',
-            },
-        },
-    },
     hoveringOverGroup: {
         backgroundColor: `${fade(theme.palette.secondary.dark, 0.4)}`,
     },
-    trackIndex: {
-        display: 'inline-block',
-        height: '16px',
-        width: '16px',
+    dragHandleEmpty: {
+        width: 20,
+        padding: `${theme.spacing(0.5)}px 0 0 0`,
     },
 }));
 
+function getTrackStatus(track: Track, deviceStatus: DeviceStatus | null): 'playing' | 'paused' | 'none' {
+    if (!deviceStatus || track.index !== deviceStatus.track) {
+        return 'none';
+    }
+
+    if (deviceStatus.state === 'playing') {
+        return 'playing';
+    } else if (deviceStatus.state === 'paused') {
+        return 'paused';
+    } else {
+        return 'none';
+    }
+}
+
 export const Main = (props: {}) => {
     let dispatch = useDispatch();
-    let disc = useShallowEqualSelector(state => state.main.disc);
-    let deviceName = useShallowEqualSelector(state => state.main.deviceName);
+    const disc = useShallowEqualSelector(state => state.main.disc);
+    const deviceName = useShallowEqualSelector(state => state.main.deviceName);
     const deviceStatus = useShallowEqualSelector(state => state.main.deviceStatus);
     const { vintageMode } = useShallowEqualSelector(state => state.appState);
 
     const [selected, setSelected] = React.useState<number[]>([]);
+    const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
     const [lastClicked, setLastClicked] = useState(-1);
-    const selectedCount = selected.length;
-
     const [moveMenuAnchorEl, setMoveMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+
     const handleShowMoveMenu = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             setMoveMenuAnchorEl(event.currentTarget);
@@ -250,6 +166,7 @@ export const Main = (props: {}) => {
     const handleCloseMoveMenu = useCallback(() => {
         setMoveMenuAnchorEl(null);
     }, [setMoveMenuAnchorEl]);
+
     const handleMoveSelectedTrack = useCallback(
         (destIndex: number) => {
             dispatch(moveTrack(selected[0], destIndex));
@@ -282,7 +199,6 @@ export const Main = (props: {}) => {
         setSelected([]); // Reset selection if disc changes
     }, [disc]);
 
-    let [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
     const onDrop = useCallback(
         (acceptedFiles: File[], rejectedFiles: File[]) => {
             setUploadedFiles(acceptedFiles);
@@ -290,6 +206,7 @@ export const Main = (props: {}) => {
         },
         [dispatch]
     );
+
     const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
         onDrop,
         accept: [`audio/*`, `video/mp4`],
@@ -301,88 +218,125 @@ export const Main = (props: {}) => {
     const groupedTracks = useMemo(() => getGroupedTracks(disc), [disc]);
 
     // Action Handlers
-    const handleSelectClick = (event: React.MouseEvent, item: number) => {
-        if (event.shiftKey && selected.length && lastClicked !== -1) {
-            let rangeBegin = Math.min(lastClicked + 1, item),
-                rangeEnd = Math.max(lastClicked - 1, item);
-            let copy = [...selected];
-            for (let i = rangeBegin; i <= rangeEnd; i++) {
-                let index = copy.indexOf(i);
-                if (index === -1) copy.push(i);
-                else copy.splice(index, 1);
+    const handleSelectTrackClick = useCallback(
+        (event: React.MouseEvent, item: number) => {
+            if (event.shiftKey && selected.length && lastClicked !== -1) {
+                let rangeBegin = Math.min(lastClicked + 1, item),
+                    rangeEnd = Math.max(lastClicked - 1, item);
+                let copy = [...selected];
+                for (let i = rangeBegin; i <= rangeEnd; i++) {
+                    let index = copy.indexOf(i);
+                    if (index === -1) copy.push(i);
+                    else copy.splice(index, 1);
+                }
+                if (!copy.includes(item)) copy.push(item);
+                setSelected(copy);
+            } else if (selected.includes(item)) {
+                setSelected(selected.filter(i => i !== item));
+            } else {
+                setSelected([...selected, item]);
             }
-            if (!copy.includes(item)) copy.push(item);
-            setSelected(copy);
-        } else if (selected.includes(item)) {
-            setSelected(selected.filter(i => i !== item));
-        } else {
-            setSelected([...selected, item]);
-        }
-        setLastClicked(item);
-    };
+            setLastClicked(item);
+        },
+        [selected, setSelected, lastClicked, setLastClicked]
+    );
 
-    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (selected.length < tracks.length) {
-            setSelected(tracks.map(t => t.index));
-        } else {
-            setSelected([]);
-        }
-    };
+    const handleSelectAllClick = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            if (selected.length < tracks.length) {
+                setSelected(tracks.map(t => t.index));
+            } else {
+                setSelected([]);
+            }
+        },
+        [selected, tracks]
+    );
 
-    const handleRenameDoubleClick = (event: React.MouseEvent, index: number, renameGroup?: boolean) => {
-        let group, track;
-        if (renameGroup) {
-            group = groupedTracks.find(n => n.tracks[0]?.index === index);
-            if (!group) return;
-        } else {
-            track = tracks.find(n => n.index === index);
-            if (!track) return;
-        }
+    const handleRenameTrack = useCallback(
+        (event: React.MouseEvent, index: number) => {
+            let track = tracks.find(t => t.index === index);
+            if (!track) {
+                return;
+            }
 
-        let currentName = (track ? track.title : group?.title) ?? '';
-        let currentFullWidthName = (track ? track.fullWidthTitle : group?.fullWidthTitle) ?? '';
-        dispatch(
-            batchActions([
-                renameDialogActions.setVisible(true),
-                renameDialogActions.setGroupIndex(group ? index : null),
-                renameDialogActions.setCurrentName(currentName),
-                renameDialogActions.setCurrentFullWidthName(currentFullWidthName),
-                renameDialogActions.setIndex(track?.index ?? -1),
-            ])
-        );
-    };
+            dispatch(
+                batchActions([
+                    renameDialogActions.setVisible(true),
+                    renameDialogActions.setGroupIndex(null),
+                    renameDialogActions.setCurrentName(track.title),
+                    renameDialogActions.setCurrentFullWidthName(track.fullWidthTitle),
+                    renameDialogActions.setIndex(track.index),
+                ])
+            );
+        },
+        [dispatch, tracks]
+    );
 
-    const handleRenameActionClick = (event: React.MouseEvent) => {
-        if(event.detail !== 1) return; //Event retriggering when hitting enter in the dialog
-        handleRenameDoubleClick(event, selected[0]);
-    };
+    const handleRenameGroup = useCallback(
+        (event: React.MouseEvent, index: number) => {
+            let group = groupedTracks.find(g => g.index === index);
+            if (!group) {
+                return;
+            }
 
-    const handleDeleteSelected = (event: React.MouseEvent) => {
-        dispatch(deleteTracks(selected));
-    };
+            dispatch(
+                batchActions([
+                    renameDialogActions.setVisible(true),
+                    renameDialogActions.setGroupIndex(index),
+                    renameDialogActions.setCurrentName(group.title ?? ''),
+                    renameDialogActions.setCurrentFullWidthName(group.fullWidthTitle ?? ''),
+                    renameDialogActions.setIndex(-1),
+                ])
+            );
+        },
+        [dispatch, groupedTracks]
+    );
 
-    const handleGroupTracks = (event: React.MouseEvent) => {
-        dispatch(groupTracks(selected));
-    };
+    const handleRenameActionClick = useCallback(
+        (event: React.MouseEvent) => {
+            if (event.detail !== 1) return; //Event retriggering when hitting enter in the dialog
+            handleRenameTrack(event, selected[0]);
+        },
+        [handleRenameTrack, selected]
+    );
 
-    const handleGroupRemoval = (event: React.MouseEvent, groupBegin: number) => {
-        dispatch(deleteGroup(groupBegin));
-    };
+    const handleDeleteSelected = useCallback(
+        (event: React.MouseEvent) => {
+            dispatch(deleteTracks(selected));
+        },
+        [dispatch, selected]
+    );
 
-    const handlePlayTrack = async (event: React.MouseEvent, track: number) => {
-        if (deviceStatus?.track !== track) {
-            dispatch(control('goto', track));
-        }
-        if (deviceStatus?.state !== 'playing') {
-            dispatch(control('play'));
-        }
-    };
+    const handleGroupTracks = useCallback(
+        (event: React.MouseEvent) => {
+            dispatch(groupTracks(selected));
+        },
+        [dispatch, selected]
+    );
 
-    const handleCurrentClick = async (event: React.MouseEvent) => {
-        if (deviceStatus?.state === 'playing') {
-            dispatch(control('pause'));
-        } else dispatch(control('play'));
-    };
+    const handleDeleteGroup = useCallback(
+        (event: React.MouseEvent, index: number) => {
+            dispatch(deleteGroup(index));
+        },
+        [dispatch]
+    );
+
+    const handleTogglePlayPauseTrack = useCallback(
+        (event: React.MouseEvent, track: number) => {
+            if (!deviceStatus) {
+                return;
+            }
+            if (deviceStatus.track !== track) {
+                dispatch(control('goto', track));
+                if (deviceStatus.state !== 'playing') {
+                    dispatch(control('play'));
+                }
+            } else if (deviceStatus.state === 'playing') {
+                dispatch(control('pause'));
+            }
+        },
+        [dispatch, deviceStatus]
+    );
 
     const canGroup = useMemo(() => {
         return (
@@ -390,6 +344,7 @@ export const Main = (props: {}) => {
             isSequential(selected.sort((a, b) => a - b))
         );
     }, [tracks, selected]);
+    const selectedCount = selected.length;
 
     if (vintageMode) {
         const p = {
@@ -419,70 +374,12 @@ export const Main = (props: {}) => {
             handleShowDumpDialog,
             handleDeleteSelected,
             handleRenameActionClick,
-            handleRenameDoubleClick,
+            handleRenameTrack,
             handleSelectAllClick,
-            handleSelectClick,
+            handleSelectTrackClick,
         };
         return <W95Main {...p} />;
     }
-
-    const getTrackRow = (track: Track, inGroup: boolean, additional: {}) => {
-        const child = (
-            <TableRow
-                {...additional}
-                hover
-                selected={selected.includes(track.index)}
-                onDoubleClick={event => handleRenameDoubleClick(event, track.index)}
-                onClick={event => handleSelectClick(event, track.index)}
-                className={clsx(classes.trackRow, { [classes.inGroupTrackRow]: inGroup })}
-            >
-                <TableCell className={classes.indexCell}>
-                    {track.index === deviceStatus?.track && ['playing', 'paused'].includes(deviceStatus?.state) ? (
-                        <span>
-                            <PlayArrowIcon
-                                className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackListPlaying, {
-                                    [classes.currentControlButton]: deviceStatus?.state === 'playing',
-                                })}
-                                onClick={event => {
-                                    handleCurrentClick(event);
-                                    event.stopPropagation();
-                                }}
-                            />
-                            <PauseIcon
-                                className={clsx(classes.controlButtonInTrackCommon, classes.pauseButtonInTrackListPlaying, {
-                                    [classes.currentControlButton]: deviceStatus?.state === 'paused',
-                                })}
-                                onClick={event => {
-                                    handleCurrentClick(event);
-                                    event.stopPropagation();
-                                }}
-                            />
-                        </span>
-                    ) : (
-                        <span>
-                            <span className={classes.trackIndex}>{track.index + 1}</span>
-                            <PlayArrowIcon
-                                className={clsx(classes.controlButtonInTrackCommon, classes.playButtonInTrackListNotPlaying)}
-                                onClick={event => {
-                                    handlePlayTrack(event, track.index);
-                                    event.stopPropagation();
-                                }}
-                            />
-                        </span>
-                    )}
-                </TableCell>
-                <TableCell className={classes.titleCell} title={track.title ?? ''}>
-                    {track.fullWidthTitle ? `${track.fullWidthTitle} / ` : ``}
-                    {track.title || `No Title`}
-                </TableCell>
-                <TableCell align="right" className={classes.durationCell}>
-                    <span className={classes.formatBadge}>{EncodingName[track.encoding]}</span>
-                    <span className={classes.durationCellTime}>{formatTimeFromFrames(track.duration, false)}</span>
-                </TableCell>
-            </TableRow>
-        );
-        return child;
-    };
 
     return (
         <React.Fragment>
@@ -575,6 +472,7 @@ export const Main = (props: {}) => {
                 <Table size="small">
                     <TableHead>
                         <TableRow>
+                            <TableCell className={classes.dragHandleEmpty}></TableCell>
                             <TableCell className={classes.indexCell}>#</TableCell>
                             <TableCell>Title</TableCell>
                             <TableCell align="right">Duration</TableCell>
@@ -584,7 +482,7 @@ export const Main = (props: {}) => {
                         <TableBody>
                             {groupedTracks.map((group, index) => (
                                 <TableRow key={`${index}`}>
-                                    <TableCell colSpan={3} style={{ padding: '0' }}>
+                                    <TableCell colSpan={4} style={{ padding: '0' }}>
                                         <Table size="small">
                                             <Droppable droppableId={`${index}`} key={`${index}`}>
                                                 {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
@@ -594,56 +492,33 @@ export const Main = (props: {}) => {
                                                         className={clsx({ [classes.hoveringOverGroup]: snapshot.isDraggingOver })}
                                                     >
                                                         {group.title !== null && (
-                                                            <TableRow
-                                                                hover
-                                                                className={classes.groupHeadRow}
-                                                                key={`${index}-head`}
-                                                                onDoubleClick={event =>
-                                                                    handleRenameDoubleClick(event, group.tracks[0].index, true)
-                                                                }
-                                                            >
-                                                                <TableCell className={classes.indexCell}>
-                                                                    <FolderIcon className={classes.controlButtonInTrackCommon} />
-                                                                    <DeleteIcon
-                                                                        className={clsx(
-                                                                            classes.controlButtonInTrackCommon,
-                                                                            classes.deleteGroupButton
-                                                                        )}
-                                                                        onClick={event => {
-                                                                            handleGroupRemoval(event, group.tracks[0].index);
-                                                                        }}
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell className={classes.titleCell} title={group.title!}>
-                                                                    {group.fullWidthTitle ? `${group.fullWidthTitle} / ` : ``}
-                                                                    {group.title || `No Name`}
-                                                                </TableCell>
-                                                                <TableCell align="right" className={classes.durationCell}>
-                                                                    <span className={classes.durationCellTime}>
-                                                                        {formatTimeFromFrames(
-                                                                            group.tracks.map(n => n.duration).reduce((a, b) => a + b),
-                                                                            false
-                                                                        )}
-                                                                    </span>
-                                                                </TableCell>
-                                                            </TableRow>
+                                                            <GroupRow
+                                                                group={group}
+                                                                onRename={handleRenameGroup}
+                                                                onDelete={handleDeleteGroup}
+                                                            />
                                                         )}
                                                         {group.title === null && group.tracks.length === 0 && (
                                                             <TableRow style={{ height: '1px' }} />
                                                         )}
-                                                        {group.tracks.map(n => (
+                                                        {group.tracks.map((t, tidx) => (
                                                             <Draggable
-                                                                draggableId={`${group.index}-${n.index}`}
-                                                                key={`${n.index - group.tracks[0].index}`}
-                                                                index={n.index - group.tracks[0].index}
+                                                                draggableId={`${group.index}-${t.index}`}
+                                                                key={`t-${t.index}`}
+                                                                index={tidx}
                                                             >
-                                                                {(providedInGroup: DraggableProvided) =>
-                                                                    getTrackRow(n, group.title !== null, {
-                                                                        ref: providedInGroup.innerRef,
-                                                                        ...providedInGroup.draggableProps,
-                                                                        ...providedInGroup.dragHandleProps,
-                                                                    })
-                                                                }
+                                                                {(provided: DraggableProvided) => (
+                                                                    <TrackRow
+                                                                        track={t}
+                                                                        draggableProvided={provided}
+                                                                        inGroup={group.title !== null}
+                                                                        isSelected={selected.includes(t.index)}
+                                                                        trackStatus={getTrackStatus(t, deviceStatus)}
+                                                                        onSelect={handleSelectTrackClick}
+                                                                        onRename={handleRenameTrack}
+                                                                        onTogglePlayPause={handleTogglePlayPauseTrack}
+                                                                    />
+                                                                )}
                                                             </Draggable>
                                                         ))}
                                                         {provided.placeholder}
@@ -657,9 +532,11 @@ export const Main = (props: {}) => {
                         </TableBody>
                     </DragDropContext>
                 </Table>
-                <Backdrop className={classes.backdrop} open={isDragActive}>
-                    Drop your Music to Upload
-                </Backdrop>
+                {isDragActive ? (
+                    <Backdrop className={classes.backdrop} open={isDragActive}>
+                        Drop your Music to Upload
+                    </Backdrop>
+                ) : null}
             </Box>
             <Fab color="primary" aria-label="add" className={classes.add} onClick={open}>
                 <AddIcon />
