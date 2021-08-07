@@ -13,6 +13,7 @@ const trackTitleOptions = [
     { value: 'title', label: 'Title' },
     { value: 'album-title', label: 'Album - Title' },
     { value: 'artist-title', label: 'Artist - Title' },
+    { value: 'title-artist', label: 'Title - Artist' },
     { value: 'artist-album-title', label: 'Artist - Album - Title' },
 ];
 
