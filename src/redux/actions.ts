@@ -414,6 +414,9 @@ async function getTrackNameFromMediaTags(file: File, titleFormat: TitleFormatTyp
         case 'artist-title': {
             return `${artist} - ${title}`;
         }
+        case 'title-artist': {
+            return `${title} - ${artist}`;
+        }
         case 'album-title': {
             return `${album} - ${title}`;
         }
