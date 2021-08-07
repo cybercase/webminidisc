@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { enableBatching } from 'redux-batched-actions';
 import { savePreference, loadPreference } from '../utils';
 
-export type TitleFormatType = 'filename' | 'title' | 'album-title' | 'artist-title' | 'artist-album-title';
+export type TitleFormatType = 'filename' | 'title' | 'album-title' | 'artist-title' | 'artist-album-title' | 'title-artist';
 export type UploadFormat = 'SP' | 'LP2' | 'LP4';
 
 export interface ConvertDialogFeature {

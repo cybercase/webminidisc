@@ -316,6 +316,7 @@ export const ConvertDialog = (props: { files: File[] }) => {
                                     <MenuItem value={`title`}>Title</MenuItem>
                                     <MenuItem value={`album-title`}>Album - Title</MenuItem>
                                     <MenuItem value={`artist-title`}>Artist - Title</MenuItem>
+                                    <MenuItem value={`title-artist`}>Title - Artist</MenuItem>
                                     <MenuItem value={`artist-album-title`}>Artist - Album - Title</MenuItem>
                                 </Select>
                             </FormControl>
