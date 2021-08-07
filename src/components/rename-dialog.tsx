@@ -47,7 +47,6 @@ export const RenameDialog = (props: {}) => {
     }, [dispatch]);
 
     const handleDoRename = useCallback(() => {
-        console.log(renameDialogGroupIndex, renameDialogIndex);
         if (renameDialogGroupIndex !== null) {
             // Just rename the group with this range
             dispatch(

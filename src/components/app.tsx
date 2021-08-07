@@ -4,7 +4,7 @@ import { belowDesktop, forAnyDesktop, forWideDesktop, useShallowEqualSelector } 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { makeStyles, createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import { Welcome } from './welcome';
 import { Main } from './main';
@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const darkTheme = createMuiTheme({
+const darkTheme = createTheme({
     palette: {
         type: 'dark',
         primary: {
@@ -85,7 +85,7 @@ const darkTheme = createMuiTheme({
     },
 });
 
-const lightTheme = createMuiTheme({
+const lightTheme = createTheme({
     palette: {
         type: 'light',
     },

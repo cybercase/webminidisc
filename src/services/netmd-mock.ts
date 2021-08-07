@@ -269,6 +269,7 @@ class NetMDMockService implements NetMDService {
 
     async wipeDisc() {
         this._tracks = [];
+        await this.wipeDiscTitleInfo();
     }
 
     async wipeDiscTitleInfo() {

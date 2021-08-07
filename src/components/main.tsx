@@ -23,7 +23,7 @@ import { control } from '../redux/actions';
 import { belowDesktop, forAnyDesktop, getGroupedTracks, getSortedTracks, isSequential, useShallowEqualSelector } from '../utils';
 
 import { lighten, makeStyles } from '@material-ui/core/styles';
-import { fade } from '@material-ui/core/styles/colorManipulator';
+import { alpha } from '@material-ui/core/styles/colorManipulator';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Fab from '@material-ui/core/Fab';
@@ -123,7 +123,7 @@ const useStyles = makeStyles(theme => ({
         textDecorationStyle: 'dotted',
     },
     hoveringOverGroup: {
-        backgroundColor: `${fade(theme.palette.secondary.dark, 0.4)}`,
+        backgroundColor: `${alpha(theme.palette.secondary.dark, 0.4)}`,
     },
     dragHandleEmpty: {
         width: 20,
