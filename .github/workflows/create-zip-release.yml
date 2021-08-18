@@ -54,7 +54,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "release.zip,release-no-g.zip"
+          artifacts: "release.zip,release-no-ga.zip"
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
           replacesArtifacts: true
