@@ -106,5 +106,27 @@ ReactDOM.render(
     document.getElementById('root')
 );
 
-// serviceWorker.unregister();
-serviceWorker.register();
+if (process.env.REACT_APP_NO_GA_RELEASE !== 'true') {
+    serviceWorker.register();
+    // serviceWorker.unregister();
+
+    try {
+        (function() {
+            let head = document.getElementsByTagName('head')[0];
+            let uascript = document.createElement('script');
+            uascript.type = 'text/javascript';
+            uascript.src = 'https://www.googletagmanager.com/gtag/js?id=UA-60498490-1';
+            head.appendChild(uascript);
+
+            let pvscript = document.createElement('script');
+            pvscript.type = 'text/javascript';
+            pvscript.text = `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-60498490-1');
+            `;
+            head.appendChild(pvscript);
+        })();
+    } catch (err) {}
+}
