@@ -16,12 +16,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/4a3a421ab134cd5ff776.worker.js.LICENSE.txt"
   },
   {
-    "revision": "427280b95a13094e2017c2b6903b9fff",
+    "revision": "91163c87069bef4a67c58bbade7c7bf3",
     "url": "/webminidisc/index.html"
   },
   {
-    "revision": "29186cb3b5925101402d",
-    "url": "/webminidisc/static/css/main.1b93ab93.chunk.css"
+    "revision": "89fcf67246065d16c6d6",
+    "url": "/webminidisc/static/css/main.0b2cfbb9.chunk.css"
   },
   {
     "revision": "5ae0ee621cd98099686e",
@@ -32,8 +32,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/static/js/2.35357f3b.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "29186cb3b5925101402d",
-    "url": "/webminidisc/static/js/main.04c4bd95.chunk.js"
+    "revision": "89fcf67246065d16c6d6",
+    "url": "/webminidisc/static/js/main.59c85b51.chunk.js"
   },
   {
     "revision": "b873df5f5158f06b4f7b",
@@ -64,6 +64,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/webminidisc/static/media/chrome-icon.f3b6c54c.svg"
   },
   {
+    "revision": "a6229cd1afc13c1275c65b6d2e6b35aa",
+    "url": "/webminidisc/static/media/material-icons.a6229cd1.woff2"
+  },
+  {
     "revision": "a7574f835e639c7eccf1884c27c2939d",
     "url": "/webminidisc/static/media/md0.a7574f83.svg"
   },
@@ -90,5 +94,45 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
     "revision": "f6ae1070888558c71bca4200688d1c8a",
     "url": "/webminidisc/static/media/record-complete-notification-icon.f6ae1070.png"
+  },
+  {
+    "revision": "04b7fd97f88b82dccce5ec446ccc29e6",
+    "url": "/webminidisc/static/media/roboto-v27-latin-100.04b7fd97.woff"
+  },
+  {
+    "revision": "efdab736053df2248df0789a58e5f523",
+    "url": "/webminidisc/static/media/roboto-v27-latin-100.efdab736.woff2"
+  },
+  {
+    "revision": "80fe119e5efa3911b9d61b265f723b3d",
+    "url": "/webminidisc/static/media/roboto-v27-latin-300.80fe119e.woff2"
+  },
+  {
+    "revision": "bf0f407102faf3a0b521d3b545f547a5",
+    "url": "/webminidisc/static/media/roboto-v27-latin-300.bf0f4071.woff"
+  },
+  {
+    "revision": "da2721c68b4bc80db8d4c404f76b118c",
+    "url": "/webminidisc/static/media/roboto-v27-latin-500.da2721c6.woff"
+  },
+  {
+    "revision": "f00e7e4432f7c70d8c97efbe2c50d43b",
+    "url": "/webminidisc/static/media/roboto-v27-latin-500.f00e7e44.woff2"
+  },
+  {
+    "revision": "68d6dabfe54e245e7d5d5c16c3c4b1a9",
+    "url": "/webminidisc/static/media/roboto-v27-latin-700.68d6dabf.woff"
+  },
+  {
+    "revision": "bf28241e67511184c14dbd0ef7d39f91",
+    "url": "/webminidisc/static/media/roboto-v27-latin-700.bf28241e.woff2"
+  },
+  {
+    "revision": "aa23b7b4bcf2b8f0e876106bb3de69c6",
+    "url": "/webminidisc/static/media/roboto-v27-latin-regular.aa23b7b4.woff2"
+  },
+  {
+    "revision": "dc3e086fc0c5addc09702e111d2adb42",
+    "url": "/webminidisc/static/media/roboto-v27-latin-regular.dc3e086f.woff"
   }
 ]);
