@@ -365,7 +365,8 @@ export function recordTracks(indexes: number[], deviceId: string) {
 
             // Stop recording and download the wav
             await mediaRecorderService?.stopRecording();
-            mediaRecorderService?.downloadRecorded(`${track.title}`);
+            const fileName = track.title || `Track ${track.index + 1}`;
+            mediaRecorderService?.downloadRecorded(`${fileName}`);
 
             await mediaRecorderService?.closeStream();
         }
