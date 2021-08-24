@@ -15,31 +15,12 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.3.1
 
-      - name: Build no-ga Release 🔧
-        run: |
-          npm install
-          npm run build
-        env:
-          CI: false # Do not treat warnings as errors
-          PUBLIC_URL: ./
-          REACT_APP_NO_GA_RELEASE: true # disables service workers and GA
-
-      - name: Create Archive 📦
-        uses: thedoctor0/zip-release@master
-        with:
-          type: 'zip'
-          filename: 'release-no-ga.zip'
-          directory: 'build'
-          exclusions: '.DS_Store service-worker.js final-service-worker.js extra-service-worker.js'
-
-      - name: Copy Release Archive
-        run: mv build/release-no-ga.zip ./
-
       - name: Build Release 🔧
         run: npm run build
         env:
           CI: false # Do not treat warnings as errors
           PUBLIC_URL: ./
+          GENERATE_SOURCEMAP: false
 
       - name: Create Archive 📦
         uses: thedoctor0/zip-release@master
@@ -52,9 +33,52 @@ jobs:
       - name: Copy no-g Release Archive
         run: mv build/release.zip ./
 
+      - name: Build no-ga Release 🔧
+        run: |
+          npm install
+          npm run build
+        env:
+          CI: false # Do not treat warnings as errors
+          PUBLIC_URL: ./
+          REACT_APP_NO_GA_RELEASE: true # disables service workers and GA
+          GENERATE_SOURCEMAP: false
+
+      - name: Create Archive 📦
+        uses: thedoctor0/zip-release@master
+        with:
+          type: 'zip'
+          filename: 'release-no-ga.zip'
+          directory: 'build'
+          exclusions: '.DS_Store service-worker.js final-service-worker.js extra-service-worker.js'
+
+      - name: Copy Release Archive
+        run: mv build/release-no-ga.zip ./
+
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "release.zip,release-no-ga.zip"
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
           replacesArtifacts: true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/webminidisc:latest
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
