@@ -1,6 +1,6 @@
 {
   "name": "webmd",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "dependencies": {
     "@ffmpeg/ffmpeg": "0.6.1",
