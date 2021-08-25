@@ -38,10 +38,20 @@ export class MediaRecorderService {
             deviceId: deviceId,
             echoCancellation: false,
             noiseSuppression: false,
-            sampleRate: 44100,
+            sampleRate: { min: 44100, max: 44100, ideal: 44100 }, // CAVEAT: it looks like this is the only way to get 44100Hz as sampling rate for some devices in chrome
             highpassFilter: false,
         };
-        this.stream = await navigator.mediaDevices.getUserMedia({ audio: recordConstraints });
+
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ audio: recordConstraints });
+        } catch (err) {
+            if (err instanceof OverconstrainedError && err.constraint === 'sampleRate') {
+                console.log('Cannot obtain a sampleRate of 44100Hz. Falling back to default value...');
+                this.stream = await navigator.mediaDevices.getUserMedia({ audio: { ...recordConstraints, sampleRate: undefined } }); // fallback to default sampleRate
+            } else {
+                throw err;
+            }
+        }
 
         // Dump recording settings
         const audioTracks = this.stream.getAudioTracks();
