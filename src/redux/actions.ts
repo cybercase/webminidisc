@@ -450,10 +450,9 @@ async function getTrackNameFromMediaTags(file: File, titleFormat: TitleFormatTyp
     }
 }
 
-export function convertAndUpload(files: File[], format: UploadFormat, titleFormat: TitleFormatType) {
+export function convertAndUpload(files: File[], requestedFormat: UploadFormat, titleFormat: TitleFormatType) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         const { audioExportService, netmdService } = serviceRegistry;
-        const wireformat = WireformatDict[format];
 
         await netmdService?.stop();
         dispatch(batchActions([uploadDialogActions.setVisible(true), uploadDialogActions.setCancelUpload(false)]));
@@ -498,7 +497,7 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
         };
 
         let conversionIterator = async function*(files: File[]) {
-            let converted: Promise<{ file: File; data: ArrayBuffer }>[] = [];
+            let converted: Promise<{ file: File; data: ArrayBuffer; format: Wireformat }>[] = [];
 
             let i = 0;
             function convertNext() {
@@ -518,11 +517,12 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
                 converted.push(
                     new Promise(async (resolve, reject) => {
                         let data: ArrayBuffer;
+                        let format: Wireformat;
                         try {
                             await audioExportService!.prepare(f);
-                            data = await audioExportService!.export({ format });
+                            ({ data, format } = await audioExportService!.export({ requestedFormat }));
                             convertNext();
-                            resolve({ file: f, data: data });
+                            resolve({ file: f, data: data, format: format });
                         } catch (err) {
                             error = err;
                             errorMessage = `${f.name}: Unsupported or unrecognized format`;
@@ -553,7 +553,7 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
                 break;
             }
 
-            const { file, data } = item;
+            const { file, data, format } = item;
 
             let title = file.name;
             try {
@@ -577,7 +577,7 @@ export function convertAndUpload(files: File[], format: UploadFormat, titleForma
             updateTrack();
             updateProgressCallback({ written: 0, encrypted: 0, total: 100 });
             try {
-                await netmdService?.upload(halfWidthTitle, fullWidthTitle, data, wireformat, updateProgressCallback);
+                await netmdService?.upload(halfWidthTitle, fullWidthTitle, data, format, updateProgressCallback);
             } catch (err) {
                 error = err;
                 errorMessage = `${file.name}: Error uploading to device. There might not be enough space left.`;
