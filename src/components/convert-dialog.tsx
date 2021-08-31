@@ -355,7 +355,7 @@ export const ConvertDialog = (props: { files: File[] }) => {
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleToggleTracksOrder} className={classes.showTracksOrderBtn}>
-                    {`${tracksOrderVisible ? 'Hide' : 'Show'} Tracks`}
+                    {`${tracksOrderVisible ? 'Hide' : 'Edit'} Tracks`}
                 </Button>
                 <div className={classes.spacer}></div>
                 <Button onClick={handleClose}>Cancel</Button>
