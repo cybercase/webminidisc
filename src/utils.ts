@@ -391,4 +391,79 @@ export function askNotificationPermission(): Promise<NotificationPermission> {
     }
 }
 
+export async function getAtrac3Info(file: File) {
+    // see: http://soundfile.sapp.org/doc/WaveFormat/
+    // and: https://www.fatalerrors.org/a/detailed-explanation-of-wav-file-format.html
+
+    const fileData = await file.arrayBuffer();
+    if (fileData.byteLength < 44) {
+        return null;
+    }
+
+    const riffDescriptor = new Uint32Array(fileData.slice(0, 12));
+    if (riffDescriptor[0] !== 0x46464952 || riffDescriptor[2] !== 0x45564157) {
+        // 'RIFF' && 'WAVE'
+        return null;
+    }
+
+    // WAVE format
+    const waveDescriptor = new Uint32Array(fileData.slice(12, 20));
+    if (waveDescriptor[0] !== 0x20746d66) {
+        return false;
+    }
+
+    const audioFormatAndChanneld = new Uint16Array(fileData.slice(20, 24));
+    if (audioFormatAndChanneld[0] !== 0x270 || audioFormatAndChanneld[1] !== 2) {
+        // 'atrac3' && 2 channels
+        return null;
+    }
+
+    const sampleRateAndByteRate = new Uint32Array(fileData.slice(24, 32));
+    if (sampleRateAndByteRate[0] !== 44100) {
+        // Sample rate
+        return null;
+    }
+    const byteRate = sampleRateAndByteRate[1];
+
+    let mode: 'LP2' | 'LP105' | 'LP4' | null = null;
+    if (byteRate > 16000) {
+        mode = 'LP2';
+    } else if (byteRate > 13000) {
+        mode = 'LP105';
+    } else if (byteRate > 8000) {
+        mode = 'LP4';
+    } else {
+        mode = null;
+    }
+
+    if (mode === null) {
+        return null;
+    }
+
+    const waveBlockEndOffset = new Uint16Array(fileData.slice(36, 38));
+
+    let dataOffset = -1;
+
+    const nextBlockStartOffset = waveBlockEndOffset[0] + 38;
+    const nextBlockEndOffset = nextBlockStartOffset + 8;
+    const nextBlock = new Uint32Array(fileData.slice(nextBlockStartOffset, nextBlockEndOffset));
+    if (nextBlock[0] === 0x61746164) {
+        // data
+        dataOffset = nextBlockEndOffset;
+    } else if (nextBlock[0] === 0x74636166) {
+        // fact
+        const dataBlockLength = 8;
+        dataOffset = nextBlockEndOffset + nextBlock[1] + dataBlockLength;
+    }
+
+    if (dataOffset === -1) {
+        return null;
+    }
+
+    return {
+        mode,
+        dataOffset,
+    };
+}
+
 declare let process: any;

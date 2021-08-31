@@ -1,6 +1,8 @@
 import { createWorker, setLogging } from '@ffmpeg/ffmpeg';
 import { AtracdencProcess } from './atracdenc-worker';
-import { getPublicPathFor } from '../utils';
+import { getAtrac3Info, getPublicPathFor } from '../utils';
+import { Wireformat } from 'netmd-js';
+import { WireformatDict } from '../redux/actions';
 const AtracdencWorker = require('worker-loader!./atracdenc-worker'); // eslint-disable-line import/no-webpack-loader-syntax
 
 interface LogPayload {
@@ -10,7 +12,7 @@ interface LogPayload {
 
 export interface AudioExportService {
     init(): Promise<void>;
-    export(params: { format: string }): Promise<ArrayBuffer>;
+    export(params: { requestedFormat: 'SP' | 'LP2' | 'LP4' }): Promise<{ data: ArrayBuffer; format: Wireformat }>;
     info(): Promise<{ format: string | null; input: string | null }>;
     prepare(file: File): Promise<void>;
 }
@@ -21,12 +23,14 @@ export class FFMpegAudioExportService implements AudioExportService {
     public loglines: { action: string; message: string }[] = [];
     public inFileName: string = ``;
     public outFileNameNoExt: string = ``;
+    public inFile?: File;
 
     async init() {
         setLogging(true);
     }
 
     async prepare(file: File) {
+        this.inFile = file;
         this.loglines = [];
         this.ffmpegProcess = createWorker({
             logger: (payload: LogPayload) => {
@@ -79,33 +83,45 @@ export class FFMpegAudioExportService implements AudioExportService {
         return { format, input };
     }
 
-    async export({ format }: { format: string }) {
+    async export({ requestedFormat }: { requestedFormat: 'SP' | 'LP2' | 'LP4' | 'LP105' }) {
         let result: ArrayBuffer;
-        if (format === `SP`) {
+        let format: Wireformat;
+        const atrac3Info = await getAtrac3Info(this.inFile!);
+        if (atrac3Info) {
+            format = WireformatDict[atrac3Info.mode];
+            result = (await this.inFile!.arrayBuffer()).slice(atrac3Info.dataOffset);
+        } else if (requestedFormat === `SP`) {
             const outFileName = `${this.outFileNameNoExt}.raw`;
             await this.ffmpegProcess.transcode(this.inFileName, outFileName, '-ac 2 -ar 44100 -f s16be');
             let { data } = await this.ffmpegProcess.read(outFileName);
             result = data.buffer;
+            format = Wireformat.pcm;
         } else {
             const outFileName = `${this.outFileNameNoExt}.wav`;
             await this.ffmpegProcess.transcode(this.inFileName, outFileName, '-f wav -ar 44100 -ac 2');
             let { data } = await this.ffmpegProcess.read(outFileName);
             let bitrate: string = `0`;
-            switch (format) {
+            switch (requestedFormat) {
                 case `LP2`:
                     bitrate = `128`;
+                    format = Wireformat.lp2;
                     break;
                 case `LP105`:
                     bitrate = `102`;
+                    format = Wireformat.l105kbps;
                     break;
                 case `LP4`:
                     bitrate = `64`;
+                    format = Wireformat.lp4;
                     break;
             }
             result = await this.atracdencProcess!.encode(data.buffer, bitrate);
         }
         this.ffmpegProcess.worker.terminate();
         this.atracdencProcess!.terminate();
-        return result;
+        return {
+            data: result,
+            format,
+        };
     }
 }
