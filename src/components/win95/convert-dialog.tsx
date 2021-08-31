@@ -133,7 +133,7 @@ export const W95ConvertDialog = (props: {
                     ) : null}
 
                     <DialogFooter>
-                        <Button onClick={props.handleToggleTracksOrder}>{`${props.tracksOrderVisible ? 'Hide' : 'Show'} Tracks`}</Button>
+                        <Button onClick={props.handleToggleTracksOrder}>{`${props.tracksOrderVisible ? 'Hide' : 'Edit'} Tracks`}</Button>
                         <div style={{ flex: '1 1 auto' }}></div>
                         <FooterButton onClick={props.handleConvert}>OK</FooterButton>
                         <FooterButton onClick={props.handleClose}>Cancel</FooterButton>
