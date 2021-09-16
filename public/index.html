@@ -30,8 +30,8 @@
   <body>
     <script>
     try {
-      if (location.protocol !== 'https:' && !location.host.match(/^localhost/gm)) {
-        // Make sure we're on https, or WebUSB won't work.
+      if (location.protocol !== 'file:' && location.protocol !== 'https:' && !location.host.match(/^localhost/gm)) {
+        // Make sure we're on https/file, or WebUSB won't work.
         location.replace(`https:${location.href.substring(location.protocol.length)}`);
         console.log('Redirecting to https....');
       }
