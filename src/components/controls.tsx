@@ -141,20 +141,20 @@ export const Controls = () => {
             navigator.mediaSession.metadata = null;
             if (!initialized) {
                 setInitialized(true);
-                fakeAudio.play();
+                fakeAudio?.play();
                 if (deviceStatus?.state !== "playing") {
-                    setTimeout(() => fakeAudio.pause(), 5000);
+                    setTimeout(() => fakeAudio?.pause(), 5000);
                 }
             }
             navigator.mediaSession.setActionHandler("previoustrack", handlePrev);
             navigator.mediaSession.setActionHandler("nexttrack", handleNext);
             navigator.mediaSession.setActionHandler("pause", () => {
                 handlePause();
-                fakeAudio.pause();
+                fakeAudio?.pause();
             });
             navigator.mediaSession.setActionHandler("play", () => {
                 handlePlay();
-                fakeAudio.play();
+                fakeAudio?.play();
             });
         }    
     }, []);
