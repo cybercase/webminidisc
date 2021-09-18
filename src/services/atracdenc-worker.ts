@@ -49,25 +49,31 @@ if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScop
             const inWavFile = `inWavFile.wav`;
             const outAt3File = `outAt3File.aea`;
             const dataArray = new Uint8Array(data);
-            Module.FS.writeFile(`${inWavFile}`, dataArray);
-            Module.callMain([`-e`, `atrac3`, `-i`, inWavFile, `-o`, outAt3File, `--bitrate`, bitrate]);
+            let result = null;
 
-            // Read file and trim header (96 bytes)
-            let fileStat = Module.FS.stat(outAt3File);
-            let size = fileStat.size;
-            let tmp = new Uint8Array(size - 96);
-            let outAt3FileStream = Module.FS.open(outAt3File, 'r');
-            Module.FS.read(outAt3FileStream, tmp, 0, tmp.length, 96);
-            Module.FS.close(outAt3FileStream);
+            try {
+                Module.FS.writeFile(`${inWavFile}`, dataArray);
+                Module.callMain([`-e`, `atrac3`, `-i`, inWavFile, `-o`, outAt3File, `--bitrate`, bitrate]);
 
-            let result = tmp.buffer;
+                // Read file and trim header (96 bytes)
+                let fileStat = Module.FS.stat(outAt3File);
+                let size = fileStat.size;
+                let tmp = new Uint8Array(size - 96);
+                let outAt3FileStream = Module.FS.open(outAt3File, 'r');
+                Module.FS.read(outAt3FileStream, tmp, 0, tmp.length, 96);
+                Module.FS.close(outAt3FileStream);
+
+                result = tmp.buffer;
+            } catch (err) {
+                console.error(`AtracdencProcess error: `, err);
+            }
 
             self.postMessage(
                 {
                     action: 'encode',
                     result,
                 },
-                [result]
+                result ? [result] : []
             );
         }
     };

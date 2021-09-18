@@ -534,12 +534,18 @@ export function convertAndUpload(files: File[], requestedFormat: UploadFormat, t
         let error: any;
         let errorMessage = ``;
         let i = 1;
+        let failedConversion: File[] = [];
         for await (let item of conversionIterator(files)) {
             if (hasUploadBeenCancelled()) {
                 break;
             }
 
             const { file, data, format } = item;
+            if (data === null) {
+                console.error(`Conversion failed for file: ${file.name}`);
+                failedConversion.push(file);
+                continue;
+            }
 
             let title = file.name;
             try {
