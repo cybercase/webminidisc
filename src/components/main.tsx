@@ -328,11 +328,11 @@ export const Main = (props: {}) => {
             }
             if (deviceStatus.track !== track) {
                 dispatch(control('goto', track));
-                if (deviceStatus.state !== 'playing') {
-                    dispatch(control('play'));
-                }
+                dispatch(control('play'));
             } else if (deviceStatus.state === 'playing') {
                 dispatch(control('pause'));
+            } else {
+                dispatch(control('play'));
             }
         },
         [dispatch, deviceStatus]

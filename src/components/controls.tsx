@@ -129,6 +129,37 @@ export const Controls = () => {
         dispatch(control('pause'));
     }, [dispatch]);
 
+    const [initialized, setInitialized] = useState(false);
+    const navigator = window.navigator as any;
+
+    const fakeAudioRef = useCallback(fakeAudio => {
+        if (navigator.mediaSession) {
+            navigator.mediaSession.setActionHandler("play", null);
+            navigator.mediaSession.setActionHandler("previoustrack", null);
+            navigator.mediaSession.setActionHandler("nexttrack", null);
+            navigator.mediaSession.setActionHandler("pause", null);
+            navigator.mediaSession.metadata = null;
+            if (!initialized) {
+                setInitialized(true);
+                fakeAudio?.play();
+                if (deviceStatus?.state !== "playing") {
+                    setTimeout(() => fakeAudio?.pause(), 5000);
+                }
+            }
+            navigator.mediaSession.setActionHandler("previoustrack", handlePrev);
+            navigator.mediaSession.setActionHandler("nexttrack", handleNext);
+            navigator.mediaSession.setActionHandler("pause", () => {
+                handlePause();
+                fakeAudio?.pause();
+            });
+            navigator.mediaSession.setActionHandler("play", () => {
+                handlePlay();
+                fakeAudio?.play();
+            });
+        }    
+    }, []);
+
+
     let message = ``;
     let trackIndex = deviceStatus?.track ?? null;
     let deviceState = deviceStatus?.state ?? null;
@@ -146,6 +177,16 @@ export const Controls = () => {
         message =
             (deviceStatus.track + 1).toString().padStart(3, '0') +
             (title ? ' - ' + title : '');
+
+        if (navigator.mediaSession) {
+            //@ts-ignore
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title,
+                album: disc?.fullWidthTitle || disc?.title,
+                artwork: []
+            });
+            navigator.mediaSession.playbackState = deviceStatus?.state === "playing" ? "playing" : "paused";
+        }
     }
 
     const [lcdScroll, setLcdScroll] = useState(0);
@@ -223,6 +264,7 @@ export const Controls = () => {
 
     return (
         <Box className={classes.container}>
+            <audio ref={fakeAudioRef} loop src="10-seconds-of-silence.mp3"/>
             <IconButton aria-label="prev" onClick={handlePrev} className={classes.button}>
                 <SkipPreviousIcon />
             </IconButton>
