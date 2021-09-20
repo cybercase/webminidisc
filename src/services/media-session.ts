@@ -3,6 +3,7 @@ import { createEmptyWave } from '../create-empty-wave';
 import { control } from '../redux/actions';
 import { AppStore, AppSubscribe, AppGetState } from '../redux/store';
 import { Dispatch } from '@reduxjs/toolkit';
+import { Disc } from 'netmd-js';
 
 export interface MediaSessionService {
     init(): Promise<void>;
@@ -92,6 +93,17 @@ export class BrowserMediaSessionService {
         });
     }
 
+    // This will save cpu cycles when just playing music. Might replace in the future with some memoization library
+    private sortedTracks: DisplayTrack[] = [];
+    private sortedTracksDisc: Disc | null = null;
+    getSortedTracksWithCache(disc: Disc | null) {
+        if (disc !== this.sortedTracksDisc) {
+            this.sortedTracks = getSortedTracks(disc);
+            this.sortedTracksDisc = disc;
+        }
+        return this.sortedTracks;
+    }
+
     syncState() {
         if (!this.initialized) {
             return;
@@ -105,7 +117,7 @@ export class BrowserMediaSessionService {
         const isPlaying = deviceStatus?.state === 'playing';
         const currentDiscTitle = disc?.title;
         const currentTrackIndex = deviceStatus?.track ?? -1;
-        const allTracks = getSortedTracks(disc);
+        const allTracks = this.getSortedTracksWithCache(disc);
         const currentTrack: DisplayTrack | undefined = allTracks[currentTrackIndex];
         const currentTrackTitle = currentTrack ? currentTrack.fullWidthTitle || currentTrack?.title : '';
         const currentTrackDurationInSecs = Math.round(currentTrack?.durationInSecs ?? -1);
