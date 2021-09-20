@@ -12,6 +12,17 @@ export function sleep(ms: number) {
     });
 }
 
+export function debounce<T extends Function>(func: T, timeout = 300): T {
+    let timer: ReturnType<typeof setTimeout>;
+    const debouncedFn = (...args: any) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            func(...args);
+        }, timeout);
+    };
+    return (debouncedFn as any) as T;
+}
+
 export async function sleepWithProgressCallback(ms: number, cb: (perc: number) => void) {
     let elapsedSecs = 1;
     let interval = setInterval(() => {
@@ -82,6 +93,20 @@ export function getAvailableCharsForTitle(disc: Disc, includeGroups?: boolean) {
 
 export function framesToSec(frames: number) {
     return frames / 512;
+}
+
+export function timeToSeekArgs(timeInSecs: number): number[] {
+    let value = Math.round(timeInSecs); // ignore frames
+
+    let s = value % 60;
+    value = (value - s) / 60; // min
+
+    let m = value % 60;
+    value = (value - m) / 60; // hour
+
+    let h = value;
+
+    return [h, m, s, 0];
 }
 
 export function sanitizeTitle(title: string) {
@@ -197,6 +222,7 @@ export type DisplayTrack = {
     group: string | null;
     duration: string;
     encoding: string;
+    durationInSecs: number;
 };
 
 export function getSortedTracks(disc: Disc | null) {
@@ -211,6 +237,7 @@ export function getSortedTracks(disc: Disc | null) {
                     group: group.title ?? null,
                     encoding: EncodingName[track.encoding],
                     duration: formatTimeFromFrames(track.duration, false),
+                    durationInSecs: track.duration / 512, // CAVEAT: 1s = 512 frames
                 });
             }
         }

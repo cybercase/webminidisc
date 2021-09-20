@@ -58,6 +58,7 @@ export interface NetMDService {
     next(): Promise<void>;
     prev(): Promise<void>;
     gotoTrack(index: number): Promise<void>;
+    gotoTime(index: number, hour: number, minute: number, second: number, frame: number): Promise<void>;
     getPosition(): Promise<number[] | null>;
 }
 
@@ -382,6 +383,11 @@ export class NetMDUSBService implements NetMDService {
     @asyncMutex
     async gotoTrack(index: number) {
         await this.netmdInterface!.gotoTrack(index);
+    }
+
+    @asyncMutex
+    async gotoTime(index: number, h: number, m: number, s: number, f: number) {
+        await this.netmdInterface!.gotoTime(index, h, m, s, f);
     }
 
     @asyncMutex
