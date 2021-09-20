@@ -129,16 +129,21 @@ export function getHalfWidthTitleLength(title: string) {
 
 export function sanitizeHalfWidthTitle(title: string) {
     enum CharType {
-        normal, dakuten, handakuten
+        normal,
+        dakuten,
+        handakuten,
     }
 
-    const handakutenPossible = 'はひふへほハヒフヘホ'.split("");
-    const dakutenPossible = "かきくけこさしすせそたちつてとカキクケコサシスセソタチツテト".split("").concat(handakutenPossible);
+    const handakutenPossible = 'はひふへほハヒフヘホ'.split('');
+    const dakutenPossible = 'かきくけこさしすせそたちつてとカキクケコサシスセソタチツテト'.split('').concat(handakutenPossible);
 
     //'Flatten' all the characters followed by the (han)dakuten character into one
     let dakutenFix = [];
     let type = CharType.normal;
-    for (const char of sanitizeFullWidthTitle(title, true).split('').reverse()) { //This only works for full-width kana. It will get converted to half-width later anyway...
+    for (const char of sanitizeFullWidthTitle(title, true)
+        .split('')
+        .reverse()) {
+        //This only works for full-width kana. It will get converted to half-width later anyway...
         switch (type) {
             case CharType.dakuten:
                 if (dakutenPossible.includes(char)) {
