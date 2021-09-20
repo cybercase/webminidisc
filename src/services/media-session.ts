@@ -125,7 +125,10 @@ export class BrowserMediaSessionService {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrackTitle,
                 album: currentDiscTitle,
-                artwork: [],
+                artwork: [
+                    { src: window.location.pathname + 'MiniDisc192.png', sizes: '192x192', type: 'image/png' },
+                    { src: window.location.pathname + 'MiniDisc512.png', sizes: '512x512', type: 'image/png' },
+                ],
             });
         }
 
