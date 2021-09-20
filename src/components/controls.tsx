@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState, useMemo } from 'react';
 import clsx from 'clsx';
 
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
@@ -129,15 +129,12 @@ export const Controls = () => {
         dispatch(control('pause'));
     }, [dispatch]);
 
-    const [initialized, setInitialized] = useState(false);
-    const navigator = window.navigator as any;
-
     let message = ``;
     let trackIndex = deviceStatus?.track ?? null;
     let deviceState = deviceStatus?.state ?? null;
     let discPresent = deviceStatus?.discPresent ?? false;
     let paused = deviceStatus?.state === 'paused';
-    const tracks = getSortedTracks(disc);
+    const tracks = useMemo(() => getSortedTracks(disc), [disc]);
     if (!discPresent) {
         message = ``;
     } else if (deviceState === 'readingTOC') {
