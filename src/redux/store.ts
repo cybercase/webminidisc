@@ -50,5 +50,8 @@ export const store = configureStore({
 
 const initialState = Object.freeze(store.getState());
 
+export type AppStore = typeof store;
+export type AppSubscribe = typeof store.subscribe;
+export type AppGetState = typeof store.getState;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

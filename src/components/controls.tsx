@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState, useMemo } from 'react';
 import clsx from 'clsx';
 
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
@@ -134,7 +134,7 @@ export const Controls = () => {
     let deviceState = deviceStatus?.state ?? null;
     let discPresent = deviceStatus?.discPresent ?? false;
     let paused = deviceStatus?.state === 'paused';
-    const tracks = getSortedTracks(disc);
+    const tracks = useMemo(() => getSortedTracks(disc), [disc]);
     if (!discPresent) {
         message = ``;
     } else if (deviceState === 'readingTOC') {
@@ -143,9 +143,7 @@ export const Controls = () => {
         message = `BLANKDISC`;
     } else if (deviceStatus && deviceStatus.track !== null && tracks[deviceStatus.track]) {
         let title = tracks[deviceStatus.track].fullWidthTitle || tracks[deviceStatus.track].title;
-        message =
-            (deviceStatus.track + 1).toString().padStart(3, '0') +
-            (title ? ' - ' + title : '');
+        message = (deviceStatus.track + 1).toString().padStart(3, '0') + (title ? ' - ' + title : '');
     }
 
     const [lcdScroll, setLcdScroll] = useState(0);

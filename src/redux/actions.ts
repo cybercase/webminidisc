@@ -17,13 +17,14 @@ import {
     askNotificationPermission,
     getGroupedTracks,
     getHalfWidthTitleLength,
+    timeToSeekArgs,
 } from '../utils';
 import * as mm from 'music-metadata-browser';
 import { TitleFormatType, UploadFormat } from './convert-dialog-feature';
 import NotificationCompleteIconUrl from '../images/record-complete-notification-icon.png';
 import { assertNumber } from 'netmd-js/dist/utils';
 
-export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto' | 'pause', params?: unknown) {
+export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto' | 'pause' | 'seek', params?: unknown) {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         switch (action) {
             case 'play':
@@ -41,10 +42,22 @@ export function control(action: 'play' | 'stop' | 'next' | 'prev' | 'goto' | 'pa
             case 'pause':
                 await serviceRegistry.netmdService!.pause();
                 break;
-            case 'goto':
+            case 'goto': {
                 const trackNumber = assertNumber(params, 'Invalid track number for "goto" command');
                 await serviceRegistry.netmdService!.gotoTrack(trackNumber);
                 break;
+            }
+            case 'seek': {
+                if (!(params instanceof Object)) {
+                    throw new Error('"seek" command has wrong params');
+                }
+                const typedParams: { trackNumber: number; time: number } = params as any;
+                const trackNumber = assertNumber(typedParams.trackNumber, 'Invalid track number for "seek" command');
+                const time = assertNumber(typedParams.time, 'Invalid time for "seek" command');
+                const timeArgs = timeToSeekArgs(time);
+                await serviceRegistry.netmdService!.gotoTime(trackNumber, timeArgs[0], timeArgs[1], timeArgs[2], timeArgs[3]);
+                break;
+            }
         }
         // CAVEAT: change-track might take a up to a few seconds to complete.
         // We wait 500ms and let the monitor do further updates
@@ -184,6 +197,7 @@ export function pair() {
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         dispatch(appStateActions.setPairingFailed(false));
 
+        serviceRegistry.mediaSessionService?.init(); // no need to await
         await serviceRegistry.audioExportService!.init();
 
         try {

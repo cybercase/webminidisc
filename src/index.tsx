@@ -18,11 +18,13 @@ import './fonts/fonts.css';
 
 import { FFMpegAudioExportService } from './services/audio-export';
 import { MediaRecorderService } from './services/mediarecorder';
+import { BrowserMediaSessionService } from './services/media-session';
 
-serviceRegistry.netmdService = new NetMDUSBService({ debug: true });
+serviceRegistry.netmdService = (window as any).native?.interface || new NetMDUSBService({ debug: true });
 // serviceRegistry.netmdService = new NetMDMockService(); // Uncomment to work without a device attached
 serviceRegistry.audioExportService = new FFMpegAudioExportService();
 serviceRegistry.mediaRecorderService = new MediaRecorderService();
+serviceRegistry.mediaSessionService = new BrowserMediaSessionService(store);
 
 (function setupEventHandlers() {
     window.addEventListener('beforeunload', ev => {

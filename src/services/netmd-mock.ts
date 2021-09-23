@@ -13,7 +13,7 @@ class NetMDMockService implements NetMDService {
     public _discCapacity: number = 80 * 60 * 512;
     public _tracks: Track[] = [
         {
-            duration: 5 * 60 * 512,
+            duration: 3 * 60 * 512,
             encoding: Encoding.sp,
             index: 0,
             channel: Channels.stereo,
@@ -356,6 +356,11 @@ class NetMDMockService implements NetMDService {
     }
 
     async gotoTrack(index: number) {
+        this._status.track = index;
+        await sleep(500);
+    }
+
+    async gotoTime(index: number, hour = 0, minute = 0, second = 0, frame = 0) {
         this._status.track = index;
         await sleep(500);
     }
