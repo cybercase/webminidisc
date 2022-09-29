@@ -17,6 +17,8 @@ import { TopMenu } from './topmenu';
 import ChromeIconPath from '../images/chrome-icon.svg';
 import { W95Welcome } from './win95/welcome';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import Snackbar from '@material-ui/core/Snackbar';
+import Alert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles(theme => ({
     main: {
@@ -33,6 +35,9 @@ const useStyles = makeStyles(theme => ({
     },
     spacing: {
         marginTop: theme.spacing(1),
+    },
+    spacing2: {
+        marginTop: theme.spacing(2),
     },
     chromeLogo: {
         marginTop: theme.spacing(1),
@@ -117,6 +122,11 @@ export const Welcome = (props: {}) => {
                             >
                                 <FormHelperText>{pairingMessage}</FormHelperText>
                             </FormControl>
+
+                            <Alert severity="warning" className={classes.spacing2}>
+                                Want an updated version of Web Minidisc? Try{' '}
+                                <Link href="https://web.minidisc.wiki/">Web MiniDisc Pro.</Link>
+                            </Alert>
                         </div>
                         <div>
                             <Typography component="h2" variant="subtitle1" align="center" className={classes.spacing}>
