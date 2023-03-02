@@ -12,7 +12,17 @@ Requires *Chrome* or any other browser that supports both **WASM** and **WebUSB*
 _it just works ®_ ... no need to download or install any software.
 
 #### Linux
-Follow the instructions here [https://github.com/glaubitz/linux-minidisc/tree/master/netmd/etc](https://github.com/glaubitz/linux-minidisc/tree/master/netmd/etc) to grant your user access to the device. If you skip this step you'll likely get an *Access denied* message when trying to connect.
+To grant permission to the browser to access the USB device you'll need to add UDEV rules that grant access to a group called `plugdev`. You will also need to ensure your user is added to that `plugdev` group.
+1. Copy https://github.com/glaubitz/linux-minidisc/blob/master/netmd/etc/netmd.rules into `/etc/udev/rules.d/70-netmd.rules`
+2. Add yourself to the `plugdev` group (create the group if it doesn't exist)
+```
+$ groupadd plugdev
+$ usermod -a -G plugdev YourUserName
+```
+3. Reboot
+4. Plug-in your netmd device after loggin in.
+
+Also note that you will need to use a browser packaged by your distro vendor; browsers installed via snap or flatpak wont work.
 
 #### Windows 10
 The Windows USB stack requires a driver to be installed to communicate with any USB device. The bad news is that there are no official Windows 10 drivers for NetMD devices. The good news is that we don't need it!
