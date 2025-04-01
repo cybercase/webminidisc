@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import * as serviceWorker from './serviceWorker';
 import { NetMDUSBService } from './services/netmd';
 import { NetMDMockService } from './services/netmd-mock';
-import serviceRegistry from './services/registry';
+import serviceRegistry, { LastFmAPIService } from './services/registry';
 
 import { store } from './redux/store';
 import { actions as appActions } from './redux/app-feature';
@@ -25,6 +25,8 @@ serviceRegistry.netmdService = (window as any).native?.interface || new NetMDUSB
 serviceRegistry.audioExportService = new FFMpegAudioExportService();
 serviceRegistry.mediaRecorderService = new MediaRecorderService();
 serviceRegistry.mediaSessionService = new BrowserMediaSessionService(store);
+// Initialize Last.fm API service
+serviceRegistry.lastFmService = new LastFmAPIService();
 
 (function setupEventHandlers() {
     window.addEventListener('beforeunload', ev => {
