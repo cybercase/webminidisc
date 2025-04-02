@@ -101,95 +101,105 @@ export function dragDropTrack(sourceList: number, sourceIndex: number, targetLis
     // This code is here, because it would need to be duplicated in both netmd and netmd-mock.
     return async function(dispatch: AppDispatch, getState: () => RootState) {
         if (sourceList === targetList && sourceIndex === targetIndex) return;
+
         dispatch(appStateActions.setLoading(true));
-        const groupedTracks = getGroupedTracks(await serviceRegistry.netmdService!.listContent());
-        // Remove the moved item from its current list
-        let movedItem = groupedTracks[sourceList].tracks.splice(sourceIndex, 1)[0];
-        let newIndex: number;
 
-        // Calculate bounds
-        let boundsStartList, boundsEndList, boundsStartIndex, boundsEndIndex, offset;
+        try {
+            const groupedTracks = getGroupedTracks(await serviceRegistry.netmdService!.listContent());
+            // Remove the moved item from its current list
+            let movedItem = groupedTracks[sourceList].tracks.splice(sourceIndex, 1)[0];
+            let newIndex: number;
 
-        if (sourceList < targetList) {
-            boundsStartList = sourceList;
-            boundsStartIndex = sourceIndex;
-            boundsEndList = targetList;
-            boundsEndIndex = targetIndex;
-            offset = -1;
-        } else if (sourceList > targetList) {
-            boundsStartList = targetList;
-            boundsStartIndex = targetIndex;
-            boundsEndList = sourceList;
-            boundsEndIndex = sourceIndex;
-            offset = 1;
-        } else {
-            if (sourceIndex < targetIndex) {
-                boundsStartList = boundsEndList = sourceList;
+            // Calculate bounds
+            let boundsStartList, boundsEndList, boundsStartIndex, boundsEndIndex, offset;
+
+            if (sourceList < targetList) {
+                boundsStartList = sourceList;
                 boundsStartIndex = sourceIndex;
+                boundsEndList = targetList;
                 boundsEndIndex = targetIndex;
                 offset = -1;
-            } else {
-                boundsStartList = boundsEndList = targetList;
+            } else if (sourceList > targetList) {
+                boundsStartList = targetList;
                 boundsStartIndex = targetIndex;
+                boundsEndList = sourceList;
                 boundsEndIndex = sourceIndex;
                 offset = 1;
-            }
-        }
-
-        // Shift indices
-        for (let i = boundsStartList; i <= boundsEndList; i++) {
-            let startingIndex = i === boundsStartList ? boundsStartIndex : 0;
-            let endingIndex = i === boundsEndList ? boundsEndIndex : groupedTracks[i].tracks.length;
-            for (let j = startingIndex; j < endingIndex; j++) {
-                groupedTracks[i].tracks[j].index += offset;
-            }
-        }
-
-        // Calculate the moved track's destination index
-        if (targetList === 0) {
-            newIndex = targetIndex;
-        } else {
-            if (targetIndex === 0) {
-                let prevList = groupedTracks[targetList - 1];
-                let i = 2;
-                while (prevList && prevList.tracks.length === 0) {
-                    // Skip past all the empty lists
-                    prevList = groupedTracks[targetList - i++];
-                }
-                if (prevList) {
-                    // If there's a previous list, make this tracks's index previous list's last item's index + 1
-                    let lastIndexOfPrevList = prevList.tracks[prevList.tracks.length - 1].index;
-                    newIndex = lastIndexOfPrevList + 1;
-                } else newIndex = 0; // Else default to index 0
             } else {
-                newIndex = groupedTracks[targetList].tracks[0].index + targetIndex;
+                if (sourceIndex < targetIndex) {
+                    boundsStartList = boundsEndList = sourceList;
+                    boundsStartIndex = sourceIndex;
+                    boundsEndIndex = targetIndex;
+                    offset = -1;
+                } else {
+                    boundsStartList = boundsEndList = targetList;
+                    boundsStartIndex = targetIndex;
+                    boundsEndIndex = sourceIndex;
+                    offset = 1;
+                }
             }
-        }
 
-        if (movedItem.index !== newIndex) {
-            await serviceRegistry!.netmdService!.moveTrack(movedItem.index, newIndex, false);
-        }
+            // Shift indices
+            for (let i = boundsStartList; i <= boundsEndList; i++) {
+                let startingIndex = i === boundsStartList ? boundsStartIndex : 0;
+                let endingIndex = i === boundsEndList ? boundsEndIndex : groupedTracks[i].tracks.length;
+                for (let j = startingIndex; j < endingIndex; j++) {
+                    groupedTracks[i].tracks[j].index += offset;
+                }
+            }
 
-        movedItem.index = newIndex;
-        groupedTracks[targetList].tracks.splice(targetIndex, 0, movedItem);
-        let ungrouped = [];
+            // Calculate the moved track's destination index
+            if (targetList === 0) {
+                newIndex = targetIndex;
+            } else {
+                if (targetIndex === 0) {
+                    let prevList = groupedTracks[targetList - 1];
+                    let i = 2;
+                    while (prevList && prevList.tracks.length === 0) {
+                        // Skip past all the empty lists
+                        prevList = groupedTracks[targetList - i++];
+                    }
+                    if (prevList) {
+                        // If there's a previous list, make this tracks's index previous list's last item's index + 1
+                        let lastIndexOfPrevList = prevList.tracks[prevList.tracks.length - 1].index;
+                        newIndex = lastIndexOfPrevList + 1;
+                    } else newIndex = 0; // Else default to index 0
+                } else {
+                    newIndex = groupedTracks[targetList].tracks[0].index + targetIndex;
+                }
+            }
 
-        // Recompile the groups and update them on the player
-        let normalGroups = [];
-        for (let group of groupedTracks) {
-            if (group.tracks.length === 0) continue;
-            if (group.index === -1) ungrouped.push(...group.tracks);
-            else normalGroups.push(group);
+            if (movedItem.index !== newIndex) {
+                await serviceRegistry!.netmdService!.moveTrack(movedItem.index, newIndex, false);
+            }
+
+            movedItem.index = newIndex;
+            groupedTracks[targetList].tracks.splice(targetIndex, 0, movedItem);
+            let ungrouped = [];
+
+            // Recompile the groups and update them on the player
+            let normalGroups = [];
+            for (let group of groupedTracks) {
+                if (group.tracks.length === 0) continue;
+                if (group.index === -1) ungrouped.push(...group.tracks);
+                else normalGroups.push(group);
+            }
+            if (ungrouped.length)
+                normalGroups.unshift({
+                    index: 0,
+                    title: null,
+                    fullWidthTitle: null,
+                    tracks: ungrouped,
+                });
+            await serviceRegistry.netmdService!.rewriteGroups(normalGroups);
+
+            // Update content list without resetting the loading state
+            listContent(true)(dispatch);
+        } catch (error) {
+            console.error('Error during drag and drop operation:', error);
+            dispatch(appStateActions.setLoading(false));
+            listContent()(dispatch);
         }
-        if (ungrouped.length)
-            normalGroups.unshift({
-                index: 0,
-                title: null,
-                fullWidthTitle: null,
-                tracks: ungrouped,
-            });
-        await serviceRegistry.netmdService!.rewriteGroups(normalGroups);
-        listContent()(dispatch);
     };
 }
 
@@ -226,10 +236,12 @@ export function pair() {
     };
 }
 
-export function listContent() {
+export function listContent(skipLoadingState = false) {
     return async function(dispatch: AppDispatch) {
         // Issue loading
-        dispatch(appStateActions.setLoading(true));
+        if (!skipLoadingState) {
+            dispatch(appStateActions.setLoading(true));
+        }
         let disc;
         try {
             disc = await serviceRegistry.netmdService!.listContent();
@@ -313,9 +325,18 @@ export function wipeDisc() {
 
 export function moveTrack(srcIndex: number, destIndex: number) {
     return async function(dispatch: AppDispatch) {
-        const { netmdService } = serviceRegistry;
-        await netmdService!.moveTrack(srcIndex, destIndex);
-        listContent()(dispatch);
+        dispatch(appStateActions.setLoading(true));
+        try {
+            const { netmdService } = serviceRegistry;
+            await netmdService!.moveTrack(srcIndex, destIndex);
+
+            // Update content list without resetting the loading state
+            listContent(true)(dispatch);
+        } catch (error) {
+            console.error('Error moving track:', error);
+            dispatch(appStateActions.setLoading(false));
+            listContent()(dispatch);
+        }
     };
 }
 
@@ -497,11 +518,20 @@ export function convertAndUpload(files: File[], requestedFormat: UploadFormat, t
         };
 
         let conversionIterator = async function*(files: File[]) {
+            console.log(`[convertAndUpload] Starting conversion of ${files.length} files`);
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                console.log(
+                    `[convertAndUpload] Processing file ${i + 1}/${files.length}: ${file.name}, size: ${file.size}bytes, type: ${file.type}`
+                );
+            }
+
             let converted: Promise<{ file: File; data: ArrayBuffer; format: Wireformat }>[] = [];
 
             let i = 0;
             function convertNext() {
                 if (i === files.length || hasUploadBeenCancelled()) {
+                    console.log(`[convertAndUpload] Conversion queue completed or cancelled. Current index: ${i}/${files.length}`);
                     trackUpdate.converting = i;
                     trackUpdate.titleConverting = ``;
                     updateTrack();
@@ -509,6 +539,7 @@ export function convertAndUpload(files: File[], requestedFormat: UploadFormat, t
                 }
 
                 let f = files[i];
+                console.log(`[convertAndUpload] Starting conversion of file ${i + 1}/${files.length}: ${f.name}`);
                 trackUpdate.converting = i;
                 trackUpdate.titleConverting = f.name;
                 updateTrack();
@@ -519,23 +550,42 @@ export function convertAndUpload(files: File[], requestedFormat: UploadFormat, t
                         let data: ArrayBuffer;
                         let format: Wireformat;
                         try {
+                            console.log(`[convertAndUpload] Preparing file for conversion: ${f.name}`);
                             await audioExportService!.prepare(f);
+                            console.log(`[convertAndUpload] File prepared successfully, starting export with format: ${requestedFormat}`);
                             ({ data, format } = await audioExportService!.export({ requestedFormat }));
+                            console.log(
+                                `[convertAndUpload] Export completed successfully, data size: ${data.byteLength}bytes, format: ${format}`
+                            );
                             convertNext();
                             resolve({ file: f, data: data, format: format });
                         } catch (err) {
+                            console.error(`[convertAndUpload] Error converting file ${f.name}:`, err);
                             error = err;
-                            errorMessage = `${f.name}: Unsupported or unrecognized format`;
+                            if (typeof err === 'object' && err !== null) {
+                                errorMessage = `${f.name}: ${err.message || 'Unsupported or unrecognized format'}`;
+                            } else {
+                                errorMessage = `${f.name}: Unsupported or unrecognized format`;
+                            }
                             reject(err);
                         }
                     })
                 );
             }
+            console.log(`[convertAndUpload] Starting conversion queue`);
             convertNext();
 
             let j = 0;
             while (j < converted.length) {
-                yield await converted[j];
+                try {
+                    console.log(`[convertAndUpload] Waiting for conversion result ${j + 1}/${converted.length}`);
+                    const result = await converted[j];
+                    console.log(`[convertAndUpload] Conversion result ready: ${result.file.name}`);
+                    yield result;
+                } catch (err) {
+                    console.error(`[convertAndUpload] Error in conversion queue for item ${j + 1}:`, err);
+                    // Skip this item and continue with the next one
+                }
                 delete converted[j];
                 j++;
             }
